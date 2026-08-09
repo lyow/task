@@ -374,20 +374,20 @@ body.board-open{overflow:hidden}
 
 .nav{display:flex;flex-direction:column;gap:6px;padding:0 12px 10px}
 .btn-nav{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;
-  font-family:Unbounded,sans-serif;font-weight:600;font-size:11.5px;border:1px solid var(--line);
+  font-family:Unbounded,sans-serif;font-weight:600;font-size:11.5px;border:none;
   background:var(--panel-2);transition:.16s;position:relative;
-  background-clip:padding-box;box-shadow:inset 3px 0 0 var(--acc,transparent)}
-.btn-nav:hover{border-color:var(--line-2)}
+  box-shadow:inset 0 0 0 1px var(--line),inset 3px 0 0 var(--acc,transparent)}
+.btn-nav:hover{box-shadow:inset 0 0 0 1px var(--line-2),inset 3px 0 0 var(--acc,transparent)}
 .btn-nav .ncount{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;
   padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.08)}
 .btn-nav.focus{color:var(--amber);background:rgba(255,193,85,.055);--acc:#FFC155}
 .btn-nav.ideas{color:var(--cyan);background:rgba(107,150,255,.055);--acc:#7BA0FF}
 .btn-nav.want{color:var(--mint);background:rgba(63,233,164,.055);--acc:#3FE9A4}
-.btn-nav.on{color:#0A0A0E;border-color:transparent;background-clip:border-box}
+.btn-nav.on{color:#0A0A0E}
 .btn-nav.on .ncount{background:rgba(0,0,0,.2)}
-.btn-nav.focus.on{background:linear-gradient(135deg,#FFC155,#FF9F45);box-shadow:0 6px 22px -10px rgba(255,193,85,.8)}
-.btn-nav.ideas.on{background:linear-gradient(135deg,#8B6BFF,#4FD4FF);box-shadow:0 6px 22px -10px rgba(139,107,255,.85)}
-.btn-nav.want.on{background:linear-gradient(135deg,#3FE9A4,#A8FF4D);box-shadow:0 6px 22px -10px rgba(63,233,164,.85)}
+.btn-nav.focus.on,.btn-nav.focus.on:hover{background:linear-gradient(100deg,#FFC155,#FF9F45);box-shadow:0 6px 22px -10px rgba(255,193,85,.8)}
+.btn-nav.ideas.on,.btn-nav.ideas.on:hover{background:linear-gradient(100deg,#8B6BFF,#4FD4FF);box-shadow:0 6px 22px -10px rgba(139,107,255,.85)}
+.btn-nav.want.on,.btn-nav.want.on:hover{background:linear-gradient(100deg,#3FE9A4,#A8FF4D);box-shadow:0 6px 22px -10px rgba(63,233,164,.85)}
 
 .side-label{display:flex;align-items:center;gap:8px}
 .lbl-btn{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;
@@ -453,7 +453,7 @@ body.board-open #main{z-index:90}
 .want:hover .idea-acts{opacity:1}
 
 .btn-nav.todo{color:var(--magenta);background:rgba(255,90,224,.055);--acc:#FF5AE0}
-.btn-nav.todo.on{background:linear-gradient(135deg,#FF5AE0,#B478FF);box-shadow:0 6px 22px -10px rgba(255,90,224,.85)}
+.btn-nav.todo.on,.btn-nav.todo.on:hover{background:linear-gradient(100deg,#FF5AE0,#B478FF);box-shadow:0 6px 22px -10px rgba(255,90,224,.85)}
 .btn-nav.focus.on,.btn-nav.ideas.on,.btn-nav.want.on,.btn-nav.todo.on{color:#08080B}
 .btn-nav.on svg{color:#08080B}
 
@@ -846,8 +846,10 @@ body.no-hints .lede{display:none}
   border-radius:12px;background:var(--panel);text-decoration:none;color:var(--txt);transition:.14s}
 .prow:hover{border-color:var(--line-2);background:var(--raise)}
 .prow.tinted{box-shadow:inset 3px 0 0 var(--pc)}
-.pname{flex:0 0 auto;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+.pname{flex:0 1 auto;min-width:0;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-family:Unbounded,sans-serif;font-weight:600;font-size:13px}
+.pflag{flex:0 0 auto;display:flex;align-items:center}
+.prow .flag svg{display:block}
 .pnext{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:12.5px;color:var(--soft)}
 .pmeta{flex:0 0 auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--dim)}
@@ -856,6 +858,29 @@ body.no-hints .lede{display:none}
 @keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .view-in{animation:viewIn .16s ease}
 @media (prefers-reduced-motion:reduce){.view-in{animation:none}}
+.pthumb{flex:0 0 auto;width:34px;height:34px;border-radius:10px;background:var(--panel-2) center/cover no-repeat;
+  box-shadow:inset 0 0 0 1px var(--line)}
+.prow:not(.has-cover) .pthumb{background-image:radial-gradient(70% 70% at 50% 30%,rgba(139,107,255,.22),transparent 72%)}
+
+/* тонкая полоса прокрутки в панели */
+#sideList::-webkit-scrollbar{width:8px}
+#sideList::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:8px;
+  border:2px solid transparent;background-clip:padding-box}
+#sideList:hover::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);background-clip:padding-box}
+
+/* заметнее фокус с клавиатуры */
+.btn-nav:focus-visible,.row-name:focus-visible,.card:focus-visible,.prow:focus-visible{
+  outline:2px solid var(--violet);outline-offset:2px}
+
+/* заголовок проекта: подпись статуса заметнее на тёмном */
+.card-status{backdrop-filter:blur(3px);padding:3px 8px;border-radius:999px;background:rgba(2,2,3,.45)}
+.card:not(.has-cover) .card-status{background:transparent;backdrop-filter:none;padding:0}
+
+/* мягкая подсветка строки под курсором в списке */
+.prow{position:relative;overflow:hidden}
+.prow::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .16s;
+  background:linear-gradient(90deg,rgba(139,107,255,.10),transparent 45%)}
+.prow:hover::after{opacity:1}
 
 /* ── сенсорные экраны: наведения нет, действия видны всегда ── */
 @media (hover:none){
@@ -1549,7 +1574,7 @@ async function coverOf(p){
 const coverCache={};
 const COVER_TTL=45*60*1000;
 async function paintCovers(){
-  const cards=Array.from(document.querySelectorAll('.card[data-cover]'));
+  const cards=Array.from(document.querySelectorAll('.card[data-cover], .prow[data-cover]'));
   // сначала мгновенно ставим то, что уже знаем — без мигания
   const pending=[];
   for(const card of cards){
@@ -1572,6 +1597,13 @@ async function paintCovers(){
   }
 }
 function attachCover(card,url){
+  const thumb=card.querySelector('.pthumb');
+  if(thumb){                       // компактная строка — маленькое превью
+    if(thumb.style.backgroundImage.indexOf(url)>=0) return;
+    thumb.style.backgroundImage='url("'+url+'")';
+    card.classList.add('has-cover');
+    return;
+  }
   const old=card.querySelector('img.cover');
   if(old){ if(old.src===url) return; old.remove() }
   const img=document.createElement('img');
@@ -1697,9 +1729,11 @@ function renderAll(){
     ${list.length?(st.listView?`<div class="plist">${list.map(p=>{
       const t=tasksOf(p),d=t.filter(x=>x.done).length;
       const nx=nextStep(p);
-      return `<a class="prow ${p.color?'tinted c-'+p.color:''}" href="#p/${p.id}" data-open="${p.id}">
+      return `<a class="prow ${p.color?'tinted c-'+p.color:''}" href="#p/${p.id}" data-open="${p.id}" data-cover="${p.id}">
+        <span class="pthumb"></span>
         <span class="dot" data-s="${p.status}"></span>
-        <span class="pname">${esc(p.name)}${p.important?` <span class="flag">${svg('flag',10,2.2)}</span>`:''}</span>
+        <span class="pname">${esc(p.name)}</span>
+        ${p.important?`<span class="flag pflag">${svg('flag',11,2.2)}</span>`:''}
         <span class="pnext">${nx&&p.status!=='done'?esc(nx.text):''}</span>
         <span class="pmeta">${isDue(p)?'<span class="due-badge">due back</span>':(t.length?`${d}/${t.length}`:'—')}</span>
       </a>`}).join('')}</div>`
