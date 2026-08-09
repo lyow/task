@@ -72,7 +72,7 @@ body:not(.side-open) #btnShow{display:inline-flex}
 .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--dim)}
 .side-label{padding:8px 15px 7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;
   letter-spacing:.2em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
-#sideList{flex:1;overflow-y:auto;padding:7px 9px}
+#sideList{flex:1;overflow-y:auto;padding:7px 9px;display:flex;flex-direction:column;gap:5px}
 .empty-side{padding:16px 9px;font-size:12.5px;line-height:1.6;color:var(--dim)}
 .row{display:flex;align-items:center;gap:2px;border-radius:11px;padding-right:5px;position:relative;transition:.14s}
 .row:hover{background:var(--panel-2)}
@@ -2882,7 +2882,10 @@ function pinEl(ph){
     <button class="pin-x" title="Delete">${svg('x',12,2.2)}</button>
     <div class="pin-size" title="Drag to resize">${svg('size',11,2)}</div>`;
 
-  const front=()=>{ph.z=++st.maxZ;el.style.zIndex=ph.z;saveLayout(ph)};
+  const front=()=>{
+    ph.z=++st.maxZ; el.style.zIndex=ph.z; saveLayout(ph);
+    raiseNotes(ph);
+  };
 
   el.querySelector('.pin-x').addEventListener('pointerdown',e=>e.stopPropagation());
   el.querySelector('.pin-x').addEventListener('click',async e=>{
@@ -2937,6 +2940,7 @@ function stickyEl(p,note){
   const el=document.createElement('div');
   el.className='sticky c-'+(L.c||'violet')+' s-'+(L.s||'m');
   el.dataset.id=note.id;
+  el._L=L;
   el.style.left=(L.x||60)+'px'; el.style.top=(L.y||60)+'px'; el.style.zIndex=L.z||1;
   if(L.fs) el.style.setProperty('--fs',L.fs+'px');
   if(L.w) el.style.width=L.w+'px';
@@ -3030,11 +3034,23 @@ function attachedTo(photoId){
 function moveAttached(ph,dx,dy){
   const p=cur(); if(!p) return;
   attachedTo(ph.id).forEach(n=>{
-    const L=layoutOf(n);
+    const el=document.querySelector('.sticky[data-id="'+n.id+'"]');
+    // правим тот же объект, что держит элемент, иначе он потом вернётся на старое место
+    const L=(el&&el._L)?el._L:layoutOf(n);
     L.x=(L.x||0)+dx; L.y=(L.y||0)+dy;
     n.layout=JSON.stringify(L);
-    const el=document.querySelector('.sticky[data-id="'+n.id+'"]');
     if(el){ el.style.left=L.x+'px'; el.style.top=L.y+'px' }
+  });
+}
+
+function raiseNotes(ph){
+  const p=cur(); if(!p) return;
+  attachedTo(ph.id).forEach(n=>{
+    const el=document.querySelector('.sticky[data-id="'+n.id+'"]');
+    const L=(el&&el._L)?el._L:layoutOf(n);
+    L.z=++st.maxZ;
+    n.layout=JSON.stringify(L);
+    if(el) el.style.zIndex=L.z;
   });
 }
 function photoUnder(x,y){
@@ -3098,10 +3114,14 @@ function packBoard(keepSize){
     const el=document.querySelector('.pin[data-id="'+ph.id+'"]');
     const h=el?el.offsetHeight*(w/(ph.w||w)):w;
     if(x+w>left+maxW){ x=left; y+=rowH+gap; rowH=0 }
+    const sx=x-ph.x, sy=y-ph.y;
     ph.x=x; ph.y=y; ph.r=0; ph.z=++st.maxZ;
+    if(sx||sy) moveAttached(ph,sx,sy);
+    raiseNotes(ph);
     x+=w+gap; rowH=Math.max(rowH,h);
     putPhoto(ph).catch(()=>{});
   });
+  const pr=cur(); if(pr) saveProject(pr,true);
   paintBoard();
   toast(keepSize?'Arranged, sizes kept':'Arranged in a grid');
 }
