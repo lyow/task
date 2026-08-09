@@ -138,9 +138,10 @@ body:not(.side-open) #btnShow{display:inline-flex}
   font-size:12.5px;font-weight:500;color:var(--soft);transition:.14s}
 .chip:hover{color:var(--txt);border-color:var(--line-2)}
 .chip.on{color:#0A0A0E;border-color:transparent;background:var(--iris);box-shadow:0 5px 18px -9px rgba(255,90,224,.65)}
-.grid{max-width:1500px;margin:0 auto;display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(252px,1fr))}
-.card{position:relative;display:block;text-align:left;background:var(--panel);border:1px solid var(--line);
-  border-radius:16px;overflow:hidden;padding:16px 16px 15px;transition:.18s;min-height:130px}
+.grid{max-width:1500px;margin:0 auto;display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(216px,1fr))}
+.card{position:relative;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  padding:15px;transition:.18s;aspect-ratio:1/1}
 .card::before{content:'';position:absolute;inset:0;background-image:var(--dots);background-size:20px 20px;
   opacity:.5;-webkit-mask-image:radial-gradient(70% 70% at 80% 10%,#000,transparent);mask-image:radial-gradient(70% 70% at 80% 10%,#000,transparent)}
 .card:hover{transform:translateY(-3px);border-color:var(--line-2);box-shadow:0 20px 44px -20px #000}
@@ -152,19 +153,23 @@ body:not(.side-open) #btnShow{display:inline-flex}
 .card .veil{position:absolute;inset:0;z-index:1;opacity:0;transition:opacity .3s;
   background:linear-gradient(180deg,rgba(2,2,3,.62) 0%,rgba(2,2,3,.78) 42%,rgba(2,2,3,.93) 100%)}
 .card.has-cover .veil{opacity:1}
+.card:not(.has-cover)::after{content:'';position:absolute;inset:auto -20% -40% -20%;height:70%;z-index:1;
+  background:radial-gradient(50% 100% at 50% 100%,rgba(139,107,255,.13),transparent 72%);pointer-events:none}
 .card.has-cover .card-name{text-shadow:0 2px 18px rgba(0,0,0,.95)}
 .card.has-cover .card-meta,.card.has-cover .next{text-shadow:0 1px 10px rgba(0,0,0,.9)}
 .card>*{position:relative;z-index:2}
 .card>*{position:relative}
-.card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-top{position:absolute;top:14px;left:15px;right:15px;z-index:2;
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
 .card-status{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;
   font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--s-idle)}
 .card-status[data-s=active]{color:var(--s-active)}
 .card-status[data-s=done]{color:var(--s-done)}
-.card-name{margin:12px 0 8px;font-family:Unbounded,sans-serif;font-weight:600;font-size:16px;
-  line-height:1.3;letter-spacing:-.01em;word-break:break-word}
+.card-name{margin:0 0 7px;font-family:Unbounded,sans-serif;font-weight:600;font-size:16px;
+  line-height:1.25;letter-spacing:-.01em;word-break:break-word;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .card-meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--dim);line-height:1.7}
-.mini{margin-top:11px;height:3px;border-radius:3px;background:rgba(255,255,255,.09);overflow:hidden}
+.mini{margin-top:10px;height:3px;border-radius:3px;background:rgba(255,255,255,.09);overflow:hidden}
 .mini i{display:block;height:100%;background:var(--iris)}
 .empty-main{max-width:1500px;margin:0 auto;color:var(--soft)}
 .btn-inline{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:12px 22px;border-radius:12px;
@@ -294,6 +299,8 @@ body.dragging #board{border-color:var(--violet);box-shadow:0 0 40px -14px var(--
 .next em{flex:0 0 auto;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:9px;
   letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);padding-top:3px}
 .next span{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.card .next{margin:0 0 7px}
+.card .next span{-webkit-line-clamp:1}
 .stale{color:var(--amber)}
 .tasks li.first-open{border-radius:10px;background:rgba(79,212,255,.045);
   box-shadow:inset 2px 0 0 var(--cyan);padding-left:11px}
@@ -748,9 +755,12 @@ input,textarea{cursor:text}
   .capture input{font-size:16px;padding:12px}
   .chips{gap:6px}
   .chip{padding:7px 12px;font-size:12px}
-  .grid{grid-template-columns:1fr;gap:11px}
-  .card{min-height:112px;padding:14px}
-  .card-name{font-size:15px}
+  .grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .card{padding:12px;border-radius:15px}
+  .card-top{top:11px;left:12px;right:12px}
+  .card-name{font-size:13px;-webkit-line-clamp:2}
+  .card .next{display:none}
+  .card-meta{font-size:9.5px}
 
   .panes{gap:18px}
   .task-add input,.want-add input,.wish-add input,.notes,.f input,.tdlink input,.tdmore textarea,
@@ -1168,6 +1178,13 @@ async function capture(text){
   toast('Saved to Ideas');
 }
 
+function touchProject(p){
+  if(!p||SPECIAL(p.id)) return false;
+  if(p.status!=='idle') return false;
+  p.status='active';
+  if(!p.startDate) p.startDate=today();
+  return true;
+}
 function saveProject(p,quiet){
   p.updated=Date.now();
   if(!quiet) setSave('saving…');
@@ -1249,23 +1266,40 @@ async function coverOf(p){
   }
   return await firstPhotoOf(p.id);
 }
+const coverCache={};
+const COVER_TTL=45*60*1000;
 async function paintCovers(){
-  clearUrls();
   const cards=Array.from(document.querySelectorAll('.card[data-cover]'));
+  // сначала мгновенно ставим то, что уже знаем — без мигания
+  const pending=[];
   for(const card of cards){
+    const c=coverCache[card.dataset.cover];
+    if(c&&c.url&&Date.now()-c.at<COVER_TTL) attachCover(card,c.url);
+    else if(c&&c.empty&&Date.now()-c.at<COVER_TTL) continue;
+    else pending.push(card);
+  }
+  for(const card of pending){
     const p=st.projects.find(x=>x.id===card.dataset.cover);
     if(!p) continue;
-    const ph=await coverOf(p);
+    let ph=null;
+    try{ ph=await coverOf(p) }catch(e){}
     const u=ph?photoSrc(ph):'';
+    coverCache[p.id]=u?{url:u,at:Date.now()}:{empty:true,at:Date.now()};
     if(!u) continue;
-    if(!document.body.contains(card)) return;
     if(u.indexOf('blob:')===0) st.urls.push(u);
-    const img=document.createElement('img');
-    img.className='cover'; img.alt=''; img.loading='lazy'; img.src=u;
-    card.insertBefore(img,card.firstChild);
-    card.classList.add('has-cover');
+    if(!document.body.contains(card)) return;
+    attachCover(card,u);
   }
 }
+function attachCover(card,url){
+  const old=card.querySelector('img.cover');
+  if(old){ if(old.src===url) return; old.remove() }
+  const img=document.createElement('img');
+  img.className='cover'; img.alt=''; img.decoding='async'; img.src=url;
+  card.insertBefore(img,card.firstChild);
+  card.classList.add('has-cover');
+}
+function dropCover(pid){ delete coverCache[pid] }
 
 function bindRowDrag(box){
   let dragId=null;
@@ -2102,12 +2136,21 @@ function bindProject(p){
     const r=document.querySelector(`[data-open="${p.id}"] .row-text`); if(r) r.textContent=p.name;
     saveProject(p);
   });
-  const nt=$('#notes'); if(nt) nt.addEventListener('input',e=>{p.notes=e.target.value;saveProject(p)});
+  const nt=$('#notes');
+  if(nt) nt.addEventListener('input',e=>{
+    const wasEmpty=!(p.notes||'').trim();
+    p.notes=e.target.value;
+    if(wasEmpty&&p.notes.trim()&&touchProject(p)){ sortProjects(); renderSide() }
+    saveProject(p);
+  });
   const add=()=>{
     const i=$('#taskInput'); if(!i) return;
     const v=i.value.trim(); if(!v) return;
     p.tasks=p.tasks||[]; p.tasks.push({id:uid(),text:v,done:false,created:Date.now()});
-    i.value=''; saveProject(p,true); renderProject(); renderSide();
+    const moved=touchProject(p);
+    i.value=''; saveProject(p,true);
+    if(moved){ sortProjects(); toast('Moved to In progress') }
+    renderProject(); renderSide();
   };
   const ta=$('#taskAdd'), ti=$('#taskInput');
   if(ta) ta.addEventListener('click',add);
@@ -2130,6 +2173,7 @@ function bindProject(p){
     x.subs=x.subs||[];
     x.subs.push({id:uid(),text:v,done:false});
     if(x.done){ x.done=false; x.doneAt=null }
+    if(touchProject(p)){ sortProjects(); toast('Moved to In progress') }
     st.taskOpen=tid;
     redrawTasks();
     const inp=document.querySelector('[data-subadd="'+tid+'"]');
@@ -2331,6 +2375,8 @@ async function addPhotos(files){
         r:Math.random()*5-2.5,z:++st.maxZ};
       await putPhoto(ph);
       st.photos.push(ph);
+      dropCover(p.id);
+      if(touchProject(p)){ saveProject(p,true); sortProjects(); renderSide() }
       if(wasEmpty&&st.photos.length===1&&b) b.innerHTML='';
       if(b) b.appendChild(pinEl(ph));
     }catch(e){console.error(e);toast('Could not add '+(f.name||'file'))}
@@ -2351,11 +2397,12 @@ function lightbox(ph,url){
     if(e.target===el||e.target.closest('[data-close]')) return close();
     if(e.target.closest('[data-cov]')){
       const pr=cur();
-      if(pr){ pr.cover=ph.id; saveProject(pr,true); toast('Set as the project cover') }
+      if(pr){ pr.cover=ph.id; dropCover(pr.id); saveProject(pr,true); toast('Set as the project cover') }
       close(); return;
     }
     if(e.target.closest('[data-del]')){
       const pr=cur();
+      if(pr) dropCover(pr.id);
       if(pr&&pr.cover===ph.id){ pr.cover=null; saveProject(pr,true) }
       await delPhotoDB(ph.id);
       st.photos=st.photos.filter(x=>x.id!==ph.id);
@@ -2577,7 +2624,7 @@ function openQuick(){
     if(sel===WANT) target.tasks.push({id:uid(),text,price:price||null,url,done:false,created:Date.now()});
     else if(sel===TODO) target.tasks.push({id:uid(),text,cat:st.todoCat||'other',url,note:'',done:false,created:Date.now()});
     else if(sel===INBOX) target.tasks.push({id:uid(),text,done:false,created:Date.now()});
-    else target.tasks.push({id:uid(),text,done:false});
+    else { target.tasks.push({id:uid(),text,done:false,created:Date.now()}); touchProject(target) }
     target.updated=Date.now();
     await putProject(target);
     toast('Added to '+target.name);
@@ -2605,12 +2652,40 @@ function openQuick(){
 }
 
 /* ───────── events ───────── */
+let hashLock=false;
+function currentHash(){
+  if(st.openId) return '#p/'+st.openId;
+  if(st.hist) return '#history';
+  if(st.focus) return '#focus';
+  return '#all';
+}
+function syncHash(){
+  const h=currentHash();
+  if(location.hash===h) return;
+  hashLock=true;
+  location.hash=h;
+  setTimeout(()=>{hashLock=false},0);
+}
+function applyHash(){
+  const h=(location.hash||'').replace(/^#\/?/,'');
+  if(h.indexOf('p/')===0){
+    const id=h.slice(2);
+    if(st.projects.some(x=>x.id===id)){ st.openId=id; st.focus=false; st.hist=false; return }
+  }
+  st.openId=null;
+  st.focus=(h==='focus');
+  st.hist=(h==='history');
+}
+window.addEventListener('hashchange',()=>{
+  if(hashLock||!ME) return;
+  applyHash(); route();
+});
 const isTouch=()=>!!(window.matchMedia&&window.matchMedia('(hover:none)').matches);
 function syncSidebarButton(){
   if(window.innerWidth<900&&document.body.classList.contains('side-open')&&!st.sideForced)
     document.body.classList.remove('side-open');
 }
-function route(){closeBoardFull();clearUrls();if(st.openId)renderProject();else if(st.hist)renderHistory();else if(st.focus)renderFocus();else renderAll();renderSide()}
+function route(){syncHash();closeBoardFull();clearUrls();if(st.openId)renderProject();else if(st.hist)renderHistory();else if(st.focus)renderFocus();else renderAll();renderSide()}
 function openProject(id){st.openId=id;st.focus=false;st.hist=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
 
 document.addEventListener('click',e=>{
@@ -2786,6 +2861,7 @@ async function reload(){
   if(!st.projects.some(p=>p.id===WANT)){const wl=makeWant();await putProject(wl);st.projects.push(wl)}
   if(!st.projects.some(p=>p.id===TODO)){const td=makeTodo();await putProject(td);st.projects.push(td)}
   sortProjects();
+  applyHash();
   route();
 }
 
@@ -2832,12 +2908,20 @@ document.getElementById('signOut').addEventListener('click',async()=>{
   location.reload();
 });
 
+function dataSig(list){
+  return (list||[]).map(p=>[p.id,p.name,p.status,p.important?1:0,p.archived?1:0,p.pinned?1:0,
+    p.ord,p.cover||'',p.revisit||'',p.updated||0,(p.tasks||[]).length,
+    (p.tasks||[]).filter(t=>t.done).length].join('~')).sort().join('|');
+}
 window.addEventListener('focus',async()=>{
   if(!ME||!lastLoad) return;
   if(Date.now()-lastLoad<30000) return;
   try{
+    const before=dataSig(st.projects);
+    const fresh=await allProjects();
+    if(dataSig(fresh)===before) return;      // ничего не менялось — не трогаем экран
     const open=st.openId;
-    st.projects=await allProjects();
+    st.projects=fresh;
     sortProjects();
     if(open&&!st.projects.some(p=>p.id===open)) st.openId=null;
     route();
