@@ -954,6 +954,34 @@ body.shared-view #board{touch-action:auto}
 body.shared-view .pin{cursor:default}
 body.shared-view .sticky{cursor:default}
 body.shared-view .topbar{justify-content:center}
+.net-dot{margin-left:12px;padding:4px 10px;border-radius:999px;font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;letter-spacing:.12em;text-transform:uppercase}
+.net-dot.off{color:var(--magenta);box-shadow:inset 0 0 0 1px rgba(255,90,224,.4);background:rgba(255,90,224,.08)}
+.net-dot.syncing{color:var(--amber);box-shadow:inset 0 0 0 1px rgba(255,193,85,.4);background:rgba(255,193,85,.08)}
+.tasks li[draggable]{cursor:grab}
+.tasks li.drag{opacity:.45;background:var(--raise);border-radius:10px}
+.trash-grid{display:grid;gap:9px;grid-template-columns:repeat(3,1fr);max-height:50vh;overflow-y:auto}
+.trash-item{position:relative;aspect-ratio:1;border-radius:11px;overflow:hidden;border:1px solid var(--line)}
+.trash-item img{width:100%;height:100%;object-fit:cover;filter:grayscale(.6)}
+.trash-age{position:absolute;left:6px;bottom:6px;font-family:'JetBrains Mono',monospace;font-size:8.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px #000}
+.trash-acts{position:absolute;top:5px;right:5px;display:flex;gap:4px}
+.trash-acts button{width:25px;height:25px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,4,7,.7);color:#fff;backdrop-filter:blur(3px)}
+.trash-acts button[data-restore]:hover{background:var(--mint);color:#08120D}
+.trash-acts button[data-purge]:hover{background:var(--magenta);color:#08080B}
+.tasks li[draggable]{cursor:grab}
+.tasks li.drag{opacity:.45;background:var(--raise);border-radius:10px}
+.trash-grid{display:grid;gap:9px;grid-template-columns:repeat(3,1fr);max-height:50vh;overflow-y:auto}
+.trash-item{position:relative;aspect-ratio:1;border-radius:11px;overflow:hidden;border:1px solid var(--line)}
+.trash-item img{width:100%;height:100%;object-fit:cover;filter:grayscale(.6)}
+.trash-age{position:absolute;left:6px;bottom:6px;font-family:'JetBrains Mono',monospace;font-size:8.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px #000}
+.trash-acts{position:absolute;top:5px;right:5px;display:flex;gap:4px}
+.trash-acts button{width:25px;height:25px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,4,7,.7);color:#fff;backdrop-filter:blur(3px)}
+.trash-acts button[data-restore]:hover{background:var(--mint);color:#08120D}
+.trash-acts button[data-purge]:hover{background:var(--magenta);color:#08080B}
 
 /* ── сенсорные экраны: наведения нет, действия видны всегда ── */
 @media (hover:none){
@@ -1160,6 +1188,7 @@ body.shared-view .topbar{justify-content:center}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18M14 9.5L16.5 12 14 14.5"/></svg>
     </button>
     <span class="crumb" id="crumb">All projects</span>
+    <span class="net-dot" id="netDot" style="display:none"></span>
     <button class="quick-btn" id="quickBtn" title="Quick add — Ctrl+K">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       quick add <kbd>Ctrl K</kbd>
@@ -1194,7 +1223,7 @@ const SUPA_KEY='sb_publishable_jtedcHjzGQ8Ow8Usp8WiWA_xF25IBGU';
 let sb=null, ME=null, lastLoad=0;
 
 /* ───────── local cache (kept for migration) ───────── */
-const DB_NAME='proekty', DB_VER=1;
+const DB_NAME='proekty', DB_VER=2;
 let db=null;
 function openDB(){
   return new Promise((res,rej)=>{
@@ -1206,6 +1235,7 @@ function openDB(){
         const s=d.createObjectStore('photos',{keyPath:'id'});
         s.createIndex('pid','pid');
       }
+      if(!d.objectStoreNames.contains('queue')) d.createObjectStore('queue',{keyPath:'id'});
     };
     r.onsuccess=()=>res(r.result);
     r.onerror=()=>rej(r.error);
@@ -1258,27 +1288,110 @@ function itemFromRow(r){
   return t;
 }
 
+let netOk=true, pendingCount=0;
+
+function setNet(ok){
+  if(netOk===ok) return;
+  netOk=ok;
+  paintNet();
+  if(ok) toast('Back online — syncing');
+}
+function paintNet(){
+  const el=document.getElementById('netDot');
+  if(!el) return;
+  if(netOk&&!pendingCount){ el.style.display='none'; return }
+  el.style.display='';
+  el.className='net-dot'+(netOk?' syncing':' off');
+  el.textContent=netOk?('syncing '+pendingCount):('offline'+(pendingCount?' · '+pendingCount+' waiting':''));
+}
+
+async function localPut(store,val){ if(!db) return; try{ await req(tx(store,'readwrite').put(val)) }catch(e){} }
+async function localDel(store,id){ if(!db) return; try{ await req(tx(store,'readwrite').delete(id)) }catch(e){} }
+async function queueAll(){ if(!db) return []; try{ return await req(tx('queue').getAll()) }catch(e){ return [] } }
+
+async function enqueue(job){
+  job.id=job.id||uid(); job.at=Date.now();
+  await localPut('queue',job);
+  pendingCount=(await queueAll()).length;
+  paintNet();
+}
+
+async function pushProject(p){
+  try{
+    const r1=await sb.from('projects').upsert(projectRow(p));
+    if(r1.error) throw r1.error;
+    const rows=(p.tasks||[]).map((t,i)=>itemRow(t,p,i));
+    if(rows.length){
+      const r2=await sb.from('items').upsert(rows);
+      if(r2.error) throw r2.error;
+    }
+    let q=sb.from('items').delete().eq('project_id',p.id);
+    const ids=rows.map(r=>r.id);
+    if(ids.length) q=q.not('id','in','('+ids.map(x=>'"'+x+'"').join(',')+')');
+    const r3=await q;
+    if(r3.error) throw r3.error;
+    return true;
+  }catch(e){ console.error(e); return false }
+}
+
 async function putProject(p){
   if(!sb||!ME) return;
-  const {error}=await sb.from('projects').upsert(projectRow(p));
-  if(error){ console.error(error); toast('Could not save — check your connection'); return }
-  const rows=(p.tasks||[]).map((t,i)=>itemRow(t,p,i));
-  if(rows.length){
-    const e2=(await sb.from('items').upsert(rows)).error;
-    if(e2) console.error(e2);
-  }
-  let q=sb.from('items').delete().eq('project_id',p.id);
-  const ids=rows.map(r=>r.id);
-  if(ids.length) q=q.not('id','in','('+ids.map(x=>'"'+x+'"').join(',')+')');
-  const e3=(await q).error;
-  if(e3) console.error(e3);
+  await localPut('projects',JSON.parse(JSON.stringify(p)));   // зеркало на диске
+  const ok=await pushProject(p);
+  if(!ok){ await enqueue({kind:'project',pid:p.id}); setNet(false) }
+  else setNet(true);
 }
+
+async function flushQueue(){
+  if(!sb||!ME||!db) return;
+  const jobs=await queueAll();
+  pendingCount=jobs.length; paintNet();
+  for(const job of jobs.sort((a,b)=>a.at-b.at)){
+    let done=false;
+    try{
+      if(job.kind==='project'){
+        const p=st.projects.find(x=>x.id===job.pid)
+             ||(await req(tx('projects').get(job.pid)));
+        done=p?await pushProject(p):true;
+      }
+      if(job.kind==='projDel'){
+        done=!(await sb.from('projects').delete().eq('id',job.pid)).error;
+      }
+      if(job.kind==='photo'){
+        const up=await sb.storage.from('photos').upload(job.path,job.blob,{contentType:'image/jpeg',upsert:true});
+        if(!up.error||/exists/i.test(up.error.message||'')){
+          done=!(await sb.from('photos').upsert(job.row)).error;
+        }
+      }
+      if(job.kind==='photoRow'){
+        done=!(await sb.from('photos').upsert(job.row)).error;
+      }
+      if(job.kind==='photoPurge'){
+        if(job.path) await sb.storage.from('photos').remove([job.path]);
+        done=!(await sb.from('photos').delete().eq('id',job.pid)).error;
+      }
+    }catch(e){ done=false }
+    if(done) await localDel('queue',job.id); else { setNet(false); break }
+  }
+  const left=await queueAll();
+  pendingCount=left.length;
+  if(!left.length) setNet(true);
+  paintNet();
+}
+
+window.addEventListener('online',()=>{ setNet(true); flushQueue() });
+window.addEventListener('offline',()=>setNet(false));
 
 async function delProject(id){
   if(!sb||!ME) return;
-  const {data}=await sb.from('photos').select('path').eq('project_id',id);
-  if(data&&data.length) await sb.storage.from('photos').remove(data.map(x=>x.path));
-  await sb.from('projects').delete().eq('id',id);
+  await localDel('projects',id);
+  try{
+    const {data}=await sb.from('photos').select('path').eq('project_id',id);
+    if(data&&data.length) await sb.storage.from('photos').remove(data.map(x=>x.path));
+    const r=await sb.from('projects').delete().eq('id',id);
+    if(r.error) throw r.error;
+    setNet(true);
+  }catch(e){ await enqueue({kind:'projDel',pid:id}); setNet(false) }
 }
 
 async function allProjects(){
@@ -1307,48 +1420,103 @@ async function signPhotos(rows){
   }
   const map={};
   rows.forEach(r=>{ const c=urlCache[r.path]; if(c) map[r.path]=c.url });
-  return rows.map(r=>({id:r.id,pid:r.project_id,item:r.item_id||null,album:!!r.album,name:r.name||'photo',
+  return rows.map(r=>({id:r.id,pid:r.project_id,item:r.item_id||null,album:!!r.album,
+    deletedAt:r.deleted_at?Number(r.deleted_at):null,name:r.name||'photo',
     path:r.path,x:r.x,y:r.y,w:r.w,r:r.r,z:r.z,created:Number(r.created)||0,url:map[r.path]||''}));
 }
 
 const boardPhotos=list=>list.filter(x=>!x.item);
 
-async function putPhoto(ph){
-  if(!sb||!ME) return;
-  if(ph.blob){
-    ph.path=ME.id+'/'+ph.pid+'/'+ph.id+'.jpg';
-    const up=await sb.storage.from('photos').upload(ph.path,ph.blob,{contentType:'image/jpeg',upsert:true});
-    if(up.error){ console.error(up.error); toast('Photo upload failed'); return }
-    const sg=await sb.storage.from('photos').createSignedUrl(ph.path,3600);
-    ph.url=(sg.data&&sg.data.signedUrl)||'';
-    delete ph.blob;
-  }
-  const {error}=await sb.from('photos').upsert({id:ph.id,project_id:ph.pid,user_id:ME.id,
-    item_id:ph.item||null,album:!!ph.album,path:ph.path,name:ph.name||'photo',
+function photoRow(ph){
+  return {id:ph.id,project_id:ph.pid,user_id:ME.id,item_id:ph.item||null,album:!!ph.album,
+    path:ph.path,name:ph.name||'photo',deleted_at:ph.deletedAt||null,
     x:ph.x==null?null:ph.x,y:ph.y==null?null:ph.y,w:ph.w==null?null:ph.w,
-    r:ph.r==null?null:ph.r,z:ph.z==null?null:ph.z,created:ph.created||Date.now()});
-  if(error) console.error(error);
+    r:ph.r==null?null:ph.r,z:ph.z==null?null:ph.z,created:ph.created||Date.now()};
 }
 
-async function delPhotoDB(id){
+async function putPhoto(ph){
   if(!sb||!ME) return;
-  const {data}=await sb.from('photos').select('path').eq('id',id);
-  if(data&&data.length) await sb.storage.from('photos').remove(data.map(x=>x.path));
-  await sb.from('photos').delete().eq('id',id);
+  const blob=ph.blob;
+  if(blob){
+    ph.path=ME.id+'/'+ph.pid+'/'+ph.id+'.jpg';
+    delete ph.blob;
+  }
+  const row=photoRow(ph);
+  try{
+    if(blob){
+      const up=await sb.storage.from('photos').upload(ph.path,blob,{contentType:'image/jpeg',upsert:true});
+      if(up.error) throw up.error;
+      const sg=await sb.storage.from('photos').createSignedUrl(ph.path,3600);
+      ph.url=(sg.data&&sg.data.signedUrl)||'';
+    }
+    const r=await sb.from('photos').upsert(row);
+    if(r.error) throw r.error;
+    setNet(true);
+  }catch(e){
+    console.error(e);
+    if(blob){ ph.url=URL.createObjectURL(blob); await enqueue({kind:'photo',path:ph.path,blob,row}) }
+    else await enqueue({kind:'photoRow',row});
+    setNet(false);
+  }
+}
+
+const TRASH_DAYS=30;
+
+async function delPhotoDB(id){          // в корзину, не насовсем
+  if(!sb||!ME) return;
+  try{
+    const {data}=await sb.from('photos').select('*').eq('id',id);
+    if(!data||!data.length) return;
+    const row=Object.assign({},data[0],{deleted_at:Date.now()});
+    const r=await sb.from('photos').upsert(row);
+    if(r.error) throw r.error;
+    setNet(true);
+  }catch(e){ await enqueue({kind:'photoRow',row:{id,deleted_at:Date.now()}}); setNet(false) }
+}
+
+async function restorePhoto(id){
+  try{
+    const {data}=await sb.from('photos').select('*').eq('id',id);
+    if(!data||!data.length) return;
+    const row=Object.assign({},data[0],{deleted_at:null});
+    await sb.from('photos').upsert(row);
+  }catch(e){ await enqueue({kind:'photoRow',row:{id,deleted_at:null}}) }
+}
+
+async function purgePhoto(id,path){     // теперь уже насовсем
+  try{
+    if(path) await sb.storage.from('photos').remove([path]);
+    const r=await sb.from('photos').delete().eq('id',id);
+    if(r.error) throw r.error;
+  }catch(e){ await enqueue({kind:'photoPurge',pid:id,path}) }
+}
+
+async function trashOf(pid){
+  if(!sb||!ME) return [];
+  try{
+    const {data}=await sb.from('photos').select('*').eq('project_id',pid);
+    const rows=(data||[]).filter(r=>r.deleted_at);
+    return await signPhotos(rows);
+  }catch(e){ return [] }
+}
+
+async function sweepTrash(pid){         // старше месяца — вычищаем
+  const old=(await trashOf(pid)).filter(x=>Date.now()-(x.deletedAt||0)>TRASH_DAYS*864e5);
+  for(const ph of old) await purgePhoto(ph.id,ph.path);
 }
 
 async function photosOf(pid){
   if(!sb||!ME) return [];
   const {data,error}=await sb.from('photos').select('*').eq('project_id',pid).order('created',{ascending:true});
   if(error){ console.error(error); return [] }
-  return await signPhotos(data||[]);
+  return await signPhotos((data||[]).filter(r=>!r.deleted_at));
 }
 
 async function firstPhotoOf(pid){
   if(!sb||!ME) return null;
   const {data}=await sb.from('photos').select('*').eq('project_id',pid)
-    .order('created',{ascending:true}).limit(1);
-  const out=await signPhotos(data||[]);
+    .order('created',{ascending:true}).limit(4);
+  const out=await signPhotos((data||[]).filter(r=>!r.deleted_at));
   return out[0]||null;
 }
 async function photoById(id){
@@ -2826,6 +2994,82 @@ function linkEdit(p,item){
   document.body.appendChild(el);
 }
 
+async function openTrash(p){
+  const list=await trashOf(p.id);
+  const el=document.createElement('div');
+  el.className='sheet-wrap';
+  el.innerHTML=`<div class="sheet" style="max-width:520px">
+    <div class="sheet-head"><span>Recently deleted</span><button data-close>${svg('x',15,2)}</button></div>
+    ${list.length?`<div class="trash-grid">${list.map(ph=>`
+      <div class="trash-item" data-tid="${ph.id}">
+        <img src="${esc(ph.url||'')}" alt="">
+        <span class="trash-age">${ago(ph.deletedAt)}</span>
+        <div class="trash-acts">
+          <button data-restore="${ph.id}" title="Restore">${svg('arrow',13,2)}</button>
+          <button data-purge="${ph.id}" data-path="${esc(ph.path||'')}" title="Delete for good">${svg('trash',13,1.8)}</button>
+        </div>
+      </div>`).join('')}</div>
+      <p class="hint" style="margin-top:12px">Anything here is cleared automatically after ${TRASH_DAYS} days.</p>`
+    :`<p class="hint" style="margin:0">Nothing deleted recently.</p>`}
+  </div>`;
+  const close=()=>el.remove();
+  el.addEventListener('click',async e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    const r=e.target.closest('[data-restore]'), g=e.target.closest('[data-purge]');
+    if(r){
+      await restorePhoto(r.dataset.restore);
+      close(); dropCover(p.id);
+      await loadPhotos(p.id); paintBoard();
+      toast('Restored');
+      return;
+    }
+    if(g){
+      if(!confirm('Delete this photo for good?')) return;
+      await purgePhoto(g.dataset.purge,g.dataset.path);
+      close(); openTrash(p);
+    }
+  });
+  document.body.appendChild(el);
+}
+
+async function openTrash(p){
+  const list=await trashOf(p.id);
+  const el=document.createElement('div');
+  el.className='sheet-wrap';
+  el.innerHTML=`<div class="sheet" style="max-width:520px">
+    <div class="sheet-head"><span>Recently deleted</span><button data-close>${svg('x',15,2)}</button></div>
+    ${list.length?`<div class="trash-grid">${list.map(ph=>`
+      <div class="trash-item" data-tid="${ph.id}">
+        <img src="${esc(ph.url||'')}" alt="">
+        <span class="trash-age">${ago(ph.deletedAt)}</span>
+        <div class="trash-acts">
+          <button data-restore="${ph.id}" title="Restore">${svg('arrow',13,2)}</button>
+          <button data-purge="${ph.id}" data-path="${esc(ph.path||'')}" title="Delete for good">${svg('trash',13,1.8)}</button>
+        </div>
+      </div>`).join('')}</div>
+      <p class="hint" style="margin-top:12px">Anything here is cleared automatically after ${TRASH_DAYS} days.</p>`
+    :`<p class="hint" style="margin:0">Nothing deleted recently.</p>`}
+  </div>`;
+  const close=()=>el.remove();
+  el.addEventListener('click',async e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    const r=e.target.closest('[data-restore]'), g=e.target.closest('[data-purge]');
+    if(r){
+      await restorePhoto(r.dataset.restore);
+      close(); dropCover(p.id);
+      await loadPhotos(p.id); paintBoard();
+      toast('Restored');
+      return;
+    }
+    if(g){
+      if(!confirm('Delete this photo for good?')) return;
+      await purgePhoto(g.dataset.purge,g.dataset.path);
+      close(); openTrash(p);
+    }
+  });
+  document.body.appendChild(el);
+}
+
 function refPreview(p,item){
   const shot=st.linkShots[item.id];
   const img=(shot&&shot.url)||item.preview||'';
@@ -3045,6 +3289,7 @@ async function renderProject(){
           <button class="ghost-btn" id="addNote">+ note</button>
           <button class="ghost-btn" id="pack">arrange</button>
           <button class="ghost-btn" id="tidy">same size</button>
+          <button class="ghost-btn" id="trashBtn">trash</button>
           <button class="ghost-btn" id="addPhoto">+ photo</button>
         </h2>
         <div id="board"></div>
@@ -3063,7 +3308,7 @@ function renderTasks(t){
     const subs=x.subs||[], sd=subs.filter(y=>y.done).length;
     const exp=st.taskOpen===x.id;
     return `
-    <li class="${x.done?'done':''} ${fo&&x.id===fo.id?'first-open':''}">
+    <li class="${x.done?'done':''} ${fo&&x.id===fo.id?'first-open':''}" draggable="true" data-task="${x.id}">
       <button class="check" data-toggle="${x.id}" aria-label="Toggle">${svg(x.done?'boxOk':'box',17,1.8)}</button>
       <span>${esc(x.text)}</span>
       <button class="sub-toggle ${subs.length?(sd===subs.length?'full':'has'):''} ${exp?'open':''}"
@@ -3084,6 +3329,74 @@ function renderTasks(t){
         </li>
       </ul>`:''}
     </li>`}).join('');
+}
+
+function persistTaskOrder(box,p){
+  const ids=Array.from(box.querySelectorAll('[data-task]')).map(el=>el.dataset.task);
+  const byId={}; tasksOf(p).forEach(t=>byId[t.id]=t);
+  const ordered=ids.map(id=>byId[id]).filter(Boolean);
+  let k=0;
+  p.tasks=(p.tasks||[]).map(t=>(t.kind!=='link'&&t.kind!=='sticky')?ordered[k++]:t);
+  saveProject(p,true);
+  $('#taskList').innerHTML=renderTasks(tasksOf(p));
+  bindTaskDrag($('#taskList'),p);
+  updateBarAndNext(p); renderSide();
+}
+
+function bindTaskDrag(box,p){
+  let dragId=null;
+  box.addEventListener('dragstart',e=>{
+    const li=e.target.closest('[data-task]'); if(!li) return;
+    if(e.target.closest('input')) { e.preventDefault(); return }
+    dragId=li.dataset.task; li.classList.add('drag');
+    e.dataTransfer.effectAllowed='move';
+    try{ e.dataTransfer.setData('text/plain',dragId) }catch(_){}
+  });
+  box.addEventListener('dragend',()=>{
+    const el=box.querySelector('.drag'); if(el) el.classList.remove('drag');
+    dragId=null;
+  });
+  box.addEventListener('dragover',e=>{
+    if(!dragId) return;
+    e.preventDefault();
+    const over=e.target.closest('[data-task]');
+    const el=box.querySelector('[data-task="'+dragId+'"]');
+    if(!over||!el||over===el) return;
+    const r=over.getBoundingClientRect();
+    box.insertBefore(el,(e.clientY-r.top)>r.height/2?over.nextSibling:over);
+  });
+  box.addEventListener('drop',e=>{
+    e.preventDefault(); if(!dragId) return;
+    dragId=null; persistTaskOrder(box,p);
+  });
+
+  let held=null,timer=null,sy=0,moved=false;
+  box.addEventListener('pointerdown',e=>{
+    if(e.pointerType!=='touch') return;
+    const li=e.target.closest('[data-task]'); if(!li) return;
+    if(e.target.closest('button')||e.target.closest('input')) return;
+    sy=e.clientY; moved=false;
+    timer=setTimeout(()=>{ held=li; li.classList.add('drag'); if(navigator.vibrate) navigator.vibrate(12) },350);
+  });
+  box.addEventListener('pointermove',e=>{
+    if(e.pointerType!=='touch') return;
+    if(!held){ if(timer&&Math.abs(e.clientY-sy)>9){ clearTimeout(timer); timer=null } return }
+    moved=true; e.preventDefault();
+    const under=document.elementFromPoint(e.clientX,e.clientY);
+    const over=under&&under.closest?under.closest('[data-task]'):null;
+    if(over&&over!==held&&over.parentNode===box){
+      const r=over.getBoundingClientRect();
+      box.insertBefore(held,(e.clientY-r.top)>r.height/2?over.nextSibling:over);
+    }
+  });
+  const end=()=>{
+    clearTimeout(timer); timer=null;
+    if(!held) return;
+    held.classList.remove('drag'); held=null;
+    if(moved) persistTaskOrder(box,p);
+  };
+  box.addEventListener('pointerup',end);
+  box.addEventListener('pointercancel',end);
 }
 
 function updateBarAndNext(p){
@@ -3127,11 +3440,13 @@ function bindProject(p){
   const ap=$('#addPhoto'); if(ap) ap.addEventListener('click',()=>$('#filePick').click());
   const sn=$('#addNote'); if(sn) sn.addEventListener('click',addSticky);
   const pk=$('#pack'); if(pk) pk.addEventListener('click',()=>packBoard(true));
+  const tb=$('#trashBtn'); if(tb) tb.addEventListener('click',()=>openTrash(p));
   const td=$('#tidy'); if(td) td.addEventListener('click',tidyBoard);
   const tl=$('#taskList');
   const redrawTasks=()=>{
     saveProject(p,true);
-    $('#taskList').innerHTML=renderTasks(p.tasks);
+    $('#taskList').innerHTML=renderTasks(tasksOf(p));
+    bindTaskDrag($('#taskList'),p);
     renderSide(); updateBarAndNext(p);
   };
   const addSub=(tid,val)=>{
@@ -3146,6 +3461,7 @@ function bindProject(p){
     const inp=document.querySelector('[data-subadd="'+tid+'"]');
     if(inp) inp.focus();
   };
+  if(tl) bindTaskDrag(tl,p);
   if(tl) tl.addEventListener('keydown',e=>{
     const inp=e.target.closest('[data-subadd]');
     if(inp&&e.key==='Enter'){ e.preventDefault(); addSub(inp.dataset.subadd,inp.value) }
@@ -4044,6 +4360,7 @@ function route(){
   const v=$('#view');
   if(v){ v.scrollTop=0; v.classList.remove('view-in'); void v.offsetWidth; v.classList.add('view-in') }
 }
+function resetViews(){ st.openId=null; st.focus=false; st.hist=false; st.review=false }
 function openProject(id){st.openId=id;st.focus=false;st.hist=false;st.review=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
 
 document.addEventListener('click',e=>{
@@ -4088,22 +4405,22 @@ document.addEventListener('keydown',e=>{
 
 $('#q').addEventListener('input',e=>{
   st.query=e.target.value;
-  if(st.query.trim()){ st.openId=null; st.focus=false; st.hist=false; st.review=false }
+  if(st.query.trim()) resetViews();
   route();
 });
-$('#btnFocus').addEventListener('click',()=>{st.openId=null;st.hist=false;st.review=false;st.focus=true;if(window.innerWidth<900)document.body.classList.remove('side-open');route()});
+$('#btnFocus').addEventListener('click',()=>{resetViews();st.focus=true;if(window.innerWidth<900)document.body.classList.remove('side-open');route()});
 $('#histLink').addEventListener('click',openHistory);
 $('#revLink').addEventListener('click',()=>{
-  st.openId=null; st.focus=false; st.hist=false; st.review=true; st.query=''; $('#q').value='';
+  resetViews(); st.review=true; st.query=''; $('#q').value='';
   if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
   route();
 });
-$('#archLink').addEventListener('click',()=>{st.openId=null;st.focus=false;st.filter='archived';if(window.innerWidth<900)document.body.classList.remove('side-open');route()});
+$('#archLink').addEventListener('click',()=>{resetViews();st.filter='archived';if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}route()});
 $('#btnIdeas').addEventListener('click',()=>{openProject(INBOX)});
 $('#btnWant').addEventListener('click',()=>{openProject(WANT)});
 $('#btnTodo').addEventListener('click',()=>{openProject(TODO)});
 function openHistory(){
-  st.openId=null; st.focus=false; st.review=false; st.hist=true; st.query=''; const qq=$('#q'); if(qq) qq.value='';
+  resetViews(); st.hist=true; st.query=''; const qq=$('#q'); if(qq) qq.value='';
   if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
   route();
 }
@@ -4116,7 +4433,7 @@ $('#tHideDone').addEventListener('click',()=>{
   renderSide(); if(!st.openId&&!st.focus) renderAll();
 });
 $('#tArchive').addEventListener('click',()=>{
-  st.openId=null; st.focus=false; st.hist=false; st.review=false; st.filter='archived';
+  resetViews(); st.filter='archived';
   if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
   route();
 });
@@ -4139,7 +4456,7 @@ $('#tResort').addEventListener('click',()=>{
   st.projects.forEach(p=>{p.ord=null});
   sortProjects(); renderSide(); toast('Back to automatic order');
 });
-$('#btnAll').addEventListener('click',()=>{st.openId=null;st.focus=false;st.hist=false;st.review=false;if(st.filter==='archived')st.filter='all';if(window.innerWidth<900)document.body.classList.remove('side-open');route()});
+$('#btnAll').addEventListener('click',()=>{resetViews();if(st.filter==='archived')st.filter='all';if(window.innerWidth<900)document.body.classList.remove('side-open');route()});
 $('#btnHide').addEventListener('click',()=>{document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()});
 $('#btnShow').addEventListener('click',()=>{document.body.classList.add('side-open');st.sideForced=true;syncSidebarButton()});
 $('#scrim').addEventListener('click',()=>{document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()});
@@ -4250,7 +4567,17 @@ async function migrateLocal(){
 }
 
 async function reload(){
-  st.projects=await allProjects();
+  try{
+    st.projects=await allProjects();
+    setNet(true);
+    st.projects.forEach(p=>localPut('projects',JSON.parse(JSON.stringify(p))));
+  }catch(e){
+    const mirror=await localProjects().catch(()=>[]);
+    if(!mirror.length) throw e;
+    st.projects=mirror;
+    setNet(false);
+    toast('Offline — showing the copy saved on this device');
+  }
   if(!st.projects.some(p=>p.id===INBOX)){const ib=makeInbox();await putProject(ib);st.projects.push(ib)}
   if(!st.projects.some(p=>p.id===WANT)){const wl=makeWant();await putProject(wl);st.projects.push(wl)}
   if(!st.projects.some(p=>p.id===TODO)){const td=makeTodo();await putProject(td);st.projects.push(td)}
@@ -4271,6 +4598,8 @@ async function afterLogin(){
   document.getElementById('gate').style.display='none';
   document.getElementById('boot').style.display='';
   try{
+    try{ if(!db) db=await openDB() }catch(e){}
+    await flushQueue();
     await reload();
     const empty=st.projects.filter(p=>!SPECIAL(p.id)).length===0;
     if(empty&&LS.get('pm:migrated')!=='1'&&await localHasData()) migrateOffer=true;
