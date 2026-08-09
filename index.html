@@ -373,19 +373,15 @@ body.board-open{overflow:hidden}
 .nav{display:flex;flex-direction:column;gap:6px;padding:0 12px 10px}
 .btn-nav{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;
   font-family:Unbounded,sans-serif;font-weight:600;font-size:11.5px;border:1px solid var(--line);
-  background:var(--panel-2);transition:.16s;position:relative;overflow:hidden}
-.btn-nav::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;opacity:.9}
+  background:var(--panel-2);transition:.16s;position:relative;
+  background-clip:padding-box;box-shadow:inset 3px 0 0 var(--acc,transparent)}
 .btn-nav:hover{border-color:var(--line-2)}
 .btn-nav .ncount{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;
   padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.08)}
-.btn-nav.focus{color:var(--amber);background:rgba(255,193,85,.055)}
-.btn-nav.focus::before{background:var(--amber)}
-.btn-nav.ideas{color:var(--cyan);background:rgba(107,150,255,.055)}
-.btn-nav.ideas::before{background:linear-gradient(180deg,#8B6BFF,#4FD4FF)}
-.btn-nav.want{color:var(--mint);background:rgba(63,233,164,.055)}
-.btn-nav.want::before{background:linear-gradient(180deg,#3FE9A4,#A8FF4D)}
-.btn-nav.on{color:#0A0A0E;border-color:transparent}
-.btn-nav.on::before{content:none;display:none}
+.btn-nav.focus{color:var(--amber);background:rgba(255,193,85,.055);--acc:#FFC155}
+.btn-nav.ideas{color:var(--cyan);background:rgba(107,150,255,.055);--acc:#7BA0FF}
+.btn-nav.want{color:var(--mint);background:rgba(63,233,164,.055);--acc:#3FE9A4}
+.btn-nav.on{color:#0A0A0E;border-color:transparent;background-clip:border-box}
 .btn-nav.on .ncount{background:rgba(0,0,0,.2)}
 .btn-nav.focus.on{background:linear-gradient(135deg,#FFC155,#FF9F45);box-shadow:0 6px 22px -10px rgba(255,193,85,.8)}
 .btn-nav.ideas.on{background:linear-gradient(135deg,#8B6BFF,#4FD4FF);box-shadow:0 6px 22px -10px rgba(139,107,255,.85)}
@@ -454,8 +450,7 @@ body.board-open #main{z-index:90}
 .want .idea-acts{opacity:0}
 .want:hover .idea-acts{opacity:1}
 
-.btn-nav.todo{color:var(--magenta);background:rgba(255,90,224,.055)}
-.btn-nav.todo::before{background:linear-gradient(180deg,#FF5AE0,#8B6BFF)}
+.btn-nav.todo{color:var(--magenta);background:rgba(255,90,224,.055);--acc:#FF5AE0}
 .btn-nav.todo.on{background:linear-gradient(135deg,#FF5AE0,#B478FF);box-shadow:0 6px 22px -10px rgba(255,90,224,.85)}
 .btn-nav.focus.on,.btn-nav.ideas.on,.btn-nav.want.on,.btn-nav.todo.on{color:#08080B}
 .btn-nav.on svg{color:#08080B}
@@ -798,6 +793,65 @@ input,textarea{cursor:text}
 body.no-hints .hint{display:none}
 body.no-hints .board-empty span{display:none}
 body.no-hints .lede{display:none}
+/* поиск */
+.sgroup{max-width:900px;margin:0 auto 20px;border:1px solid var(--line);border-radius:16px;
+  background:var(--panel);overflow:hidden}
+.sgroup-h{display:flex;align-items:center;gap:10px;padding:13px 16px;text-decoration:none;color:var(--txt);
+  font-family:Unbounded,sans-serif;font-weight:600;font-size:13.5px;border-bottom:1px solid var(--line)}
+.sgroup-h:hover{background:var(--raise)}
+.scount{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);
+  padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.06)}
+.srow{display:flex;gap:12px;align-items:baseline;padding:10px 16px;text-decoration:none;color:var(--soft);
+  font-size:13px;line-height:1.45;border-bottom:1px solid var(--line-2)}
+.srow:last-child{border-bottom:none}
+.srow:hover{background:var(--raise);color:var(--txt)}
+.srow.done .stext{text-decoration:line-through;opacity:.6}
+.skind{flex:0 0 54px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--dim)}
+.stext{flex:1;min-width:0;word-break:break-word}
+.srow mark,.sgroup mark{background:rgba(139,107,255,.35);color:var(--txt);border-radius:3px;padding:0 2px}
+.smore{padding:9px 16px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim)}
+
+/* разбор */
+.rsec{max-width:900px;margin:0 auto 24px}
+.rsec h2{margin:0 0 10px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:10px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.rrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 15px;margin-bottom:8px;
+  border:1px solid var(--line);border-radius:13px;background:var(--panel)}
+.rrow:hover{border-color:var(--line-2)}
+.rname{flex:1;min-width:160px;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--txt);
+  font-family:Unbounded,sans-serif;font-weight:600;font-size:13px}
+.rmeta{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim)}
+.racts{display:flex;gap:6px;flex-wrap:wrap}
+.racts button{padding:6px 11px;border-radius:9px;border:1px solid var(--line);color:var(--soft);font-size:11.5px}
+.racts button:hover{color:var(--txt);border-color:var(--line-2);background:var(--raise)}
+.racts button[data-rev-act="del"]:hover{color:var(--magenta);border-color:var(--magenta)}
+
+/* цвет проекта */
+.pc-none{background:var(--panel-2);border:2px dashed var(--line-2)!important}
+.sk-dot.c-lime{background:#A8FF4D}
+.row.tinted{box-shadow:inset 3px 0 0 var(--pc)}
+.row.on.tinted{box-shadow:inset 3px 0 0 var(--pc),inset 0 0 0 1px var(--line-2)}
+.tinted.c-violet{--pc:#8B6BFF}.tinted.c-cyan{--pc:#4FD4FF}.tinted.c-magenta{--pc:#FF5AE0}
+.tinted.c-mint{--pc:#3FE9A4}.tinted.c-amber{--pc:#FFC155}.tinted.c-lime{--pc:#A8FF4D}
+
+/* компактный список */
+.plist{max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:6px}
+.prow{display:flex;align-items:center;gap:14px;padding:12px 15px;border:1px solid var(--line);
+  border-radius:12px;background:var(--panel);text-decoration:none;color:var(--txt);transition:.14s}
+.prow:hover{border-color:var(--line-2);background:var(--raise)}
+.prow.tinted{box-shadow:inset 3px 0 0 var(--pc)}
+.pname{flex:0 0 auto;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-family:Unbounded,sans-serif;font-weight:600;font-size:13px}
+.pnext{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:12.5px;color:var(--soft)}
+.pmeta{flex:0 0 auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--dim)}
+
+/* переходы между экранами */
+@keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.view-in{animation:viewIn .16s ease}
+@media (prefers-reduced-motion:reduce){.view-in{animation:none}}
 
 /* ── сенсорные экраны: наведения нет, действия видны всегда ── */
 @media (hover:none){
@@ -865,6 +919,10 @@ body.no-hints .lede{display:none}
   .wish-shot{justify-content:center}
   .wish-grid{grid-template-columns:repeat(2,1fr);gap:9px}
   .links{grid-template-columns:repeat(2,1fr);gap:9px}
+  .pname{max-width:none;flex:1}
+  .pnext{display:none}
+  .rname{min-width:120px}
+  .racts button{padding:7px 10px}
   .capture #capShot{width:46px}
   .l-shot{width:100%!important}
   .link-add{flex-direction:column}
@@ -983,6 +1041,7 @@ body.no-hints .lede{display:none}
     </button>
     <div style="display:flex;gap:6px">
       <button class="arch-link" id="archLink" style="display:none"></button>
+      <button class="arch-link" id="revLink">Review</button>
       <button class="arch-link" id="histLink">History</button>
     </div>
     <button class="sign-out" id="signOut">Sign out</button>
@@ -1061,13 +1120,13 @@ function projectRow(p){
   return {id:p.id,user_id:ME.id,name:p.name||'',status:p.status||'idle',
     important:!!p.important,archived:!!p.archived,pinned:!!p.pinned,
     ord:p.ord==null?null:p.ord,start_date:p.startDate||null,revisit:p.revisit||null,
-    cover:p.cover||null,notes:p.notes||'',created:p.created||Date.now(),
+    cover:p.cover||null,color:p.color||null,notes:p.notes||'',created:p.created||Date.now(),
     updated:p.updated||Date.now(),done_at:p.doneAt||null};
 }
 function projectFromRow(r,items){
   return {id:r.id,name:r.name,status:r.status,important:r.important,archived:r.archived,
     pinned:r.pinned,ord:r.ord,startDate:r.start_date||'',revisit:r.revisit||'',
-    cover:r.cover||null,notes:r.notes||'',created:Number(r.created)||0,
+    cover:r.cover||null,color:r.color||null,notes:r.notes||'',created:Number(r.created)||0,
     updated:Number(r.updated)||0,doneAt:r.done_at?Number(r.done_at):null,tasks:items||[]};
 }
 function itemRow(t,p,i){
@@ -1241,7 +1300,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,histDays:14,histMonth:0,taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -1341,7 +1400,7 @@ const UNDO_MAX=40;
 let undoStack=[], redoStack=[], baseline={}, lastSnap={};
 
 const snapOf=p=>JSON.stringify({tasks:p.tasks||[],notes:p.notes||'',name:p.name,
-  status:p.status,important:!!p.important,archived:!!p.archived});
+  status:p.status,important:!!p.important,archived:!!p.archived,color:p.color||null});
 
 function noteChange(p){
   const now=snapOf(p);
@@ -1368,6 +1427,7 @@ function applySnap(pid,snap){
   const d=JSON.parse(snap);
   p.tasks=d.tasks; p.notes=d.notes; p.name=d.name;
   p.status=d.status; p.important=d.important; p.archived=d.archived;
+  if('color' in d) p.color=d.color;
   baseline[pid]=snap;
   putProject(p).catch(()=>{});
   return before;
@@ -1461,7 +1521,7 @@ function renderSide(){
     return;
   }
   box.innerHTML=list.map(p=>`
-    <div class="row ${p.id===st.openId?'on':''} ${p.status==='done'?'done-row':''} ${p.archived?'arch':''}" draggable="true" data-id="${p.id}">
+    <div class="row ${p.id===st.openId?'on':''} ${p.status==='done'?'done-row':''} ${p.archived?'arch':''} ${p.color?'tinted c-'+p.color:''}" draggable="true" data-id="${p.id}">
       <a class="row-name" href="#p/${p.id}" data-open="${p.id}">
         <span class="dot" data-s="${p.status}"></span>
         <span class="row-text">${esc(p.name)}</span>
@@ -1609,11 +1669,6 @@ function renderAll(){
       <div class="stat" data-s="active"><b>${n('active')}</b><span>in progress</span></div>
       <div class="stat"><b>${n('idle')}</b><span>not started</span></div>
       <div class="stat" data-s="done"><b>${n('done')}</b><span>done</span></div>
-      <button class="hist-stat" id="openHist">
-        <span class="hs-ico">${svg('clock',17,1.8)}</span>
-        <span class="hs-txt"><b>History</b><span>${historyEvents(7).length} closed out this week</span></span>
-        <span class="hs-go">${svg('arrow',13,2.2)}</span>
-      </button>
     </div>`:''}
     ${migrateOffer?`<div class="mig">
       <span><b>Found data saved in this browser.</b> Move your old projects, notes and photos into the cloud so they show up on every device.</span>
@@ -1633,8 +1688,18 @@ function renderAll(){
     </div>
     <div class="chips">${chips.map(c=>`<button class="chip ${st.filter===c.id?'on':''}" data-filter="${c.id}">${c.label}</button>`).join('')}
       <button class="chip tog ${st.hideDone?'on':''}" id="hideDone">${svg(st.hideDone?'boxOk':'box',12,2)} Hide finished</button>
+      <button class="chip tog" id="viewMode">${svg(st.listView?'boxOk':'box',12,2)} Compact list</button>
     </div>
-    ${list.length?`<div class="grid">${list.map(p=>{
+    ${list.length?(st.listView?`<div class="plist">${list.map(p=>{
+      const t=tasksOf(p),d=t.filter(x=>x.done).length;
+      const nx=nextStep(p);
+      return `<a class="prow ${p.color?'tinted c-'+p.color:''}" href="#p/${p.id}" data-open="${p.id}">
+        <span class="dot" data-s="${p.status}"></span>
+        <span class="pname">${esc(p.name)}${p.important?` <span class="flag">${svg('flag',10,2.2)}</span>`:''}</span>
+        <span class="pnext">${nx&&p.status!=='done'?esc(nx.text):''}</span>
+        <span class="pmeta">${isDue(p)?'<span class="due-badge">due back</span>':(t.length?`${d}/${t.length}`:'—')}</span>
+      </a>`}).join('')}</div>`
+    :`<div class="grid">${list.map(p=>{
       const t=tasksOf(p),d=t.filter(x=>x.done).length;
       return `<a class="card" href="#p/${p.id}" data-open="${p.id}" data-cover="${p.id}">
         <div class="veil"></div>
@@ -1651,16 +1716,16 @@ function renderAll(){
           return p.status==='active'&&ag>=7?`<span class="stale">untouched for ${ag} ${ag===1?'day':'days'}</span>`
           :(p.startDate?'since '+ru(p.startDate):'no date')})()} · ${d}/${t.length} tasks</div>
         ${t.length?`<div class="mini"><i style="width:${(d/t.length)*100}%"></i></div>`:''}
-      </a>`}).join('')}</div>`
+      </a>`}).join('')}</div>`)
     :`<div class="empty-main"><p>Nothing to show.</p><button class="btn-inline" id="emptyNew">${svg('plus',14,2.2)} New project</button></div>`}`;
   paintCovers();
   const mg=$('#migGo'), mk=$('#migSkip');
   if(mg) mg.addEventListener('click',migrateLocal);
   if(mk) mk.addEventListener('click',()=>{migrateOffer=false;LS.set('pm:migrated','1');renderAll()});
-  const oh=$('#openHist');
-  if(oh) oh.addEventListener('click',openHistory);
   const hd=$('#hideDone');
   if(hd) hd.addEventListener('click',()=>{st.hideDone=!st.hideDone;LS.set('pm:hideDone',st.hideDone?'1':'0');renderAll();renderSide()});
+  const vm=$('#viewMode');
+  if(vm) vm.addEventListener('click',()=>{st.listView=!st.listView;LS.set('pm:list',st.listView?'1':'0');renderAll()});
   const cs=$('#capShot');
   if(cs) cs.addEventListener('click',()=>{
     photoSourcePick(async f=>{ if(f) await photoToIdeas(f) });
@@ -1793,6 +1858,121 @@ function renderHistory(){
   if(hb) hb.addEventListener('click',()=>{ st.hist=false; route() });
   const hm=$('#hMore');
   if(hm) hm.addEventListener('click',()=>{ st.histDays+=30; renderHistory() });
+}
+
+function mark(text,q){
+  const t=String(text||'');
+  const i=t.toLowerCase().indexOf(q);
+  if(i<0) return esc(t);
+  return esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length));
+}
+function snippet(text,q,pad){
+  const t=String(text||''); const i=t.toLowerCase().indexOf(q);
+  if(i<0) return '';
+  const a=Math.max(0,i-pad), b=Math.min(t.length,i+q.length+pad*2);
+  return (a>0?'…':'')+t.slice(a,b)+(b<t.length?'…':'');
+}
+const KIND_LABEL={task:'task',idea:'idea',wish:'wish',todo:'to do',link:'link',sticky:'note'};
+
+function searchHits(){
+  const q=st.query.trim().toLowerCase();
+  if(!q) return [];
+  const out=[];
+  st.projects.forEach(p=>{
+    const hits=[];
+    if((p.name||'').toLowerCase().includes(q)) hits.push({k:'name',t:p.name});
+    (p.tasks||[]).forEach(t=>{
+      const kind=t.kind||(SPECIAL(p.id)?KIND_OF(p.id):'task');
+      if((t.text||'').toLowerCase().includes(q)) hits.push({k:kind,t:t.text,done:t.done});
+      if((t.note||'').toLowerCase().includes(q)) hits.push({k:'note',t:snippet(t.note,q,45)});
+      if((t.url||'').toLowerCase().includes(q)) hits.push({k:'link',t:t.url});
+    });
+    if((p.notes||'').toLowerCase().includes(q)) hits.push({k:'notes',t:snippet(p.notes,q,55)});
+    if(hits.length) out.push({p,hits});
+  });
+  return out;
+}
+
+function renderSearch(){
+  const q=st.query.trim().toLowerCase();
+  const groups=searchHits();
+  const total=groups.reduce((n,g)=>n+g.hits.length,0);
+  $('#crumb').textContent='Search';
+  $('#view').innerHTML=`
+    <header class="head">
+      <h1>Found <i>${total}</i></h1>
+      <p class="lede">${total?`Across ${groups.length} ${groups.length===1?'place':'places'}. Click any line to open where it lives.`
+        :'Nothing matches. Try a shorter word — it searches names, tasks, notes, links and wishes.'}</p>
+    </header>
+    ${groups.map(g=>`<div class="sgroup">
+      <a class="sgroup-h" href="#p/${g.p.id}" data-open="${g.p.id}">
+        <span class="dot" data-s="${g.p.status}"></span>${esc(g.p.name)}
+        <span class="scount">${g.hits.length}</span>
+      </a>
+      ${g.hits.slice(0,8).map(h=>`<a class="srow ${h.done?'done':''}" href="#p/${g.p.id}" data-open="${g.p.id}">
+        <span class="skind">${KIND_LABEL[h.k]||h.k}</span>
+        <span class="stext">${mark(h.t,q)}</span>
+      </a>`).join('')}
+      ${g.hits.length>8?`<div class="smore">+${g.hits.length-8} more inside</div>`:''}
+    </div>`).join('')}
+  `;
+}
+
+/* ───────── review ───────── */
+function renderReview(){
+  $('#crumb').textContent='Review';
+  const real=st.projects.filter(x=>!SPECIAL(x.id));
+  const due=real.filter(isDue);
+  const stale=real.filter(x=>!x.archived&&x.status==='active'&&daysAgo(x.updated||x.created)>=7&&!isDue(x));
+  const cold=real.filter(x=>!x.archived&&x.status==='idle'&&daysAgo(x.created)>=30);
+  const stars=starred();
+  const week=historyEvents(7);
+  const nothing=!due.length&&!stale.length&&!cold.length;
+
+  const card=(p,actions)=>`<div class="rrow">
+    <a class="rname" href="#p/${p.id}" data-open="${p.id}">
+      <span class="dot" data-s="${p.status}"></span>${esc(p.name)}
+    </a>
+    <span class="rmeta">${p.revisit&&isDue(p)?'due back':(p.status==='active'?`untouched ${daysAgo(p.updated||p.created)}d`:`idle ${daysAgo(p.created)}d`)}</span>
+    <span class="racts">${actions.map(a=>`<button data-rev-act="${a.k}" data-pid="${p.id}">${a.l}</button>`).join('')}</span>
+  </div>`;
+
+  $('#view').innerHTML=`
+    <header class="head">
+      <h1>Weekly <i>review</i></h1>
+      <p class="lede">${nothing?'Nothing is asking for attention. Rare and worth noticing.'
+        :'Five minutes here beats an hour of guilt later. Push it, park it, or let it go.'}</p>
+    </header>
+    <div class="stats">
+      <div class="stat" data-s="done"><b>${week.length}</b><span>closed this week</span></div>
+      <div class="stat"><b>${stars.reduce((n,g)=>n+g.items.filter(t=>!t.done).length,0)}</b><span>in focus</span></div>
+      <div class="stat"><b>${due.length+stale.length+cold.length}</b><span>need a decision</span></div>
+    </div>
+    ${due.length?`<div class="rsec"><h2>Asked to come back</h2>${due.map(p=>card(p,[
+      {k:'snooze',l:'later'},{k:'start',l:'start now'},{k:'arch',l:'archive'}])).join('')}</div>`:''}
+    ${stale.length?`<div class="rsec"><h2>Started, then stalled</h2>${stale.map(p=>card(p,[
+      {k:'snooze',l:'park it'},{k:'done',l:'call it done'},{k:'arch',l:'archive'}])).join('')}</div>`:''}
+    ${cold.length?`<div class="rsec"><h2>Never got going</h2>${cold.map(p=>card(p,[
+      {k:'start',l:'start now'},{k:'arch',l:'archive'},{k:'del',l:'delete'}])).join('')}</div>`:''}
+    ${nothing?`<p class="hint" style="max-width:640px">Come back next week — or open <a href="#history" style="color:var(--violet)">History</a> to see what you got through.</p>`:''}
+  `;
+  $('#view').querySelectorAll('[data-rev-act]').forEach(b=>b.addEventListener('click',async e=>{
+    e.preventDefault(); e.stopPropagation();
+    const p=st.projects.find(x=>x.id===b.dataset.pid); if(!p) return;
+    const k=b.dataset.revAct;
+    if(k==='snooze'){ p.revisit=plusMonths(1); saveProject(p,true); toast('Back on '+ru(p.revisit)) }
+    if(k==='start'){ p.status='active'; p.revisit=''; if(!p.startDate) p.startDate=today(); saveProject(p,true); toast('In progress') }
+    if(k==='done'){ setStatus(p,'done'); toast('Marked finished') }
+    if(k==='arch'){ p.archived=true; p.revisit=''; saveProject(p,true); toast('Archived') }
+    if(k==='del'){
+      if(!confirm('Delete “'+(p.name||'project')+'” for good?')) return;
+      for(const ph of await photosOf(p.id)) await delPhotoDB(ph.id);
+      await delProject(p.id);
+      st.projects=st.projects.filter(x=>x.id!==p.id);
+      toast('Deleted');
+    }
+    sortProjects(); renderReview(); renderSide();
+  }));
 }
 
 /* ───────── focus ───────── */
@@ -3030,6 +3210,13 @@ function openSettings(id){
     <div class="f"><span>Status</span>
       <div class="picker big">${STATUSES.map(s=>`<button class="pick ${p.status===s.id?'on':''}" data-s="${s.id}" data-sset="${s.id}">${svg(s.id,14,p.status===s.id?2.2:1.6)}<span>${s.label}</span></button>`).join('')}</div>
     </div>
+    <div class="f"><span>Colour</span>
+      <div class="sk-colors">
+        <button data-pc="" class="sk-dot pc-none ${!p.color?'on':''}" title="None"></button>
+        ${['violet','cyan','magenta','mint','amber','lime'].map(c=>
+          `<button data-pc="${c}" class="sk-dot c-${c} ${p.color===c?'on':''}" title="${c}"></button>`).join('')}
+      </div>
+    </div>
     <div class="f"><span>Priority</span>
       <div class="two">
         <button class="opt ${p.important?'on':''}" data-imp="1">${svg('flag',13,2.1)} Important</button>
@@ -3037,6 +3224,9 @@ function openSettings(id){
       </div>
     </div>
     <label class="f"><span>Start date</span><input type="date" id="sDate" value="${p.startDate||''}"></label>
+    <div class="f"><span>Duplicate</span>
+      <button class="opt" data-dup style="width:100%">${svg('plus',13,2.2)} Make a copy of the structure</button>
+    </div>
     <div class="f"><span>Come back on</span>
       <input type="date" id="sRev" value="${p.revisit||''}">
       <div class="quick-dates">
@@ -3064,6 +3254,27 @@ function openSettings(id){
     if(e.target===el||e.target.closest('[data-close]')) return close();
     const s=e.target.closest('[data-sset]');
     if(s){setStatus(p,s.dataset.sset);close();openSettings(id);return}
+    const pc=e.target.closest('[data-pc]');
+    if(pc){
+      p.color=pc.dataset.pc||null;
+      saveProject(p,true); renderSide();
+      if(st.openId===p.id) renderProject(); else if(!st.openId&&!st.focus&&!st.hist&&!st.review) renderAll();
+      close(); openSettings(id);
+      return;
+    }
+    if(e.target.closest('[data-dup]')){
+      const copy={id:uid(),name:(p.name||'Project')+' copy',status:'idle',important:!!p.important,
+        color:p.color||null,startDate:'',revisit:'',created:Date.now(),updated:Date.now(),notes:p.notes||'',
+        tasks:(p.tasks||[]).filter(t=>t.kind!=='sticky').map(t=>Object.assign({},t,{
+          id:uid(),done:false,doneAt:null,star:false,created:Date.now(),
+          subs:(t.subs||[]).map(x=>Object.assign({},x,{id:uid(),done:false}))
+        }))};
+      await putProject(copy);
+      st.projects.push(copy); sortProjects();
+      close(); openProject(copy.id);
+      toast('Copied — photos and notes on the board were left behind');
+      return;
+    }
     const rv=e.target.closest('[data-rev]');
     if(rv){
       const n=Number(rv.dataset.rev);
@@ -3260,6 +3471,7 @@ let hashLock=false;
 function currentHash(){
   if(st.openId) return '#p/'+st.openId;
   if(st.hist) return '#history';
+  if(st.review) return '#review';
   if(st.focus) return '#focus';
   return '#all';
 }
@@ -3279,6 +3491,7 @@ function applyHash(){
   st.openId=null;
   st.focus=(h==='focus');
   st.hist=(h==='history');
+  st.review=(h==='review');
 }
 window.addEventListener('hashchange',()=>{
   if(hashLock||!ME) return;
@@ -3292,11 +3505,24 @@ function syncSidebarButton(){
 function pageTitle(){
   if(st.openId){ const p=cur(); return p&&p.name?p.name:'Project' }
   if(st.hist) return 'History';
+  if(st.review) return 'Review';
   if(st.focus) return 'Focus';
+  if(st.query.trim()) return 'Search';
   return 'All projects';
 }
-function route(){syncHash();document.title=pageTitle();closeBoardFull();clearUrls();if(st.openId)renderProject();else if(st.hist)renderHistory();else if(st.focus)renderFocus();else renderAll();renderSide()}
-function openProject(id){st.openId=id;st.focus=false;st.hist=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
+function route(){
+  syncHash(); document.title=pageTitle(); closeBoardFull(); clearUrls();
+  if(st.openId) renderProject();
+  else if(st.hist) renderHistory();
+  else if(st.review) renderReview();
+  else if(st.focus) renderFocus();
+  else if(st.query.trim()) renderSearch();
+  else renderAll();
+  renderSide();
+  const v=$('#view');
+  if(v){ v.classList.remove('view-in'); void v.offsetWidth; v.classList.add('view-in') }
+}
+function openProject(id){st.openId=id;st.focus=false;st.hist=false;st.review=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
 
 document.addEventListener('click',e=>{
   if(st.dragRow) return;
@@ -3338,15 +3564,24 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();document.body.classList.add('side-open');st.sideForced=true;$('#q').focus();}
 });
 
-$('#q').addEventListener('input',e=>{st.query=e.target.value;renderSide();if(!st.openId)renderAll()});
+$('#q').addEventListener('input',e=>{
+  st.query=e.target.value;
+  if(st.query.trim()){ st.openId=null; st.focus=false; st.hist=false; st.review=false }
+  route();
+});
 $('#btnFocus').addEventListener('click',()=>{st.openId=null;st.hist=false;st.focus=true;if(window.innerWidth<900)document.body.classList.remove('side-open');route()});
 $('#histLink').addEventListener('click',openHistory);
+$('#revLink').addEventListener('click',()=>{
+  st.openId=null; st.focus=false; st.hist=false; st.review=true; st.query=''; $('#q').value='';
+  if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
+  route();
+});
 $('#archLink').addEventListener('click',()=>{st.openId=null;st.focus=false;st.filter='archived';if(window.innerWidth<900)document.body.classList.remove('side-open');route()});
 $('#btnIdeas').addEventListener('click',()=>{openProject(INBOX)});
 $('#btnWant').addEventListener('click',()=>{openProject(WANT)});
 $('#btnTodo').addEventListener('click',()=>{openProject(TODO)});
 function openHistory(){
-  st.openId=null; st.focus=false; st.hist=true;
+  st.openId=null; st.focus=false; st.review=false; st.hist=true; st.query=''; const qq=$('#q'); if(qq) qq.value='';
   if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
   route();
 }
