@@ -24,7 +24,7 @@
   --violet:#9B7BFF;--cyan:#4FD4FF;--magenta:#FF5AE0;--mint:#3FE9A4;--amber:#FFC155;
   --iris:linear-gradient(135deg,#8B6BFF 0%,#4FD4FF 46%,#FF5AE0 100%);
   --s-idle:#7A7A94;--s-active:#FFC155;--s-done:#3FE9A4;
-  --lime:#A8FF4D;
+  --lime:#A8FF4D;--btn-hover:#191922;--chip-bg:rgba(255,255,255,.08);
   --dots:radial-gradient(circle at center,rgba(255,255,255,.10) 1px,transparent 1.2px);
 }
 html,body{height:100%;margin:0}
@@ -206,8 +206,9 @@ body:not(.side-open) #btnShow{display:inline-flex}
 .task-add{display:flex;gap:7px}
 .task-add input{flex:1;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel);font-size:13.5px}
 .task-add input:focus{outline:none;border-color:var(--line-2)}
-.task-add button{padding:0 15px;border-radius:11px;background:var(--iris);color:#0A0A0E;
-  box-shadow:0 6px 20px -9px rgba(139,107,255,.8)}
+.task-add button{padding:0 15px;border-radius:11px;background:var(--raise);color:var(--txt);
+  box-shadow:inset 0 0 0 1px var(--line-2);transition:.14s}
+.task-add button:hover{background:var(--btn-hover);box-shadow:inset 0 0 0 1px var(--violet)}
 .tasks{list-style:none;margin:12px 0 0;padding:0}
 .tasks li{display:flex;align-items:flex-start;gap:11px;padding:10px 6px;border-bottom:1px solid var(--line);line-height:1.5}
 .tasks li span{flex:1;word-break:break-word;font-size:13.5px}
@@ -295,7 +296,7 @@ body.dragging #board{border-color:var(--violet);box-shadow:0 0 40px -14px var(--
 .capture input{flex:1;padding:12px 15px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:13.5px}
 .capture input:focus{outline:none;border-color:var(--line-2)}
 .capture button{padding:0 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);color:var(--soft);transition:.14s}
-.capture button:hover{color:var(--txt);border-color:var(--line-2)}
+.capture button:hover{color:var(--txt);border-color:var(--violet);background:var(--raise)}
 .next{display:flex;gap:9px;margin:0 0 10px;font-size:12.5px;line-height:1.45;color:var(--txt)}
 .next em{flex:0 0 auto;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:9px;
   letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);padding-top:3px}
@@ -429,7 +430,9 @@ body.board-open #main{z-index:90}
 .kind-pick{display:flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:11px;background:var(--panel)}
 .kind-pick button{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;color:var(--dim)}
 .kind-pick button.on{color:#0A0A0E;background:var(--iris)}
-.want-add .go{padding:0 16px;border-radius:11px;background:var(--iris);color:#0A0A0E}
+.want-add .go{padding:0 16px;border-radius:11px;background:var(--raise);color:var(--txt);
+  box-shadow:inset 0 0 0 1px var(--line-2);transition:.14s}
+.want-add .go:hover{background:var(--btn-hover);box-shadow:inset 0 0 0 1px var(--violet)}
 .cur-pick{display:flex;gap:3px;margin-left:auto}
 .cur-pick button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);color:var(--dim);font-size:13px}
 .cur-pick button.on{color:var(--txt);border-color:var(--line-2);background:var(--raise)}
@@ -461,8 +464,8 @@ body.board-open #main{z-index:90}
 .wish-add>*{height:48px}
 .wish-add input{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:13.5px}
 .wish-add .go{display:inline-flex;align-items:center;justify-content:center;padding:0 22px;border-radius:12px;
-  background:var(--iris);color:#08080B;box-shadow:0 6px 20px -10px rgba(139,107,255,.85)}
-.wish-add .go:hover{box-shadow:0 8px 24px -8px rgba(139,107,255,1)}
+  background:var(--raise);color:var(--txt);box-shadow:inset 0 0 0 1px var(--line-2);transition:.14s}
+.wish-add .go:hover{background:var(--btn-hover);box-shadow:inset 0 0 0 1px var(--violet)}
 .wish-add input:focus{outline:none;border-color:var(--line-2)}
 .wish-shot{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 17px;border-radius:12px;
   border:1px dashed var(--line-2);color:var(--soft);font-size:12.5px;transition:.16s}
@@ -718,7 +721,8 @@ input,textarea{cursor:text}
   border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);transition:.16s}
 .l-shot:hover{color:var(--txt);border-color:var(--violet);background:rgba(139,107,255,.1)}
 .link-add .go{display:inline-flex;align-items:center;justify-content:center;padding:0 22px;border-radius:12px;
-  background:var(--iris);color:#08080B;box-shadow:0 6px 20px -10px rgba(139,107,255,.85)}
+  background:var(--raise);color:var(--txt);box-shadow:inset 0 0 0 1px var(--line-2);transition:.14s}
+.link-add .go:hover{background:var(--btn-hover);box-shadow:inset 0 0 0 1px var(--violet)}
 .links{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-top:14px}
 .lcard{position:relative;display:block;aspect-ratio:1/1;border-radius:16px;overflow:hidden;
   border:1px solid var(--line);background:var(--panel-2);text-decoration:none;color:var(--txt);
@@ -881,6 +885,75 @@ body.no-hints .lede{display:none}
 .prow::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .16s;
   background:linear-gradient(90deg,rgba(139,107,255,.10),transparent 45%)}
 .prow:hover::after{opacity:1}
+.links.list{display:flex;flex-direction:column;gap:6px}
+.lrow{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:12px;
+  border:1px solid var(--line);background:var(--panel);text-decoration:none;color:var(--txt);
+  transition:.14s;cursor:pointer}
+.lrow:hover{border-color:var(--line-2);background:var(--raise)}
+.lrow-thumb{flex:0 0 auto;width:38px;height:38px;border-radius:9px;overflow:hidden;
+  background:var(--panel-2);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;justify-content:center}
+.lrow-thumb img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s}
+.lrow-thumb img[src]{opacity:1}
+.lrow-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-family:Unbounded,sans-serif;font-weight:600;font-size:12.5px}
+.lrow-host{flex:0 0 auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--dim)}
+.lrow .lacts{position:static;opacity:0;flex:0 0 auto}
+.lrow:hover .lacts{opacity:1}
+.lcard.drag,.lrow.drag{opacity:.4;box-shadow:0 12px 30px -16px #000}
+.lcard[draggable],.lrow[draggable]{cursor:grab}
+.refprev img{max-width:min(92vw,760px);max-height:74vh;border-radius:14px;object-fit:contain}
+.refprev-blank{width:min(70vw,320px);height:220px;border-radius:14px;display:flex;align-items:center;
+  justify-content:center;color:var(--dim);background:var(--panel)}
+.refprev-name{font-family:Unbounded,sans-serif;font-weight:600;font-size:14px;max-width:40vw;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.refprev-host{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--dim)}
+/* рамка выделения и панель действий */
+.marquee{position:absolute;z-index:60;border:1px solid var(--violet);background:rgba(139,107,255,.12);
+  border-radius:6px;pointer-events:none}
+.pin.sel{outline:2px solid var(--violet);outline-offset:2px}
+.sel-bar{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:96;display:flex;
+  align-items:center;gap:9px;padding:9px 12px;border-radius:14px;background:var(--raise);
+  box-shadow:0 20px 50px -20px #000,inset 0 0 0 1px var(--line-2);font-size:12.5px}
+.sel-bar span{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--soft);padding-right:4px}
+.sel-bar button{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:10px;
+  color:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+.sel-bar button:hover{color:var(--txt);box-shadow:inset 0 0 0 1px var(--line-2);background:var(--panel-2)}
+.sel-bar button[data-sel="del"]:hover{color:var(--magenta);box-shadow:inset 0 0 0 1px var(--magenta)}
+
+/* светлая тема */
+body.light{
+  --bg:#F2F2F6;--panel:#FFFFFF;--panel-2:#F6F6FA;--raise:#EDEDF3;
+  --txt:#14141C;--soft:#5B5B6B;--dim:#8B8B9B;
+  --line:rgba(0,0,0,.09);--line-2:rgba(0,0,0,.16);
+  --violet:#6B46F0;--cyan:#0E93C4;--magenta:#C6249E;--mint:#0F9A66;--amber:#A9720F;--lime:#5E9209;
+  --dots:radial-gradient(circle at center,rgba(0,0,0,.10) 1px,transparent 1.2px);
+  --btn-hover:#E4E4EC;--chip-bg:rgba(0,0,0,.06);
+}
+body.light{--iris:linear-gradient(135deg,#7C5CFF 0%,#31B6E8 46%,#E23FBE 100%)}
+body.light::before{opacity:.5}
+body.light .btn-nav .ncount,body.light .fcount,body.light .scount{background:var(--chip-bg)}
+body.light .mini,body.light .bar{background:rgba(0,0,0,.07)}
+body.light .sticky-acts button{background:rgba(255,255,255,.7);color:#14141C}
+body.light .lacts button{background:rgba(255,255,255,.8)}
+body.light .lb,body.light .refprev{background:rgba(20,20,28,.88)}
+body.light .lb-bar{color:#fff}
+body.light .card.has-cover .veil{background:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.7) 42%,rgba(255,255,255,.94) 100%)}
+body.light .wcard .shade,body.light .lshade{
+  background:linear-gradient(180deg,rgba(0,0,0,.32) 0%,transparent 38%,transparent 46%,rgba(0,0,0,.78) 100%)}
+body.light .card,body.light .prow,body.light .lrow,body.light .rrow,body.light .sgroup{
+  box-shadow:0 1px 2px rgba(20,20,40,.05)}
+body.light .topbar{background:rgba(255,255,255,.82)}
+body.light ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.14)}
+body.light,body.light button,body.light .row,body.light .card,body.light a{
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M4 2.5v14.2l3.9-3.8 2.4 5.2 2.4-1.1-2.4-5.1 5.3-.3z' fill='%23141420' stroke='%23fff' stroke-width='1.1' stroke-linejoin='round'/%3E%3C/svg%3E") 4 3,auto}
+.share-box{display:flex;gap:6px}
+.share-box input{flex:1;min-width:0;padding:9px 11px;border:1px solid var(--line);border-radius:9px;
+  background:var(--panel-2);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--soft)}
+.share-box .opt{flex:0 0 auto;width:auto;padding:9px 14px}
+body.shared-view #board{touch-action:auto}
+body.shared-view .pin{cursor:default}
+body.shared-view .sticky{cursor:default}
+body.shared-view .topbar{justify-content:center}
 
 /* ── сенсорные экраны: наведения нет, действия видны всегда ── */
 @media (hover:none){
@@ -948,6 +1021,8 @@ body.no-hints .lede{display:none}
   .wish-shot{justify-content:center}
   .wish-grid{grid-template-columns:repeat(2,1fr);gap:9px}
   .links{grid-template-columns:repeat(2,1fr);gap:9px}
+  .links.list{grid-template-columns:1fr}
+  .lrow-host{display:none}
   .pname{max-width:none;flex:1}
   .pnext{display:none}
   .rname{min-width:120px}
@@ -1059,6 +1134,7 @@ body.no-hints .lede{display:none}
     <button class="tool" id="tHideDone"></button>
     <button class="tool" id="tArchive"></button>
     <button class="tool" id="tHints"></button>
+    <button class="tool" id="tTheme"></button>
     <button class="tool" id="tResort">Sort automatically again</button>
   </div>
   <div id="sideList"></div>
@@ -1149,13 +1225,15 @@ function projectRow(p){
   return {id:p.id,user_id:ME.id,name:p.name||'',status:p.status||'idle',
     important:!!p.important,archived:!!p.archived,pinned:!!p.pinned,
     ord:p.ord==null?null:p.ord,start_date:p.startDate||null,revisit:p.revisit||null,
-    cover:p.cover||null,color:p.color||null,notes:p.notes||'',created:p.created||Date.now(),
+    cover:p.cover||null,color:p.color||null,shared:!!p.shared,share_id:p.shareId||null,
+    share_data:p.shareData||null,notes:p.notes||'',created:p.created||Date.now(),
     updated:p.updated||Date.now(),done_at:p.doneAt||null};
 }
 function projectFromRow(r,items){
   return {id:r.id,name:r.name,status:r.status,important:r.important,archived:r.archived,
     pinned:r.pinned,ord:r.ord,startDate:r.start_date||'',revisit:r.revisit||'',
-    cover:r.cover||null,color:r.color||null,notes:r.notes||'',created:Number(r.created)||0,
+    cover:r.cover||null,color:r.color||null,shared:!!r.shared,shareId:r.share_id||null,
+    shareData:r.share_data||null,notes:r.notes||'',created:Number(r.created)||0,
     updated:Number(r.updated)||0,doneAt:r.done_at?Number(r.done_at):null,tasks:items||[]};
 }
 function itemRow(t,p,i){
@@ -1329,7 +1407,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -1544,6 +1622,8 @@ function renderSide(){
   if(ta) ta.innerHTML=svg('arch',14,1.7)+' Archive · '+an;
   const th=$('#tHints');
   if(th){ th.innerHTML=svg(st.hints?'boxOk':'box',14,1.9)+' Show hints'; th.classList.toggle('on',st.hints) }
+  const tt=$('#tTheme');
+  if(tt){ tt.innerHTML=svg(st.light?'boxOk':'box',14,1.9)+' Light theme'; tt.classList.toggle('on',st.light) }
   const box=$('#sideList');
   if(!list.length){
     box.innerHTML=`<div class="empty-side">${st.query?'No matches.':'Nothing yet. Start your first project — even if it is just an idea.'}</div>`;
@@ -2422,15 +2502,27 @@ async function fetchPreview(u){
 function linksPane(p){
   const items=linksOf(p).slice().reverse();
   return `<section class="pane">
-    <h2 class="pane-h">References ${items.length?`<span class="count">${items.length}</span>`:''}</h2>
+    <h2 class="pane-h">References ${items.length?`<span class="count">${items.length}</span>`:''}
+      ${items.length?`<button class="ghost-btn" id="refView" style="margin-left:auto">${st.refList?'grid':'list'}</button>`:''}
+    </h2>
     <div class="link-add">
       <button class="l-shot" id="lShot" title="Add a photo without a link">${svg('img',16,1.7)}</button>
       <input class="l-url" id="lUrl" placeholder="Paste a link, or drop a photo" autocomplete="off">
       <input class="l-name" id="lName" placeholder="name it (optional)" autocomplete="off">
       <button class="go" id="lAdd">${svg('plus',16,2.5)}</button>
     </div>
-    ${items.length?`<div class="links" id="links">${items.map(i=>`
-      <${i.url?'a':'div'} class="lcard" data-id="${i.id}" ${i.url?`href="${esc(i.url)}" target="_blank" rel="noopener"`:'data-shot tabindex="0" role="button"'}>
+    ${items.length?(st.refList?`<div class="links list" id="links">${items.map(i=>`
+      <${i.url?'a':'div'} class="lrow" draggable="true" data-ref="${i.id}" data-id="${i.id}" ${i.url?`href="${esc(i.url)}" target="_blank" rel="noopener"`:'data-shot tabindex="0" role="button"'}>
+        <span class="lrow-thumb"><img data-limg="${i.id}" alt="" ${i.preview?`src="${esc(i.preview)}"`:''}></span>
+        <span class="lrow-name">${esc(i.text||hostOf(i.url)||'Untitled')}</span>
+        <span class="lrow-host">${esc(hostOf(i.url)||'photo')}</span>
+        <span class="lacts">
+          <button data-led="${i.id}" title="Settings">${svg('gear',13,1.6)}</button>
+          <button data-ldel="${i.id}" title="Delete">${svg('trash',13,1.7)}</button>
+        </span>
+      </${i.url?'a':'div'}>`).join('')}</div>`
+    :`<div class="links" id="links">${items.map(i=>`
+      <${i.url?'a':'div'} class="lcard" draggable="true" data-ref="${i.id}" data-id="${i.id}" ${i.url?`href="${esc(i.url)}" target="_blank" rel="noopener"`:'data-shot tabindex="0" role="button"'}>
         <img class="lshot" data-limg="${i.id}" alt="" ${i.preview?`src="${esc(i.preview)}"`:''}>
         <span class="lfall">${favOf(i.url)?`<img class="lfav" src="${esc(favOf(i.url))}" alt="">`:svg('img',22,1.5)}</span>
         <span class="lshade"></span>
@@ -2442,7 +2534,7 @@ function linksPane(p){
           <button data-led="${i.id}" title="Settings">${svg('gear',13,1.6)}</button>
           <button data-ldel="${i.id}" title="Delete">${svg('trash',13,1.7)}</button>
         </span>
-      </${i.url?'a':'div'}>`).join('')}</div>`
+      </${i.url?'a':'div'}>`).join('')}</div>`)
     :`<p class="hint" style="margin-top:16px;max-width:62ch">Nothing pinned yet. Drop in a reel, a reference photo, a shop page — it lands here as a preview card you can open with one tap.</p>`}
   </section>`;
 }
@@ -2464,8 +2556,226 @@ async function loadLinkPhotos(pid){
   list.filter(x=>x.item).forEach(ph=>{
     st.linkShots[ph.item]=ph;
     const el=document.querySelector('[data-limg="'+ph.item+'"]');
-    if(el&&ph.url){ el.src=ph.url; const c=el.closest('.lcard'); if(c) c.classList.add('shot') }
+    if(el&&ph.url){ el.src=ph.url; const c=el.closest('.lcard,.lrow'); if(c) c.classList.add('shot') }
   });
+}
+
+function persistRefOrder(box,p){
+  const domIds=Array.from(box.querySelectorAll('[data-ref]')).map(el=>el.dataset.ref);
+  const wanted=domIds.slice().reverse();           // на экране новые сверху
+  const links=linksOf(p);
+  const byId={}; links.forEach(l=>byId[l.id]=l);
+  const ordered=wanted.map(id=>byId[id]).filter(Boolean);
+  let k=0;
+  p.tasks=(p.tasks||[]).map(t=>t.kind==='link'?ordered[k++]:t);
+  saveProject(p,true);
+  toast('Order saved');
+}
+
+function bindRefDrag(box,p){
+  let dragId=null;
+  box.addEventListener('dragstart',e=>{
+    const el=e.target.closest('[data-ref]'); if(!el) return;
+    dragId=el.dataset.ref; el.classList.add('drag');
+    e.dataTransfer.effectAllowed='move';
+    try{ e.dataTransfer.setData('text/plain',dragId) }catch(_){}
+  });
+  box.addEventListener('dragend',e=>{
+    const el=box.querySelector('.drag'); if(el) el.classList.remove('drag');
+    dragId=null;
+  });
+  box.addEventListener('dragover',e=>{
+    if(!dragId) return;
+    e.preventDefault();
+    const over=e.target.closest('[data-ref]');
+    const el=box.querySelector('[data-ref="'+dragId+'"]');
+    if(!over||!el||over===el) return;
+    const r=over.getBoundingClientRect();
+    const after=st.refList?(e.clientY-r.top)>r.height/2:(e.clientX-r.left)>r.width/2;
+    box.insertBefore(el,after?over.nextSibling:over);
+  });
+  box.addEventListener('drop',e=>{
+    e.preventDefault(); if(!dragId) return;
+    dragId=null;
+    persistRefOrder(box,p);
+  });
+
+  // то же пальцем: долгое нажатие
+  let held=null,timer=null,sy=0,moved=false;
+  box.addEventListener('pointerdown',e=>{
+    if(e.pointerType!=='touch') return;
+    const el=e.target.closest('[data-ref]'); if(!el) return;
+    if(e.target.closest('button')) return;
+    sy=e.clientY; moved=false;
+    timer=setTimeout(()=>{ held=el; el.classList.add('drag'); if(navigator.vibrate) navigator.vibrate(12) },350);
+  });
+  box.addEventListener('pointermove',e=>{
+    if(e.pointerType!=='touch') return;
+    if(!held){ if(timer&&Math.abs(e.clientY-sy)>9){ clearTimeout(timer); timer=null } return }
+    moved=true; e.preventDefault();
+    const under=document.elementFromPoint(e.clientX,e.clientY);
+    const over=under&&under.closest?under.closest('[data-ref]'):null;
+    if(over&&over!==held&&over.parentNode===box){
+      const r=over.getBoundingClientRect();
+      const after=st.refList?(e.clientY-r.top)>r.height/2:(e.clientX-r.left)>r.width/2;
+      box.insertBefore(held,after?over.nextSibling:over);
+    }
+  });
+  const end=()=>{
+    clearTimeout(timer); timer=null;
+    if(!held) return;
+    held.classList.remove('drag'); held=null;
+    if(moved) persistRefOrder(box,p);
+  };
+  box.addEventListener('pointerup',end);
+  box.addEventListener('pointercancel',end);
+}
+
+const YEAR=60*60*24*365;
+
+async function buildSnapshot(p){
+  let rows=[];
+  try{ rows=(await sb.from('photos').select('*').eq('project_id',p.id)).data||[] }catch(e){}
+  const paths=rows.map(r=>r.path);
+  let signed={};
+  if(paths.length){
+    try{
+      const {data}=await sb.storage.from('photos').createSignedUrls(paths,YEAR);
+      (data||[]).forEach(d=>{ if(d.path&&d.signedUrl) signed[d.path]=d.signedUrl });
+    }catch(e){}
+  }
+  return {
+    v:1, at:Date.now(),
+    name:p.name||'Untitled', status:p.status, important:!!p.important,
+    startDate:p.startDate||'', notes:p.notes||'', color:p.color||null,
+    tasks:(p.tasks||[]).map(t=>({id:t.id,kind:t.kind||'task',text:t.text||'',done:!!t.done,
+      url:t.url||'',note:t.note||'',preview:t.preview||'',cat:t.cat||'',
+      subs:(t.subs||[]).map(x=>({text:x.text,done:!!x.done})),layout:t.layout||null})),
+    photos:rows.map(r=>({id:r.id,item:r.item_id||null,url:signed[r.path]||'',
+      x:r.x,y:r.y,w:r.w,r:r.r,z:r.z}))
+  };
+}
+
+function shareUrl(token){
+  return location.origin+location.pathname+'#s/'+token;
+}
+
+async function enableShare(p){
+  toast('Preparing the link…');
+  p.shareId=p.shareId||uid()+uid();
+  p.shareData=await buildSnapshot(p);
+  p.shared=true;
+  await putProject(p);
+  return shareUrl(p.shareId);
+}
+async function refreshShare(p){
+  if(!p.shared) return;
+  toast('Updating…');
+  p.shareData=await buildSnapshot(p);
+  await putProject(p);
+  toast('Shared copy updated');
+}
+async function disableShare(p){
+  p.shared=false;
+  p.shareData=null;
+  await putProject(p);
+  toast('Link switched off');
+}
+
+/* ───────── публичная страница ───────── */
+function renderShared(d){
+  document.title=d.name;
+  document.body.classList.add('shared-view');
+  const tasks=(d.tasks||[]).filter(t=>t.kind!=='link'&&t.kind!=='sticky');
+  const links=(d.tasks||[]).filter(t=>t.kind==='link');
+  const notes=(d.tasks||[]).filter(t=>t.kind==='sticky');
+  const boardPh=(d.photos||[]).filter(x=>!x.item);
+  const shotOf=id=>((d.photos||[]).find(x=>x.item===id)||{}).url||'';
+  const done=tasks.filter(t=>t.done).length;
+  const meta=STATUSES.find(x=>x.id===d.status)||STATUSES[0];
+
+  document.body.innerHTML=`
+    <main id="main" style="width:100%">
+      <div class="topbar">
+        <span class="crumb">shared project · read only</span>
+      </div>
+      <div id="view" class="view-in">
+        <header class="head p-head">
+          <h1 style="font-family:Unbounded,sans-serif;font-weight:700;font-size:30px;margin:0">${esc(d.name)}</h1>
+          <div class="p-meta">
+            <span class="tag" style="color:var(--s-${d.status==='active'?'active':d.status==='done'?'done':'idle'})">
+              ${svg(d.status,11,2)} ${meta.short}</span>
+            ${d.important?`<span class="tag-imp">${svg('flag',11,2.1)} important</span>`:''}
+            ${d.startDate?`<span class="tag">${svg('cal',11,1.8)} since ${ru(d.startDate)}</span>`:''}
+          </div>
+          ${tasks.length?`<div class="bar"><i style="width:${(done/tasks.length)*100}%"></i><b>${done}/${tasks.length}</b></div>`:''}
+        </header>
+        <div class="panes">
+          ${tasks.length?`<section class="pane">
+            <h2 class="pane-h">Tasks</h2>
+            <ul class="tasks">${tasks.map(t=>`<li class="${t.done?'done':''}">
+              <span class="check">${svg(t.done?'boxOk':'box',17,1.8)}</span>
+              <span>${esc(t.text)}</span>
+              ${(t.subs||[]).length?`<ul class="subs">${t.subs.map(x=>`<li class="${x.done?'done':''}">
+                <span class="check">${svg(x.done?'boxOk':'box',14,1.8)}</span><span>${esc(x.text)}</span></li>`).join('')}</ul>`:''}
+            </li>`).join('')}</ul>
+          </section>`:''}
+          ${(d.notes||'').trim()?`<section class="pane">
+            <h2 class="pane-h">Notes</h2>
+            <div class="notes" style="white-space:pre-wrap">${esc(d.notes)}</div>
+          </section>`:''}
+          ${links.length?`<section class="pane">
+            <h2 class="pane-h">References <span class="count">${links.length}</span></h2>
+            <div class="links">${links.map(i=>{
+              const img=shotOf(i.id)||i.preview||'';
+              return `<${i.url?'a':'div'} class="lcard ${img?'shot':''}" ${i.url?`href="${esc(i.url)}" target="_blank" rel="noopener"`:''}>
+                <img class="lshot" ${img?`src="${esc(img)}"`:''} alt="">
+                <span class="lfall">${svg('img',22,1.5)}</span>
+                <span class="lshade"></span>
+                <span class="lbody"><b>${esc(i.text||hostOf(i.url)||'Untitled')}</b>
+                  <span>${esc(hostOf(i.url)||'photo')}</span></span>
+              </${i.url?'a':'div'}>`}).join('')}</div>
+          </section>`:''}
+          ${(boardPh.length||notes.length)?`<section class="pane wide">
+            <h2 class="pane-h">Board <span class="count">${boardPh.length}</span></h2>
+            <div id="board"><div id="canvas" style="width:2600px;height:1900px">
+              ${boardPh.map(ph=>`<div class="pin" style="left:${ph.x||0}px;top:${ph.y||0}px;width:${ph.w||210}px;
+                z-index:${ph.z||1};transform:rotate(${ph.r||0}deg)">
+                <img src="${esc(ph.url)}" alt="" draggable="false"></div>`).join('')}
+              ${notes.map(n=>{
+                const L=(()=>{try{return typeof n.layout==='string'?JSON.parse(n.layout):(n.layout||{})}catch(e){return{}}})();
+                return `<div class="sticky c-${L.c||'violet'} s-${L.s||'m'}"
+                  style="left:${L.x||60}px;top:${L.y||60}px;z-index:${L.z||1};${L.fs?`--fs:${L.fs}px;`:''}${L.w?`width:${L.w}px;`:''}">
+                  <div class="sticky-text">${esc(n.text||'')}</div></div>`}).join('')}
+            </div></div>
+          </section>`:''}
+        </div>
+        <p class="hint" style="max-width:900px;margin:26px auto 0;text-align:center">
+          A read-only snapshot, shared by its owner.
+        </p>
+      </div>
+    </main>`;
+}
+
+async function tryShared(){
+  const m=(location.hash||'').match(/^#\/?s\/(.+)$/);
+  if(!m) return false;
+  sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+  const boot=document.getElementById('boot');
+  try{
+    const {data,error}=await sb.rpc('shared_project',{token:m[1]});
+    if(error||!data) throw error||new Error('not found');
+    if(boot) boot.style.display='none';
+    renderShared(typeof data==='string'?JSON.parse(data):data);
+  }catch(e){
+    if(boot) boot.style.display='none';
+    document.body.innerHTML=`<div class="gate"><div class="gate-box">
+      <div class="gate-mark"></div>
+      <h1>Link not available</h1>
+      <p>This project is not shared any more, or the link is wrong.</p>
+    </div></div>`;
+  }
+  return true;
 }
 
 function linkEdit(p,item){
@@ -2516,6 +2826,29 @@ function linkEdit(p,item){
   document.body.appendChild(el);
 }
 
+function refPreview(p,item){
+  const shot=st.linkShots[item.id];
+  const img=(shot&&shot.url)||item.preview||'';
+  const el=document.createElement('div');
+  el.className='lb refprev';
+  el.innerHTML=`
+    ${img?`<img src="${esc(img)}" alt="">`:`<div class="refprev-blank">${svg('link',34,1.4)}</div>`}
+    <div class="lb-bar">
+      <span class="refprev-name">${esc(item.text||hostOf(item.url)||'Untitled')}</span>
+      <span class="refprev-host">${esc(hostOf(item.url))}</span>
+      <button data-go>${svg('link',14,1.9)} Open the link</button>
+      <button data-edit>${svg('gear',14,1.6)} Settings</button>
+      <button data-close>${svg('x',14,2)} Close</button>
+    </div>`;
+  const close=()=>el.remove();
+  el.addEventListener('click',e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    if(e.target.closest('[data-go]')){ window.open(item.url,'_blank','noopener'); return }
+    if(e.target.closest('[data-edit]')){ close(); linkEdit(p,item) }
+  });
+  document.body.appendChild(el);
+}
+
 function bindLinks(p){
   const la=$('#lAdd'); if(!la) return;
   const add=async()=>{
@@ -2535,6 +2868,10 @@ function bindLinks(p){
   la.addEventListener('click',add);
   $('#lUrl').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
   $('#lName').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
+  const rv=$('#refView');
+  if(rv) rv.addEventListener('click',()=>{
+    st.refList=!st.refList; LS.set('pm:reflist',st.refList?'1':'0'); renderProject();
+  });
   $('#lShot').addEventListener('click',()=>{
     const inp=$('#wishPick');
     inp.onchange=async ev=>{
@@ -2551,12 +2888,21 @@ function bindLinks(p){
     inp.click();
   });
   const box=$('#links'); if(!box) return;
+  bindRefDrag(box,p);
   box.addEventListener('keydown',e=>{
     if(e.key!=='Enter'&&e.key!==' ') return;
     const shot=e.target.closest('[data-shot]');
     if(shot&&!e.target.closest('button')){ e.preventDefault(); shot.click() }
   });
   box.addEventListener('click',async e=>{
+    const opener=e.target.closest('a[data-ref]');
+    if(opener&&!e.target.closest('[data-led]')&&!e.target.closest('[data-ldel]')){
+      if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return;   // новая вкладка — как обычно
+      e.preventDefault();
+      const item=(p.tasks||[]).find(x=>x.id===opener.dataset.ref);
+      if(item) refPreview(p,item);
+      return;
+    }
     const shot=e.target.closest('[data-shot]');
     if(shot&&!e.target.closest('[data-led]')&&!e.target.closest('[data-ldel]')){
       const ph=st.linkShots[shot.dataset.id];
@@ -2892,11 +3238,81 @@ function paintBoard(){
   requestAnimationFrame(()=>{ b.scrollLeft=0; b.scrollTop=0 });
 }
 
+const boardSel=new Set();
+
+function paintSel(){
+  document.querySelectorAll('.pin').forEach(el=>el.classList.toggle('sel',boardSel.has(el.dataset.id)));
+  let bar=document.getElementById('selBar');
+  if(!boardSel.size){ if(bar) bar.remove(); return }
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='selBar'; bar.className='sel-bar';
+    document.body.appendChild(bar);
+    bar.addEventListener('click',async e=>{
+      const b=e.target.closest('button'); if(!b) return;
+      const act=b.dataset.sel;
+      const p=cur();
+      if(act==='clear'){ boardSel.clear(); paintSel(); return }
+      if(act==='del'){
+        if(!confirm('Delete '+boardSel.size+' photo'+(boardSel.size===1?'':'s')+'? This cannot be undone.')) return;
+        for(const id of Array.from(boardSel)){
+          await delPhotoDB(id);
+          st.photos=st.photos.filter(x=>x.id!==id);
+        }
+        boardSel.clear();
+        if(p) dropCover(p.id);
+        paintBoard(); paintSel(); toast('Deleted');
+      }
+      if(act==='row'){
+        const chosen=st.photos.filter(x=>boardSel.has(x.id));
+        let x=40,y=40,rowH=0;
+        chosen.forEach(ph=>{
+          if(x+ph.w>1740){ x=40; y+=rowH+18; rowH=0 }
+          const dx=x-ph.x, dy=y-ph.y;
+          ph.x=x; ph.y=y; ph.z=++st.maxZ;
+          if(dx||dy) moveAttached(ph,dx,dy);
+          x+=ph.w+18; rowH=Math.max(rowH,ph.w);
+          putPhoto(ph).catch(()=>{});
+        });
+        if(p) saveProject(p,true);
+        paintBoard(); paintSel(); toast('Lined up');
+      }
+    });
+  }
+  bar.innerHTML=`<span>${boardSel.size} selected</span>
+    <button data-sel="row">${svg('size',13,1.9)} line up</button>
+    <button data-sel="del">${svg('trash',13,1.8)} delete</button>
+    <button data-sel="clear">${svg('x',13,2.2)} clear</button>`;
+}
+
 function bindPan(b,cv){
   let sx=0,sy=0,sl=0,stp=0,on=false;
   cv.addEventListener('pointerdown',e=>{
     if(e.target!==cv) return;
     if(e.button!==0&&e.pointerType==='mouse') return;
+    if(e.shiftKey){                       // Shift + протяжка = рамка выделения
+      e.preventDefault();
+      const rect=cv.getBoundingClientRect();
+      const ox=e.clientX-rect.left, oy=e.clientY-rect.top;
+      const box=document.createElement('div');
+      box.className='marquee'; cv.appendChild(box);
+      const draw=ev=>{
+        const cx=ev.clientX-rect.left, cy=ev.clientY-rect.top;
+        const l=Math.min(ox,cx), t=Math.min(oy,cy), w=Math.abs(cx-ox), h=Math.abs(cy-oy);
+        box.style.left=l+'px'; box.style.top=t+'px'; box.style.width=w+'px'; box.style.height=h+'px';
+        st.photos.forEach(ph=>{
+          const el=document.querySelector('.pin[data-id="'+ph.id+'"]');
+          const hh=(el&&el.offsetHeight)||ph.w;
+          const hit=ph.x<l+w&&ph.x+ph.w>l&&ph.y<t+h&&ph.y+hh>t;
+          if(hit) boardSel.add(ph.id); else boardSel.delete(ph.id);
+        });
+        paintSel();
+      };
+      const done=()=>{ box.remove(); window.removeEventListener('pointermove',draw); window.removeEventListener('pointerup',done) };
+      window.addEventListener('pointermove',draw); window.addEventListener('pointerup',done);
+      return;
+    }
+    if(boardSel.size){ boardSel.clear(); paintSel() }
     on=true; b.classList.add('panning');
     sx=e.clientX; sy=e.clientY; sl=b.scrollLeft; stp=b.scrollTop;
     const move=ev=>{ if(!on) return; b.scrollLeft=sl-(ev.clientX-sx); b.scrollTop=stp-(ev.clientY-sy) };
@@ -2944,9 +3360,16 @@ function pinEl(ph){
 
   el.addEventListener('pointerdown',e=>{
     if(e.button!==0&&e.pointerType==='mouse') return;
+    if(e.shiftKey){
+      e.preventDefault(); e.stopPropagation();
+      if(boardSel.has(ph.id)) boardSel.delete(ph.id); else boardSel.add(ph.id);
+      paintSel();
+      return;
+    }
     e.preventDefault(); front(); el.classList.add('grabbing');
     const rect=boardCanvas().getBoundingClientRect();
     const dx=e.clientX-rect.left-ph.x, dy=e.clientY-rect.top-ph.y;
+    const groupIds=boardSel.has(ph.id)?Array.from(boardSel).filter(id=>id!==ph.id):[];
     const move=ev=>{
       const h=el.offsetHeight;
       const nx=clamp(Math.round(ev.clientX-rect.left-dx),0,CANVAS_W-ph.w);
@@ -2954,12 +3377,22 @@ function pinEl(ph){
       const sx=nx-ph.x, sy=ny-ph.y;
       ph.x=nx; ph.y=ny;
       el.style.left=ph.x+'px'; el.style.top=ph.y+'px';
-      if(sx||sy) moveAttached(ph,sx,sy);
+      if(sx||sy){
+        moveAttached(ph,sx,sy);
+        groupIds.forEach(id=>{
+          const o=st.photos.find(x=>x.id===id); if(!o) return;
+          o.x+=sx; o.y+=sy;
+          const oe=document.querySelector('.pin[data-id="'+id+'"]');
+          if(oe){ oe.style.left=o.x+'px'; oe.style.top=o.y+'px' }
+          moveAttached(o,sx,sy);
+        });
+      }
     };
     const up=()=>{
       el.classList.remove('grabbing');
       window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);
       saveLayout(ph);
+      groupIds.forEach(id=>{ const o=st.photos.find(x=>x.id===id); if(o) saveLayout(o) });
       const pr=cur(); if(pr&&attachedTo(ph.id).length) saveProject(pr,true);
     };
     window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
@@ -3161,7 +3594,9 @@ function packBoard(keepSize){
 }
 const tidyBoard=()=>packBoard(false);
 
+function clearBoardSel(){ boardSel.clear(); const b=document.getElementById('selBar'); if(b) b.remove() }
 function closeBoardFull(){
+  clearBoardSel();
   const b=document.querySelector('#board.full');
   if(b) b.classList.remove('full');
   document.body.classList.remove('board-open');
@@ -3282,6 +3717,20 @@ function openSettings(id){
       </div>
     </div>
     <label class="f"><span>Start date</span><input type="date" id="sDate" value="${p.startDate||''}"></label>
+    <div class="f"><span>Share</span>
+      ${p.shared&&p.shareId?`
+        <div class="share-box">
+          <input id="shLink" readonly value="${esc(shareUrl(p.shareId))}">
+          <button class="opt" id="shCopy">Copy</button>
+        </div>
+        <div class="quick-dates">
+          <button id="shRefresh">Update the shared copy</button>
+          <button class="clr" id="shOff">Stop sharing</button>
+        </div>
+        <p class="hint" style="margin:8px 0 0">Anyone with this link sees a read-only snapshot — no login. It stays as it was when you last updated it.</p>`
+      :`<button class="opt" id="shOn" style="width:100%">${svg('link',13,1.9)} Create a public link</button>
+        <p class="hint" style="margin:8px 0 0">Makes a read-only copy anyone can open without an account.</p>`}
+    </div>
     <div class="f"><span>Duplicate</span>
       <button class="opt" data-dup style="width:100%">${svg('plus',13,2.2)} Make a copy of the structure</button>
     </div>
@@ -3312,6 +3761,21 @@ function openSettings(id){
     if(e.target===el||e.target.closest('[data-close]')) return close();
     const s=e.target.closest('[data-sset]');
     if(s){setStatus(p,s.dataset.sset);close();openSettings(id);return}
+    if(e.target.closest('#shOn')){
+      const url=await enableShare(p);
+      close(); openSettings(id);
+      try{ await navigator.clipboard.writeText(url); toast('Link created and copied') }
+      catch(_){ toast('Link created') }
+      return;
+    }
+    if(e.target.closest('#shCopy')){
+      const i=el.querySelector('#shLink');
+      i.select();
+      try{ await navigator.clipboard.writeText(i.value); toast('Copied') }catch(_){ toast('Select and copy') }
+      return;
+    }
+    if(e.target.closest('#shRefresh')){ await refreshShare(p); return }
+    if(e.target.closest('#shOff')){ await disableShare(p); close(); openSettings(id); return }
     const pc=e.target.closest('[data-pc]');
     if(pc){
       p.color=pc.dataset.pc||null;
@@ -3662,6 +4126,14 @@ $('#tHints').addEventListener('click',()=>{
   document.body.classList.toggle('no-hints',!st.hints);
   renderSide(); route();
 });
+$('#tTheme').addEventListener('click',()=>{
+  st.light=!st.light;
+  LS.set('pm:light',st.light?'1':'0');
+  document.body.classList.toggle('light',st.light);
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content',st.light?'#F2F2F6':'#020203');
+  renderSide();
+});
 $('#tResort').addEventListener('click',()=>{
   st.manual=false; LS.set('pm:manual','0');
   st.projects.forEach(p=>{p.ord=null});
@@ -3803,6 +4275,7 @@ async function afterLogin(){
     const empty=st.projects.filter(p=>!SPECIAL(p.id)).length===0;
     if(empty&&LS.get('pm:migrated')!=='1'&&await localHasData()) migrateOffer=true;
     document.body.classList.toggle('no-hints',!st.hints);
+    document.body.classList.toggle('light',st.light);
     syncSidebarButton();
     window.addEventListener('resize',syncSidebarButton);
     route();
@@ -3857,6 +4330,7 @@ window.addEventListener('focus',async()=>{
     document.getElementById('view').innerHTML='<div class="pad"><h1 style="font-family:Unbounded,sans-serif;font-size:20px">Offline</h1><p class="lede">The app could not load its cloud library. Check your connection and reload the page.</p></div>';
     return;
   }
+  if(await tryShared()) return;
   sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
   const {data}=await sb.auth.getSession();
   sb.auth.onAuthStateChange((ev,session)=>{
