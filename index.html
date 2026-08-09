@@ -1008,6 +1008,21 @@ body.shared-view .topbar{justify-content:center}
 .qadd button{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;
   color:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
 .qadd button:hover{color:var(--txt);box-shadow:inset 0 0 0 1px var(--violet)}
+.chips-toggle{display:none}
+.board-toggle{display:inline-flex;align-items:center;gap:8px;font:inherit;color:inherit;
+  letter-spacing:inherit;text-transform:inherit}
+.board-toggle .qchev{display:flex;transition:transform .16s}
+.board-pane:not(.collapsed) .board-toggle .qchev{transform:rotate(90deg)}
+.board-pane.collapsed #board,.board-pane.collapsed .hint{display:none}
+
+.fab-wrap{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:85;
+  display:none;flex-direction:column;align-items:center;gap:10px}
+.fab{width:58px;height:58px;border-radius:19px;display:flex;align-items:center;justify-content:center;
+  background:var(--iris);color:#08080B;box-shadow:0 14px 34px -12px rgba(139,107,255,.9)}
+.fab:active{transform:scale(.94)}
+.fab.small{width:44px;height:44px;border-radius:15px;background:var(--raise);color:var(--txt);
+  box-shadow:0 10px 26px -14px #000,inset 0 0 0 1px var(--line-2)}
+body.shared-view .fab-wrap{display:none!important}
 
 /* ── сенсорные экраны: наведения нет, действия видны всегда ── */
 @media (hover:none){
@@ -1036,6 +1051,27 @@ body.shared-view .topbar{justify-content:center}
 /* ── телефоны ── */
 @media (max-width:760px){
   body{padding-bottom:env(safe-area-inset-bottom)}
+  .fab-wrap{display:flex}
+  .quick-btn{display:none}
+
+  /* главная: сначала запись, потом проекты */
+  .home-stats,.head .lede{display:none}
+  .home-title{font-size:20px;margin-bottom:14px}
+  .capture{margin-bottom:12px}
+  .capture input{font-size:16px;padding:14px}
+  .chips-toggle{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;
+    color:var(--soft);font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;box-shadow:inset 0 0 0 1px var(--line);margin-bottom:12px}
+  .chips{display:none}
+  .chips.open{display:flex;margin-top:-4px}
+
+  /* внутри проекта */
+  .board-pane.collapsed .pane-h-tools{display:none}
+  .board-pane #board{height:56vh}
+  #refView{display:none}
+  .lrow-name{font-size:13px}
+  .l-shot{width:100%!important}
+  .qbar{margin-bottom:14px}
   #side{width:min(86vw,300px);flex-basis:min(86vw,300px);padding-top:env(safe-area-inset-top)}
   .topbar{padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top));gap:8px}
   .crumb{font-size:9.5px;letter-spacing:.1em}
@@ -1229,6 +1265,15 @@ body.shared-view .topbar{justify-content:center}
 
 <input type="file" id="filePick" accept="image/*" multiple hidden>
 <input type="file" id="jsonPick" accept="application/json,.json" hidden>
+<div class="fab-wrap" id="fabWrap">
+  <button class="fab small" id="fabShot" title="Photo to Ideas">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+  </button>
+  <button class="fab" id="fabAdd" title="Quick add">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+</div>
+
 <div id="toast"></div>
 
 <div id="gate" class="gate" style="display:none">
@@ -1606,7 +1651,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',qbar:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',qbar:{},chipsOpen:false,boardOpen:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -1977,7 +2022,7 @@ function renderAll(){
   const chips=[{id:'all',label:'All'},...STATUSES.map(s=>({id:s.id,label:s.short})),{id:'archived',label:'Archive'}];
   $('#view').innerHTML=`
     <header class="head">
-      <h1>Everything <i>in motion</i></h1>
+      <h1 class="home-title">Everything <i>in motion</i></h1>
       <p class="lede">${st.projects.length?'Switch status with the three dots next to a name. Inside: tasks, notes and a free-form board for photos.':'Empty so far. Start your first project — one line is enough.'}</p>
     </header>
     ${st.projects.length?`<div class="stats">
@@ -2001,7 +2046,8 @@ function renderAll(){
       <input id="cap" placeholder="Quick thought — lands in Ideas" autocomplete="off">
       <button id="capBtn">${svg('plus',15,2.2)}</button>
     </div>
-    <div class="chips">${chips.map(c=>`<button class="chip ${st.filter===c.id?'on':''}" data-filter="${c.id}">${c.label}</button>`).join('')}
+    <button class="chips-toggle" id="chipsToggle">${svg('gear',12,1.7)} Filters</button>
+    <div class="chips ${st.chipsOpen?'open':''}" id="chipsWrap">${chips.map(c=>`<button class="chip ${st.filter===c.id?'on':''}" data-filter="${c.id}">${c.label}</button>`).join('')}
       <button class="chip tog ${st.hideDone?'on':''}" id="hideDone">${svg(st.hideDone?'boxOk':'box',12,2)} Hide finished</button>
       <button class="chip tog" id="viewMode">${svg(st.listView?'boxOk':'box',12,2)} Compact list</button>
     </div>
@@ -2041,6 +2087,8 @@ function renderAll(){
   if(mk) mk.addEventListener('click',()=>{migrateOffer=false;LS.set('pm:migrated','1');renderAll()});
   const hd=$('#hideDone');
   if(hd) hd.addEventListener('click',()=>{st.hideDone=!st.hideDone;LS.set('pm:hideDone',st.hideDone?'1':'0');renderAll();renderSide()});
+  const ct=$('#chipsToggle');
+  if(ct) ct.addEventListener('click',()=>{ st.chipsOpen=!st.chipsOpen; renderAll() });
   const vm=$('#viewMode');
   if(vm) vm.addEventListener('click',()=>{st.listView=!st.listView;LS.set('pm:list',st.listView?'1':'0');renderAll()});
   const cs=$('#capShot');
@@ -2260,7 +2308,7 @@ function renderReview(){
       <p class="lede">${nothing?'Nothing is asking for attention. Rare and worth noticing.'
         :'Five minutes here beats an hour of guilt later. Push it, park it, or let it go.'}</p>
     </header>
-    <div class="stats">
+    <div class="stats home-stats">
       <div class="stat" data-s="done"><b>${week.length}</b><span>closed this week</span></div>
       <div class="stat"><b>${stars.reduce((n,g)=>n+g.items.filter(t=>!t.done).length,0)}</b><span>in focus</span></div>
       <div class="stat"><b>${due.length+stale.length+cold.length}</b><span>need a decision</span></div>
@@ -2729,6 +2777,11 @@ function quickBar(p){
   </div>`;
 }
 
+function boardOpen(pid){
+  if(pid in st.boardOpen) return st.boardOpen[pid];
+  return !isPhone();                       // на телефоне доска закрыта по умолчанию
+}
+
 function bindQuickBar(p){
   const t=$('#qToggle');
   if(t) t.addEventListener('click',()=>{
@@ -2763,11 +2816,13 @@ function bindQuickBar(p){
   });
 }
 
+function refListOn(){ return isPhone()?true:st.refList }
+
 function linksPane(p){
   const items=linksOf(p).slice().reverse();
   return `<section class="pane">
     <h2 class="pane-h">References ${items.length?`<span class="count">${items.length}</span>`:''}
-      ${items.length?`<button class="ghost-btn" id="refView" style="margin-left:auto">${st.refList?'grid':'list'}</button>`:''}
+      ${items.length?`<button class="ghost-btn" id="refView" style="margin-left:auto">${refListOn()?'grid':'list'}</button>`:''}
     </h2>
     <div class="link-add">
       <button class="l-shot" id="lShot" title="Add a photo without a link">${svg('img',16,1.7)}</button>
@@ -2775,7 +2830,7 @@ function linksPane(p){
       <input class="l-name" id="lName" placeholder="name it (optional)" autocomplete="off">
       <button class="go" id="lAdd">${svg('plus',16,2.5)}</button>
     </div>
-    ${items.length?(st.refList?`<div class="links list" id="links">${items.map(i=>`
+    ${items.length?(refListOn()?`<div class="links list" id="links">${items.map(i=>`
       <${i.url?'a':'div'} class="lrow" draggable="true" data-ref="${i.id}" data-id="${i.id}" ${i.url?`href="${esc(i.url)}" target="_blank" rel="noopener"`:'data-shot tabindex="0" role="button"'}>
         <span class="lrow-thumb"><img data-limg="${i.id}" alt="" ${i.preview?`src="${esc(i.preview)}"`:''}></span>
         <span class="lrow-name">${esc(i.text||hostOf(i.url)||'Untitled')}</span>
@@ -2855,7 +2910,7 @@ function bindRefDrag(box,p){
     const el=box.querySelector('[data-ref="'+dragId+'"]');
     if(!over||!el||over===el) return;
     const r=over.getBoundingClientRect();
-    const after=st.refList?(e.clientY-r.top)>r.height/2:(e.clientX-r.left)>r.width/2;
+    const after=refListOn()?(e.clientY-r.top)>r.height/2:(e.clientX-r.left)>r.width/2;
     box.insertBefore(el,after?over.nextSibling:over);
   });
   box.addEventListener('drop',e=>{
@@ -2881,7 +2936,7 @@ function bindRefDrag(box,p){
     const over=under&&under.closest?under.closest('[data-ref]'):null;
     if(over&&over!==held&&over.parentNode===box){
       const r=over.getBoundingClientRect();
-      const after=st.refList?(e.clientY-r.top)>r.height/2:(e.clientX-r.left)>r.width/2;
+      const after=refListOn()?(e.clientY-r.top)>r.height/2:(e.clientX-r.left)>r.width/2;
       box.insertBefore(held,after?over.nextSibling:over);
     }
   });
@@ -3384,9 +3439,10 @@ async function renderProject(){
         <textarea class="notes" id="notes" placeholder="Ideas, links, half-formed thoughts — all of it goes here. Saves itself.">${esc(p.notes||'')}</textarea>
       </section>`}
       ${p.id===WANT||p.id===TODO?'':linksPane(p)}
-      ${p.id===WANT||p.id===TODO?'':`<section class="pane wide">
+      ${p.id===WANT||p.id===TODO?'':`<section class="pane wide board-pane ${boardOpen(p.id)?'':'collapsed'}">
         <h2 class="pane-h">
-          Board <span class="count" id="phCount"></span><span class="sp"></span>
+          <button class="board-toggle" id="boardToggle">Board <span class="count" id="phCount"></span>
+            <span class="qchev">${svg('chev',11,2.2)}</span></button><span class="sp"></span>
           <button class="ghost-btn" id="expand">expand</button>
           <button class="ghost-btn" id="addNote">+ note</button>
           <button class="ghost-btn" id="pack">arrange</button>
@@ -3544,6 +3600,12 @@ function bindProject(p){
   const sn=$('#addNote'); if(sn) sn.addEventListener('click',addSticky);
   const pk=$('#pack'); if(pk) pk.addEventListener('click',()=>packBoard(true));
   const tb=$('#trashBtn'); if(tb) tb.addEventListener('click',()=>openTrash(p));
+  const bt=$('#boardToggle');
+  if(bt) bt.addEventListener('click',()=>{
+    st.boardOpen[p.id]=!boardOpen(p.id);
+    const sec=bt.closest('.board-pane');
+    if(sec) sec.classList.toggle('collapsed',!st.boardOpen[p.id]);
+  });
   const td=$('#tidy'); if(td) td.addEventListener('click',tidyBoard);
   const tl=$('#taskList');
   const redrawTasks=()=>{
@@ -4438,6 +4500,7 @@ window.addEventListener('hashchange',()=>{
   if(hashLock||!ME) return;
   applyHash(); route();
 });
+const isPhone=()=>!!(window.matchMedia&&window.matchMedia('(max-width:760px)').matches);
 const isTouch=()=>!!(window.matchMedia&&window.matchMedia('(hover:none)').matches);
 function syncSidebarButton(){
   if(window.innerWidth<900&&document.body.classList.contains('side-open')&&!st.sideForced)
@@ -4487,6 +4550,10 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#emptyNew')) newProject();
 });
 $('#quickBtn').addEventListener('click',openQuick);
+$('#fabAdd').addEventListener('click',openQuick);
+$('#fabShot').addEventListener('click',()=>{
+  photoSourcePick(async f=>{ if(f) await photoToIdeas(f) });
+});
 document.addEventListener('keydown',e=>{
   const typing=/^(INPUT|TEXTAREA)$/.test((e.target||{}).tagName||'');
   if((e.ctrlKey||e.metaKey)&&(e.key==='z'||e.key==='Z')){
