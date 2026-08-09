@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Projects</title>
+<title>All projects</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238B6BFF'/%3E%3Cstop offset='.5' stop-color='%234FD4FF'/%3E%3Cstop offset='1' stop-color='%23FF5AE0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%23050508'/%3E%3Crect x='12' y='12' width='40' height='40' rx='11' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -193,12 +193,14 @@ body:not(.side-open) #btnShow{display:inline-flex}
 .bar{position:relative;margin-top:18px;height:5px;border-radius:5px;background:rgba(255,255,255,.08);max-width:360px}
 .bar i{display:block;height:100%;border-radius:5px;background:var(--iris);transition:width .3s ease;box-shadow:0 0 16px -3px rgba(139,107,255,.85)}
 .bar b{position:absolute;right:-46px;top:-7px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:400;color:var(--dim)}
-.panes{max-width:1500px;margin:0 auto;display:grid;gap:24px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.panes{max-width:1500px;margin:0 auto;display:grid;gap:20px;grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:1240px){.panes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .pane.wide{grid-column:1/-1}
-.pane-h{display:flex;align-items:center;gap:9px;margin:0 0 12px;font-family:'JetBrains Mono',monospace;
+.pane-h{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:0 0 12px;font-family:'JetBrains Mono',monospace;
   font-weight:500;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
 .pane-h .sp{flex:1}
 .count{font-size:9.5px;padding:2px 7px;border-radius:999px;background:var(--raise);color:var(--soft)}
+.pane-h-tools{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
 .ghost-btn{padding:5px 10px;border:1px solid var(--line);border-radius:8px;color:var(--dim);
   font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
 .ghost-btn:hover{color:var(--txt);border-color:var(--line-2)}
@@ -217,12 +219,12 @@ body:not(.side-open) #btnShow{display:inline-flex}
 .task-del{opacity:0;color:var(--dim);padding:3px;transition:.14s}
 .tasks li:hover .task-del{opacity:.6}
 .task-del:hover{opacity:1;color:var(--magenta)}
-.notes{width:100%;min-height:252px;resize:vertical;padding:15px;border:1px solid var(--line);
+.notes{width:100%;min-height:190px;resize:vertical;padding:15px;border:1px solid var(--line);
   border-radius:14px;background:var(--panel);line-height:1.65;font-size:13.5px}
 .notes:focus{outline:none;border-color:var(--line-2)}
 
 /* ── photo board ── */
-#board{position:relative;height:min(78vh,880px);min-height:540px;border:1px solid var(--line);border-radius:18px;overflow:hidden;
+#board{position:relative;height:min(56vh,620px);min-height:400px;border:1px solid var(--line);border-radius:18px;overflow:hidden;
   background:var(--panel);touch-action:none}
 #board::before{content:'';position:absolute;inset:0;background-image:var(--dots);background-size:22px 22px;opacity:.55;
   -webkit-mask-image:radial-gradient(120% 90% at 50% 45%,#000 30%,transparent 100%);
@@ -712,16 +714,21 @@ input,textarea{cursor:text}
 .mig button:hover{background:rgba(79,212,255,.14)}
 .mig button.skip{border-color:var(--line);color:var(--dim)}
 .link-add{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;margin-bottom:4px}
-.link-add>*{height:46px}
+.link-add>*{height:44px}
 .link-add input{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:13.5px}
 .link-add input:focus{outline:none;border-color:var(--line-2)}
-.l-url{flex:2;min-width:220px}
-.l-name{flex:1;min-width:150px}
+.l-url{flex:2;min-width:130px}
+.l-name{flex:1;min-width:110px}
+.l-shot{flex:0 0 auto;width:44px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);transition:.16s}
+.l-shot:hover{color:var(--txt);border-color:var(--violet);background:rgba(139,107,255,.1)}
 .link-add .go{display:inline-flex;align-items:center;justify-content:center;padding:0 22px;border-radius:12px;
   background:var(--iris);color:#08080B;box-shadow:0 6px 20px -10px rgba(139,107,255,.85)}
-.links{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));margin-top:16px}
+.links{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-top:14px}
 .lcard{position:relative;display:block;aspect-ratio:1/1;border-radius:16px;overflow:hidden;
-  border:1px solid var(--line);background:var(--panel-2);text-decoration:none;color:var(--txt);transition:.18s}
+  border:1px solid var(--line);background:var(--panel-2);text-decoration:none;color:var(--txt);
+  transition:.18s;cursor:pointer;padding:0;font:inherit;text-align:left}
+.lcard[role="button"]:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
 .lcard:hover{transform:translateY(-3px);border-color:var(--line-2);box-shadow:0 20px 44px -22px #000}
 .lshot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s;z-index:1}
 .lcard.shot .lshot,.lshot[src]{opacity:1}
@@ -732,7 +739,7 @@ input,textarea{cursor:text}
   background:linear-gradient(180deg,rgba(2,2,3,.5) 0%,transparent 38%,transparent 46%,rgba(2,2,3,.92) 100%)}
 .lbody{position:absolute;left:13px;right:13px;bottom:12px;z-index:3;display:block}
 .lbody b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  font-family:Unbounded,sans-serif;font-weight:600;font-size:13px;line-height:1.25;
+  font-family:Unbounded,sans-serif;font-weight:600;font-size:11.5px;line-height:1.25;
   text-shadow:0 2px 14px rgba(0,0,0,.9)}
 .lbody>span{display:block;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:9.5px;
   letter-spacing:.08em;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -782,6 +789,9 @@ input,textarea{cursor:text}
 .sk-dot.c-violet{background:#8B6BFF}.sk-dot.c-cyan{background:#4FD4FF}
 .sk-dot.c-magenta{background:#FF5AE0}.sk-dot.c-mint{background:#3FE9A4}
 .sk-dot.c-amber{background:#FFC155}.sk-dot.c-plain{background:#E4E4EC}
+body.no-hints .hint{display:none}
+body.no-hints .board-empty span{display:none}
+body.no-hints .lede{display:none}
 
 /* ── сенсорные экраны: наведения нет, действия видны всегда ── */
 @media (hover:none){
@@ -849,8 +859,8 @@ input,textarea{cursor:text}
   .wish-shot{justify-content:center}
   .wish-grid{grid-template-columns:repeat(2,1fr);gap:9px}
   .links{grid-template-columns:repeat(2,1fr);gap:9px}
-  .album{grid-template-columns:repeat(3,1fr);gap:7px}
   .capture #capShot{width:46px}
+  .l-shot{width:100%!important}
   .link-add{flex-direction:column}
   .link-add>*{width:100%!important}
   .lbody b{font-size:11.5px}
@@ -955,6 +965,7 @@ input,textarea{cursor:text}
   <div class="side-tools" id="sideTools" style="display:none">
     <button class="tool" id="tHideDone"></button>
     <button class="tool" id="tArchive"></button>
+    <button class="tool" id="tHints"></button>
     <button class="tool" id="tResort">Sort automatically again</button>
   </div>
   <div id="sideList"></div>
@@ -1128,8 +1139,7 @@ async function signPhotos(rows){
     path:r.path,x:r.x,y:r.y,w:r.w,r:r.r,z:r.z,created:Number(r.created)||0,url:map[r.path]||''}));
 }
 
-const boardPhotos=list=>list.filter(x=>!x.item&&!x.album);
-const albumPhotos=list=>list.filter(x=>!x.item&&x.album);
+const boardPhotos=list=>list.filter(x=>!x.item);
 
 async function putPhoto(ph){
   if(!sb||!ME) return;
@@ -1225,7 +1235,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,histDays:14,histMonth:0,taskOpen:null,sideForced:false,album:[],wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,histDays:14,histMonth:0,taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -1264,13 +1274,39 @@ function sortProjects(){
   });
   st.projects.forEach((p,i)=>{ if(p.ord==null) p.ord=i; });
 }
+function photoSourcePick(cb){
+  const inp=$('#wishPick');
+  const openWith=capture=>{
+    inp.onchange=ev=>{ const f=ev.target.files[0]; ev.target.value=''; inp.removeAttribute('capture'); cb(f) };
+    if(capture) inp.setAttribute('capture','environment'); else inp.removeAttribute('capture');
+    inp.click();
+  };
+  if(!isTouch()){ openWith(false); return; }
+  const el=document.createElement('div');
+  el.className='sheet-wrap';
+  el.innerHTML=`<div class="sheet">
+    <div class="sheet-head"><span>Add a photo</span><button data-close>${svg('x',15,2)}</button></div>
+    <div class="pick-list">
+      <button data-src="camera">${svg('img',15,1.7)} Take a photo</button>
+      <button data-src="library">${svg('img',15,1.7)} Choose from library</button>
+    </div>
+  </div>`;
+  const close=()=>el.remove();
+  el.addEventListener('click',e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    const b=e.target.closest('[data-src]');
+    if(b){ close(); openWith(b.dataset.src==='camera') }
+  });
+  document.body.appendChild(el);
+}
+
 async function photoToIdeas(file){
   const ib=st.projects.find(x=>x.id===INBOX);
   if(!ib) return;
   toast('Adding to Ideas…');
   try{
     const blob=await compress(file,1400,.72);
-    await putPhoto({id:uid(),pid:INBOX,album:true,name:file.name||'photo',blob,created:Date.now()});
+    await putPhoto({id:uid(),pid:INBOX,name:file.name||'photo',blob,created:Date.now()});
     dropCover(INBOX);
     toast('Photo saved in Ideas');
     if(st.openId===INBOX) renderProject();
@@ -1349,6 +1385,8 @@ function renderSide(){
   const hd=$('#tHideDone'), ta=$('#tArchive');
   if(hd){ hd.innerHTML=svg(st.hideDone?'boxOk':'box',14,1.9)+' Hide finished'; hd.classList.toggle('on',st.hideDone); }
   if(ta) ta.innerHTML=svg('arch',14,1.7)+' Archive · '+an;
+  const th=$('#tHints');
+  if(th){ th.innerHTML=svg(st.hints?'boxOk':'box',14,1.9)+' Show hints'; th.classList.toggle('on',st.hints) }
   const box=$('#sideList');
   if(!list.length){
     box.innerHTML=`<div class="empty-side">${st.query?'No matches.':'Nothing yet. Start your first project — even if it is just an idea.'}</div>`;
@@ -1557,14 +1595,7 @@ function renderAll(){
   if(hd) hd.addEventListener('click',()=>{st.hideDone=!st.hideDone;LS.set('pm:hideDone',st.hideDone?'1':'0');renderAll();renderSide()});
   const cs=$('#capShot');
   if(cs) cs.addEventListener('click',()=>{
-    const inp=$('#wishPick');
-    inp.setAttribute('capture','environment');
-    inp.onchange=async ev=>{
-      const f=ev.target.files[0]; ev.target.value=''; inp.removeAttribute('capture');
-      if(!f) return;
-      await photoToIdeas(f);
-    };
-    inp.click();
+    photoSourcePick(async f=>{ if(f) await photoToIdeas(f) });
   });
   const cap=$('#cap');
   if(cap){
@@ -2104,27 +2135,28 @@ async function fetchPreview(u){
 
 function linksPane(p){
   const items=linksOf(p).slice().reverse();
-  return `<section class="pane wide">
+  return `<section class="pane">
     <h2 class="pane-h">References ${items.length?`<span class="count">${items.length}</span>`:''}</h2>
     <div class="link-add">
-      <input class="l-url" id="lUrl" placeholder="Paste a link — a reel, an article, a shop page" autocomplete="off">
+      <button class="l-shot" id="lShot" title="Add a photo without a link">${svg('img',16,1.7)}</button>
+      <input class="l-url" id="lUrl" placeholder="Paste a link, or drop a photo" autocomplete="off">
       <input class="l-name" id="lName" placeholder="name it (optional)" autocomplete="off">
       <button class="go" id="lAdd">${svg('plus',16,2.5)}</button>
     </div>
     ${items.length?`<div class="links" id="links">${items.map(i=>`
-      <a class="lcard" data-id="${i.id}" href="${esc(i.url||'#')}" target="_blank" rel="noopener">
+      <${i.url?'a':'div'} class="lcard" data-id="${i.id}" ${i.url?`href="${esc(i.url)}" target="_blank" rel="noopener"`:'data-shot tabindex="0" role="button"'}>
         <img class="lshot" data-limg="${i.id}" alt="" ${i.preview?`src="${esc(i.preview)}"`:''}>
-        <span class="lfall">${favOf(i.url)?`<img class="lfav" src="${esc(favOf(i.url))}" alt="">`:svg('link',22,1.7)}</span>
+        <span class="lfall">${favOf(i.url)?`<img class="lfav" src="${esc(favOf(i.url))}" alt="">`:svg('img',22,1.5)}</span>
         <span class="lshade"></span>
         <span class="lbody">
           <b>${esc(i.text||hostOf(i.url)||'Untitled')}</b>
-          <span>${esc(hostOf(i.url))}</span>
+          <span>${esc(hostOf(i.url)||'photo')}</span>
         </span>
         <span class="lacts">
           <button data-led="${i.id}" title="Settings">${svg('gear',13,1.6)}</button>
           <button data-ldel="${i.id}" title="Delete">${svg('trash',13,1.7)}</button>
         </span>
-      </a>`).join('')}</div>`
+      </${i.url?'a':'div'}>`).join('')}</div>`
     :`<p class="hint" style="margin-top:16px;max-width:62ch">Nothing pinned yet. Drop in a reel, a reference photo, a shop page — it lands here as a preview card you can open with one tap.</p>`}
   </section>`;
 }
@@ -2139,26 +2171,14 @@ async function setItemPhoto(pid,itemId,file){
   }catch(e){ console.error(e); toast('Could not attach that image'); return false }
 }
 
-async function paintAlbum(){
-  const box=$('#album'); if(!box) return;
-  const c=$('#alCount'); if(c) c.textContent=st.album.length||'';
-  if(!st.album.length){
-    box.innerHTML='<p class="hint" style="margin:0">A plain row of photos — no arranging, just a strip you can scan. Board is for pinning things around; this is for keeping them in order.</p>';
-    return;
-  }
-  box.innerHTML=st.album.map(ph=>`<button class="al" data-al="${ph.id}"><img src="${esc(ph.url||'')}" alt="${esc(ph.name||'photo')}" loading="lazy"></button>`).join('');
-  box.querySelectorAll('[data-al]').forEach(b=>b.addEventListener('click',()=>{
-    const ph=st.album.find(x=>x.id===b.dataset.al);
-    if(ph) lightbox(ph,ph.url);
-  }));
-}
-
 async function loadLinkPhotos(pid){
   let list=[];
   try{ list=await photosOf(pid) }catch(e){}
+  st.linkShots={};
   list.filter(x=>x.item).forEach(ph=>{
+    st.linkShots[ph.item]=ph;
     const el=document.querySelector('[data-limg="'+ph.item+'"]');
-    if(el&&ph.url){ el.src=ph.url; el.closest('.lcard').classList.add('shot') }
+    if(el&&ph.url){ el.src=ph.url; const c=el.closest('.lcard'); if(c) c.classList.add('shot') }
   });
 }
 
@@ -2229,8 +2249,34 @@ function bindLinks(p){
   la.addEventListener('click',add);
   $('#lUrl').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
   $('#lName').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
+  $('#lShot').addEventListener('click',()=>{
+    const inp=$('#wishPick');
+    inp.onchange=async ev=>{
+      const f=ev.target.files[0]; ev.target.value='';
+      if(!f) return;
+      const item={id:uid(),kind:'link',text:$('#lName').value.trim(),url:'',preview:'',done:false,created:Date.now()};
+      p.tasks=p.tasks||[]; p.tasks.push(item);
+      $('#lName').value='';
+      const moved=touchProject(p);
+      saveProject(p,true);
+      if(moved) sortProjects();
+      if(await setItemPhoto(p.id,item.id,f)){ renderProject(); renderSide(); toast('Reference added') }
+    };
+    inp.click();
+  });
   const box=$('#links'); if(!box) return;
+  box.addEventListener('keydown',e=>{
+    if(e.key!=='Enter'&&e.key!==' ') return;
+    const shot=e.target.closest('[data-shot]');
+    if(shot&&!e.target.closest('button')){ e.preventDefault(); shot.click() }
+  });
   box.addEventListener('click',async e=>{
+    const shot=e.target.closest('[data-shot]');
+    if(shot&&!e.target.closest('[data-led]')&&!e.target.closest('[data-ldel]')){
+      const ph=st.linkShots[shot.dataset.id];
+      if(ph) lightbox(ph,ph.url);
+      return;
+    }
     const ed=e.target.closest('[data-led]'), dl=e.target.closest('[data-ldel]');
     if(!ed&&!dl) return;
     e.preventDefault(); e.stopPropagation();
@@ -2355,15 +2401,9 @@ async function renderProject(){
         </div>
         <ul class="tasks" id="taskList">${renderTasks(t)}</ul>
       </section>`}
-      ${p.id===WANT||p.id===TODO?'':`<section class="pane ${p.id===INBOX?'wide':''}">
+      ${p.id===WANT||p.id===TODO?'':`<section class="pane">
         <h2 class="pane-h">Notes</h2>
         <textarea class="notes" id="notes" placeholder="Ideas, links, half-formed thoughts — all of it goes here. Saves itself.">${esc(p.notes||'')}</textarea>
-      </section>`}
-      ${p.id===WANT||p.id===TODO?'':`<section class="pane wide">
-        <h2 class="pane-h">Album <span class="count" id="alCount"></span>
-          <button class="ghost-btn" id="alAdd" style="margin-left:auto">+ photo</button>
-        </h2>
-        <div class="album" id="album"></div>
       </section>`}
       ${p.id===WANT||p.id===TODO?'':linksPane(p)}
       ${p.id===WANT||p.id===TODO?'':`<section class="pane wide">
@@ -2381,7 +2421,7 @@ async function renderProject(){
     </div>`;
   bindProject(p);
   if(p.id===WANT) await loadWishPhotos();
-  else if(p.id!==TODO){ await loadPhotos(p.id); paintAlbum(); await loadLinkPhotos(p.id) }
+  else if(p.id!==TODO){ await loadPhotos(p.id); await loadLinkPhotos(p.id) }
 }
 
 function renderTasks(t){
@@ -2424,6 +2464,7 @@ function bindProject(p){
   $('#pTitle').addEventListener('input',e=>{
     p.name=e.target.value;
     $('#crumb').textContent=p.name||'Untitled';
+    document.title=p.name||'Untitled';
     const r=document.querySelector(`[data-open="${p.id}"] .row-text`); if(r) r.textContent=p.name;
     saveProject(p);
   });
@@ -2451,8 +2492,7 @@ function bindProject(p){
   bindTodo(p);
   bindLinks(p);
   const ex=$('#expand'); if(ex) ex.addEventListener('click',toggleBoard);
-  const ap=$('#addPhoto'); if(ap) ap.addEventListener('click',()=>{st.addTo='board';$('#filePick').click()});
-  const aa=$('#alAdd'); if(aa) aa.addEventListener('click',()=>{st.addTo='album';$('#filePick').click()});
+  const ap=$('#addPhoto'); if(ap) ap.addEventListener('click',()=>$('#filePick').click());
   const sn=$('#addNote'); if(sn) sn.addEventListener('click',addSticky);
   const pk=$('#pack'); if(pk) pk.addEventListener('click',()=>packBoard(true));
   const td=$('#tidy'); if(td) td.addEventListener('click',tidyBoard);
@@ -2528,7 +2568,6 @@ async function loadPhotos(pid){
   clearUrls();
   let list=[];
   try{list=await photosOf(pid)}catch(e){console.error(e)}
-  st.album=albumPhotos(list);
   list=boardPhotos(list);
   list.sort((a,b)=>(a.z||0)-(b.z||0));
   st.photos=list;
@@ -2788,13 +2827,12 @@ async function addPhotos(files){
     try{
       const blob=await compress(f,1400,.72);
       const n=st.photos.length;
-      const toAlbum=st.addTo==='album';
-      const ph={id:uid(),pid:p.id,album:toAlbum,name:f.name||'photo',blob,created:Date.now(),
+      const ph={id:uid(),pid:p.id,name:f.name||'photo',blob,created:Date.now(),
         w:220,x:clamp(30+(n%5)*46+Math.random()*20,10,W-240),
         y:clamp(28+(n%4)*54+Math.random()*20,10,H-160),
         r:Math.random()*5-2.5,z:++st.maxZ};
       await putPhoto(ph);
-      if(toAlbum){ st.album.push(ph); paintAlbum() } else st.photos.push(ph);
+      st.photos.push(ph);
       dropCover(p.id);
       if(touchProject(p)){ saveProject(p,true); sortProjects(); renderSide() }
       if(wasEmpty&&st.photos.length===1&&b) b.innerHTML='';
@@ -3105,7 +3143,13 @@ function syncSidebarButton(){
   if(window.innerWidth<900&&document.body.classList.contains('side-open')&&!st.sideForced)
     document.body.classList.remove('side-open');
 }
-function route(){syncHash();closeBoardFull();clearUrls();if(st.openId)renderProject();else if(st.hist)renderHistory();else if(st.focus)renderFocus();else renderAll();renderSide()}
+function pageTitle(){
+  if(st.openId){ const p=cur(); return p&&p.name?p.name:'Project' }
+  if(st.hist) return 'History';
+  if(st.focus) return 'Focus';
+  return 'All projects';
+}
+function route(){syncHash();document.title=pageTitle();closeBoardFull();clearUrls();if(st.openId)renderProject();else if(st.hist)renderHistory();else if(st.focus)renderFocus();else renderAll();renderSide()}
 function openProject(id){st.openId=id;st.focus=false;st.hist=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
 
 document.addEventListener('click',e=>{
@@ -3164,6 +3208,12 @@ $('#tArchive').addEventListener('click',()=>{
   st.openId=null; st.focus=false; st.filter='archived';
   if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
   route();
+});
+$('#tHints').addEventListener('click',()=>{
+  st.hints=!st.hints;
+  LS.set('pm:hints',st.hints?'1':'0');
+  document.body.classList.toggle('no-hints',!st.hints);
+  renderSide(); route();
 });
 $('#tResort').addEventListener('click',()=>{
   st.manual=false; LS.set('pm:manual','0');
@@ -3305,6 +3355,7 @@ async function afterLogin(){
     await reload();
     const empty=st.projects.filter(p=>!SPECIAL(p.id)).length===0;
     if(empty&&LS.get('pm:migrated')!=='1'&&await localHasData()) migrateOffer=true;
+    document.body.classList.toggle('no-hints',!st.hints);
     syncSidebarButton();
     window.addEventListener('resize',syncSidebarButton);
     route();
