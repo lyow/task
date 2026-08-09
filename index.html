@@ -982,10 +982,36 @@ body.shared-view .topbar{justify-content:center}
   background:rgba(4,4,7,.7);color:#fff;backdrop-filter:blur(3px)}
 .trash-acts button[data-restore]:hover{background:var(--mint);color:#08120D}
 .trash-acts button[data-purge]:hover{background:var(--magenta);color:#08080B}
+.qbar{max-width:1500px;margin:-6px auto 20px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.qtoggle{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:10px;
+  color:var(--soft);font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;box-shadow:inset 0 0 0 1px var(--line);transition:.14s;flex:0 0 auto}
+.qtoggle:hover{color:var(--txt);box-shadow:inset 0 0 0 1px var(--line-2)}
+.qcount{padding:1px 6px;border-radius:999px;background:var(--chip-bg);color:var(--soft)}
+.qchev{display:flex;transition:transform .16s}
+.qbar:not(.closed) .qchev{transform:rotate(90deg)}
+.qlist{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.qchip{display:inline-flex;align-items:center;border-radius:10px;background:var(--panel);
+  box-shadow:inset 0 0 0 1px var(--line);transition:.14s;overflow:hidden}
+.qchip:hover{box-shadow:inset 0 0 0 1px var(--violet)}
+.qchip a{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;text-decoration:none;
+  color:var(--txt);font-size:12.5px;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qchip img{width:14px;height:14px;border-radius:4px;flex:0 0 auto}
+.qchip button{padding:7px 8px 7px 2px;color:var(--dim);opacity:0;transition:.14s}
+.qchip:hover button{opacity:1}
+.qchip button:hover{color:var(--magenta)}
+.qadd{display:inline-flex;align-items:center;gap:5px;border-radius:10px;padding:3px;
+  box-shadow:inset 0 0 0 1px var(--line)}
+.qadd input{padding:5px 8px;border:none;background:none;font-size:12.5px;color:var(--txt);width:150px}
+.qadd input:focus{outline:none}
+.qadd input#qName{width:92px;color:var(--soft)}
+.qadd button{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  color:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+.qadd button:hover{color:var(--txt);box-shadow:inset 0 0 0 1px var(--violet)}
 
 /* ── сенсорные экраны: наведения нет, действия видны всегда ── */
 @media (hover:none){
-  .btn-gear,.star,.task-del,.sub-del,.idea-acts,.pin-x,.pin-size,.tditem .idea-acts,.lacts,.sticky-acts,.sticky-size{opacity:1!important}
+  .btn-gear,.star,.task-del,.sub-del,.idea-acts,.pin-x,.pin-size,.tditem .idea-acts,.lacts,.sticky-acts,.sticky-size,.qchip button{opacity:1!important}
   .lcard:hover{transform:none}
   .btn-pin{opacity:.65!important}
   .row:hover,.card:hover,.idea:hover{transform:none}
@@ -1049,6 +1075,10 @@ body.shared-view .topbar{justify-content:center}
   .wish-shot{justify-content:center}
   .wish-grid{grid-template-columns:repeat(2,1fr);gap:9px}
   .links{grid-template-columns:repeat(2,1fr);gap:9px}
+  .qbar{margin-bottom:16px}
+  .qchip a{max-width:150px}
+  .qadd input{width:110px}
+  .qadd input#qName{width:70px}
   .links.list{grid-template-columns:1fr}
   .lrow-host{display:none}
   .pname{max-width:none;flex:1}
@@ -1247,7 +1277,8 @@ const localProjects=()=>req(tx('projects').getAll());
 const localPhotos=()=>req(tx('photos').getAll());
 
 /* ───────── cloud data layer ───────── */
-const tasksOf=p=>(p.tasks||[]).filter(t=>t.kind!=='link'&&t.kind!=='sticky');
+const tasksOf=p=>(p.tasks||[]).filter(t=>t.kind!=='link'&&t.kind!=='sticky'&&t.kind!=='quick');
+const quickOf=p=>(p.tasks||[]).filter(t=>t.kind==='quick');
 const linksOf=p=>(p.tasks||[]).filter(t=>t.kind==='link');
 const KIND_OF=pid=>pid===INBOX?'idea':pid===WANT?'wish':pid===TODO?'todo':'task';
 
@@ -1575,7 +1606,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',qbar:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -2158,7 +2189,7 @@ function snippet(text,q,pad){
   const a=Math.max(0,i-pad), b=Math.min(t.length,i+q.length+pad*2);
   return (a>0?'…':'')+t.slice(a,b)+(b<t.length?'…':'');
 }
-const KIND_LABEL={task:'task',idea:'idea',wish:'wish',todo:'to do',link:'link',sticky:'note'};
+const KIND_LABEL={task:'task',idea:'idea',wish:'wish',todo:'to do',link:'link',sticky:'note',quick:'link'};
 
 function searchHits(){
   const q=st.query.trim().toLowerCase();
@@ -2667,6 +2698,71 @@ async function fetchPreview(u){
   }catch(e){ return '' }
 }
 
+function qbarHidden(pid){
+  if(pid in st.qbar) return st.qbar[pid];          // память — источник правды
+  return LS.get('pm:qbar:'+pid)==='0';             // localStorage только переживает перезапуск
+}
+
+function quickBar(p){
+  const items=quickOf(p);
+  const hidden=qbarHidden(p.id);
+  return `<div class="qbar ${hidden?'closed':''}" id="qbar">
+    <button class="qtoggle" id="qToggle" title="${hidden?'Show links':'Hide links'}">
+      ${svg('link',12,1.9)} Links${items.length?` <span class="qcount">${items.length}</span>`:''}
+      <span class="qchev">${svg('chev',11,2.2)}</span>
+    </button>
+    ${hidden?'':`
+      <div class="qlist" id="qlist">
+        ${items.map(i=>`<span class="qchip" data-q="${i.id}">
+          <a href="${esc(i.url)}" target="_blank" rel="noopener">
+            <img src="${esc(favOf(i.url))}" alt="" onerror="this.style.visibility='hidden'">
+            ${esc(i.text||hostOf(i.url)||'link')}
+          </a>
+          <button data-qdel="${i.id}" title="Remove">${svg('x',10,2.4)}</button>
+        </span>`).join('')}
+        <span class="qadd">
+          <input id="qUrl" placeholder="paste a link" autocomplete="off">
+          <input id="qName" placeholder="name" autocomplete="off">
+          <button id="qAdd" title="Add">${svg('plus',12,2.6)}</button>
+        </span>
+      </div>`}
+  </div>`;
+}
+
+function bindQuickBar(p){
+  const t=$('#qToggle');
+  if(t) t.addEventListener('click',()=>{
+    const next=!qbarHidden(p.id);
+    st.qbar[p.id]=next;
+    LS.set('pm:qbar:'+p.id, next?'0':'1');
+    renderProject();
+  });
+  const add=()=>{
+    const ui=$('#qUrl'), ni=$('#qName');
+    let u=(ui.value||'').trim(); if(!u) return;
+    if(!/^https?:\/\//i.test(u)) u='https://'+u;
+    p.tasks=p.tasks||[];
+    p.tasks.push({id:uid(),kind:'quick',text:(ni.value||'').trim(),url:u,done:false,created:Date.now()});
+    ui.value=''; ni.value='';
+    saveProject(p,true); renderProject();
+    const f=$('#qUrl'); if(f) f.focus();
+  };
+  const ab=$('#qAdd');
+  if(ab){
+    ab.addEventListener('click',add);
+    $('#qUrl').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
+    $('#qName').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
+  }
+  const box=$('#qlist');
+  if(box) box.addEventListener('click',e=>{
+    const d=e.target.closest('[data-qdel]');
+    if(!d) return;
+    e.preventDefault();
+    p.tasks=p.tasks.filter(x=>x.id!==d.dataset.qdel);
+    saveProject(p,true); renderProject();
+  });
+}
+
 function linksPane(p){
   const items=linksOf(p).slice().reverse();
   return `<section class="pane">
@@ -2856,6 +2952,7 @@ function renderShared(d){
   document.body.classList.add('shared-view');
   const tasks=(d.tasks||[]).filter(t=>t.kind!=='link'&&t.kind!=='sticky');
   const links=(d.tasks||[]).filter(t=>t.kind==='link');
+  const quick=(d.tasks||[]).filter(t=>t.kind==='quick');
   const notes=(d.tasks||[]).filter(t=>t.kind==='sticky');
   const boardPh=(d.photos||[]).filter(x=>!x.item);
   const shotOf=id=>((d.photos||[]).find(x=>x.item===id)||{}).url||'';
@@ -2878,6 +2975,10 @@ function renderShared(d){
           </div>
           ${tasks.length?`<div class="bar"><i style="width:${(done/tasks.length)*100}%"></i><b>${done}/${tasks.length}</b></div>`:''}
         </header>
+        ${quick.length?`<div class="qbar"><div class="qlist">${quick.map(i=>`
+          <span class="qchip"><a href="${esc(i.url)}" target="_blank" rel="noopener">
+            <img src="${esc(favOf(i.url))}" alt="" onerror="this.style.visibility='hidden'">
+            ${esc(i.text||hostOf(i.url)||'link')}</a></span>`).join('')}</div></div>`:''}
         <div class="panes">
           ${tasks.length?`<section class="pane">
             <h2 class="pane-h">Tasks</h2>
@@ -3268,6 +3369,7 @@ async function renderProject(){
       </div>
       ${t.length&&!SPECIAL(p.id)?`<div class="bar"><i style="width:${(d/t.length)*100}%"></i><b>${d}/${t.length}</b></div>`:''}
     </header>
+    ${SPECIAL(p.id)?'':quickBar(p)}
     <div class="panes">
       ${p.id===INBOX?ideasPane(p):p.id===WANT?wishPane(p):p.id===TODO?todoPane(p):`<section class="pane">
         <h2 class="pane-h">Tasks</h2>
@@ -3432,6 +3534,7 @@ function bindProject(p){
   const ta=$('#taskAdd'), ti=$('#taskInput');
   if(ta) ta.addEventListener('click',add);
   if(ti) ti.addEventListener('keydown',e=>{if(e.key==='Enter')add()});
+  bindQuickBar(p);
   bindIdeas(p);
   bindWish(p);
   bindTodo(p);
