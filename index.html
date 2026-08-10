@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>All projects</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238B6BFF'/%3E%3Cstop offset='.5' stop-color='%234FD4FF'/%3E%3Cstop offset='1' stop-color='%23FF5AE0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%23050508'/%3E%3Crect x='12' y='12' width='40' height='40' rx='11' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#020203">
@@ -688,8 +688,8 @@ input,textarea{cursor:text}
              radial-gradient(36% 50% at 72% 10%,rgba(255,90,224,.16),transparent 72%);filter:blur(34px)}
 .gate-box{position:relative;width:100%;max-width:380px;padding:28px;border-radius:22px;
   border:1px solid var(--line-2);background:var(--panel);box-shadow:0 44px 110px -40px #000}
-.gate-mark{width:38px;height:38px;border-radius:12px;background:var(--iris);margin-bottom:18px;
-  box-shadow:0 8px 26px -10px rgba(139,107,255,.9)}
+.gate-mark{width:64px;height:64px;border-radius:18px;display:block;margin-bottom:18px;
+  box-shadow:0 12px 34px -14px rgba(139,107,255,.6)}
 .gate-box h1{margin:0 0 8px;font-family:Unbounded,sans-serif;font-weight:700;font-size:23px;letter-spacing:-.02em}
 .gate-box p{margin:0 0 22px;font-size:13px;line-height:1.55;color:var(--soft)}
 .gate-go{width:100%;padding:13px;border-radius:12px;background:var(--iris);color:#08080B;
@@ -1080,10 +1080,8 @@ body.light .row-nav{background:rgba(255,255,255,.9)}
 
 .boot{flex-direction:column;gap:18px;transition:opacity .3s ease}
 .boot.gone{opacity:0;pointer-events:none}
-.boot-mark{position:relative;width:62px;height:62px;border-radius:20px;background:var(--iris);
-  animation:bootPulse 1.5s ease-in-out infinite;box-shadow:0 18px 50px -18px rgba(139,107,255,.9)}
-.boot-mark::after{content:'';position:absolute;inset:-9px;border-radius:26px;
-  border:2px solid transparent;border-top-color:var(--violet);animation:bootSpin 1s linear infinite}
+.boot-mark{width:96px;height:96px;border-radius:24px;display:block;
+  animation:bootPulse 1.6s ease-in-out infinite;box-shadow:0 22px 60px -20px rgba(139,107,255,.55)}
 .boot-word{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.42em;
   text-transform:uppercase;color:var(--dim);padding-left:.42em}
 
@@ -1127,7 +1125,7 @@ body.shared-view .panes>*:nth-child(4){animation-delay:.24s}
   .grid>*,.plist>*,.links>*,.wish-grid>*,.tdlist>*,.ideas>*,.wants>*,.sgroup,.rrow,
   .fab,.sheet,.qa,.lb img,.refprev img,body.shared-view .head,body.shared-view .qbar,
   body.shared-view .panes>*{animation:none!important}
-  .lrow-thumb,.pthumb,.boot-mark,.boot-mark::after{animation:none!important}
+  .lrow-thumb,.pthumb,.boot-mark{animation:none!important}
 }
 
 /* ── сенсорные экраны: наведения нет, действия видны всегда ── */
@@ -1402,7 +1400,7 @@ body.shared-view .panes>*:nth-child(4){animation-delay:.24s}
 
 <div id="gate" class="gate" style="display:none">
   <form class="gate-box" id="gateForm">
-    <div class="gate-mark"></div>
+    <img class="gate-mark" src="icon-512.png" alt="">
     <h1>Welcome back</h1>
     <p>Your projects, ideas and wishlist live in the cloud now. Sign in to reach them from any device.</p>
     <label class="f"><span>Email</span><input type="email" id="gMail" autocomplete="username" required></label>
@@ -1412,7 +1410,7 @@ body.shared-view .panes>*:nth-child(4){animation-delay:.24s}
   </form>
 </div>
 
-<div id="boot" class="boot"><div class="boot-mark"></div><span class="boot-word">projects</span></div>
+<div id="boot" class="boot"><img class="boot-mark" src="icon-512.png" alt=""></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
@@ -3426,7 +3424,7 @@ async function tryShared(){
   }catch(e){
     hideBoot();
     document.body.innerHTML=`<div class="gate"><div class="gate-box">
-      <div class="gate-mark"></div>
+      <img class="gate-mark" src="icon-512.png" alt="">
       <h1>Link not available</h1>
       <p>This project is not shared any more, or the link is wrong.</p>
     </div></div>`;
