@@ -1021,7 +1021,14 @@ body.shared-view .topbar{justify-content:center}
 .fab:active{transform:scale(.94)}
 .fab.small{width:44px;height:44px;border-radius:15px;background:var(--raise);color:var(--txt);
   box-shadow:0 10px 26px -14px #000,inset 0 0 0 1px var(--line-2)}
-body.shared-view .fab-wrap{display:none!important}
+body.shared-view .fab-wrap{display:none!important}.refs-pane.collapsed .link-add,.refs-pane.collapsed .links,.refs-pane.collapsed .hint{display:none}
+.refs-pane:not(.collapsed) .board-toggle .qchev{transform:rotate(90deg)}
+.embed-box{position:relative;background:#000;border-radius:14px;overflow:hidden;
+  box-shadow:0 30px 80px -30px #000}
+.embed-box.wide{width:min(92vw,900px);aspect-ratio:16/9}
+.embed-box.tall{width:min(92vw,420px);height:min(78vh,740px)}
+.embed-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
 /* ─── движение ─── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes popIn{0%{opacity:0;transform:scale(.86)}62%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
@@ -1126,6 +1133,8 @@ body.shared-view .panes>*:nth-child(4){animation-delay:.24s}
   .board-pane.collapsed .pane-h-tools{display:none}
   .board-pane #board{height:56vh}
   #refView{display:none}
+  .embed-box.wide{width:94vw}
+  .embed-box.tall{width:94vw;height:70vh}
   .lrow{padding:11px 12px;gap:13px}
   .lrow-thumb{width:46px;height:46px;border-radius:11px}
   .lrow-name{font-size:13.5px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;
@@ -1723,7 +1732,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',qbar:{},chipsOpen:false,boardOpen:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',qbar:{},chipsOpen:false,boardOpen:{},refOpen:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -2803,6 +2812,19 @@ function bindTodo(p){
 function hostOf(u){ try{ return new URL(u).hostname.replace(/^www\./,'') }catch(e){ return '' } }
 function favOf(u){ const h=hostOf(u); return h?'https://icons.duckduckgo.com/ip3/'+h+'.ico':'' }
 
+function embedOf(u){
+  u=String(u||''); let m;
+  if((m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/)))
+    return {src:'https://www.youtube.com/embed/'+m[1]+'?autoplay=1&rel=0',wide:!/shorts/.test(u)};
+  if((m=u.match(/vimeo\.com\/(\d+)/)))
+    return {src:'https://player.vimeo.com/video/'+m[1]+'?autoplay=1',wide:true};
+  if((m=u.match(/instagram\.com\/(p|reel|reels|tv)\/([\w-]+)/)))
+    return {src:'https://www.instagram.com/'+(m[1]==='reels'?'reel':m[1])+'/'+m[2]+'/embed',wide:false};
+  if((m=u.match(/tiktok\.com\/.*\/video\/(\d+)/)))
+    return {src:'https://www.tiktok.com/embed/v2/'+m[1],wide:false};
+  return null;
+}
+
 function autoThumb(u){
   const yt=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/);
   if(yt) return 'https://img.youtube.com/vi/'+yt[1]+'/hqdefault.jpg';
@@ -2889,11 +2911,17 @@ function bindQuickBar(p){
 }
 
 function refListOn(){ return isPhone()?true:st.refList }
+function refHidden(pid){
+  if(pid in st.refOpen) return !st.refOpen[pid];
+  return LS.get('pm:refs:'+pid)==='0';
+}
 
 function linksPane(p){
   const items=linksOf(p).slice().reverse();
-  return `<section class="pane">
-    <h2 class="pane-h">References ${items.length?`<span class="count">${items.length}</span>`:''}
+  return `<section class="pane refs-pane ${refHidden(p.id)?'collapsed':''}">
+    <h2 class="pane-h">
+      <button class="board-toggle" id="refToggle">References ${items.length?`<span class="count">${items.length}</span>`:''}
+        <span class="qchev">${svg('chev',11,2.2)}</span></button>
       ${items.length?`<button class="ghost-btn" id="refView" style="margin-left:auto">${refListOn()?'grid':'list'}</button>`:''}
     </h2>
     <div class="link-add">
@@ -3120,8 +3148,11 @@ function renderShared(d){
             <h2 class="pane-h">Notes</h2>
             <div class="notes" style="white-space:pre-wrap">${esc(d.notes)}</div>
           </section>`:''}
-          ${links.length?`<section class="pane">
-            <h2 class="pane-h">References <span class="count">${links.length}</span></h2>
+          ${links.length?`<section class="pane refs-pane" id="sharedRefs">
+            <h2 class="pane-h">
+              <button class="board-toggle" id="sharedRefToggle">References <span class="count">${links.length}</span>
+                <span class="qchev">${svg('chev',11,2.2)}</span></button>
+            </h2>
             <div class="links">${links.map(i=>{
               const img=shotOf(i.id)||i.preview||'';
               return `<${i.url?'a':'div'} class="lcard ${img?'shot':''}" ${i.url?`href="${esc(i.url)}" target="_blank" rel="noopener"`:''}>
@@ -3153,6 +3184,34 @@ function renderShared(d){
     </main>`;
 }
 
+function bindShared(){
+  const t=document.getElementById('sharedRefToggle');
+  if(t) t.addEventListener('click',()=>{
+    const sec=document.getElementById('sharedRefs');
+    if(sec) sec.classList.toggle('collapsed');
+  });
+  document.querySelectorAll('.lcard[href]').forEach(a=>a.addEventListener('click',e=>{
+    if(e.metaKey||e.ctrlKey||e.shiftKey) return;
+    const emb=embedOf(a.getAttribute('href'));
+    if(!emb) return;                       // не видео — уходим по ссылке как обычно
+    e.preventDefault();
+    const el=document.createElement('div');
+    el.className='lb refprev';
+    el.innerHTML=`<div class="embed-box ${emb.wide?'wide':'tall'}">
+        <iframe src="${esc(emb.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      <div class="lb-bar">
+        <button data-go>${svg('link',14,1.9)} Open the link</button>
+        <button data-close>${svg('x',14,2)} Close</button>
+      </div>`;
+    el.addEventListener('click',ev=>{
+      if(ev.target===el||ev.target.closest('[data-close]')) return el.remove();
+      if(ev.target.closest('[data-go]')) window.open(a.getAttribute('href'),'_blank','noopener');
+    });
+    document.body.appendChild(el);
+  }));
+}
+
 async function tryShared(){
   const m=(location.hash||'').match(/^#\/?s\/(.+)$/);
   if(!m) return false;
@@ -3161,6 +3220,7 @@ async function tryShared(){
     const {data,error}=await sb.rpc('shared_project',{token:m[1]});
     if(error||!data) throw error||new Error('not found');
     renderShared(typeof data==='string'?JSON.parse(data):data);
+    bindShared();
     hideBoot();
   }catch(e){
     hideBoot();
@@ -3298,12 +3358,15 @@ async function openTrash(p){
 }
 
 function refPreview(p,item){
-  const shot=st.linkShots[item.id];
-  const img=(shot&&shot.url)||item.preview||'';
+  const emb=embedOf(item.url);
+  if(!emb){ window.open(item.url,'_blank','noopener'); return }   // не видео — открываем сразу
   const el=document.createElement('div');
   el.className='lb refprev';
   el.innerHTML=`
-    ${img?`<img src="${esc(img)}" alt="">`:`<div class="refprev-blank">${svg('link',34,1.4)}</div>`}
+    <div class="embed-box ${emb.wide?'wide':'tall'}">
+      <iframe src="${esc(emb.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+        allowfullscreen loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    </div>
     <div class="lb-bar">
       <span class="refprev-name">${esc(item.text||hostOf(item.url)||'Untitled')}</span>
       <span class="refprev-host">${esc(hostOf(item.url))}</span>
@@ -3339,6 +3402,14 @@ function bindLinks(p){
   la.addEventListener('click',add);
   $('#lUrl').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
   $('#lName').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
+  const rt=$('#refToggle');
+  if(rt) rt.addEventListener('click',()=>{
+    const next=refHidden(p.id);
+    st.refOpen[p.id]=next;
+    LS.set('pm:refs:'+p.id,next?'1':'0');
+    const sec=rt.closest('.refs-pane');
+    if(sec) sec.classList.toggle('collapsed',!next);
+  });
   const rv=$('#refView');
   if(rv) rv.addEventListener('click',()=>{
     st.refList=!st.refList; LS.set('pm:reflist',st.refList?'1':'0'); renderProject();
