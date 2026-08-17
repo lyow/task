@@ -769,6 +769,8 @@ input,textarea{cursor:text}
 .lacts button{width:29px;height:29px;border-radius:9px;display:flex;align-items:center;justify-content:center;
   border:1px solid var(--line-2);background:rgba(4,4,7,.72);color:var(--soft);backdrop-filter:blur(4px)}
 .lacts button:hover{color:var(--txt);border-color:var(--violet)}
+.lacts button[data-lshot]{color:var(--violet)}
+.lacts button[data-lshot]:hover{background:rgba(139,107,255,.14)}
 .lacts button[data-ldel]:hover{color:var(--magenta);border-color:var(--magenta)}
 .capture #capShot{flex:0 0 auto;width:48px;display:flex;align-items:center;justify-content:center;
   border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);transition:.16s}
@@ -3149,8 +3151,20 @@ function autoThumb(u){
   if(yt) return 'https://img.youtube.com/vi/'+yt[1]+'/hqdefault.jpg';
   return '';
 }
+async function tiktokMeta(u){
+  // официальный публичный oEmbed TikTok — не требует ключа, надёжнее сторонних сервисов
+  if(!/tiktok\.com/i.test(u)) return null;
+  try{
+    const r=await fetch('https://www.tiktok.com/oembed?url='+encodeURIComponent(u));
+    if(!r.ok) return null;
+    const j=await r.json();
+    return {image:j.thumbnail_url||'',title:(j.title||'').trim().slice(0,90)};
+  }catch(e){ return null }
+}
 async function fetchMeta(u){
   const out={image:autoThumb(u)||'',title:''};
+  const tt=await tiktokMeta(u);
+  if(tt){ if(tt.image) out.image=tt.image; if(tt.title) out.title=tt.title; return out }
   try{
     const r=await fetch('https://api.microlink.io/?url='+encodeURIComponent(u));
     const j=await r.json();
@@ -3285,6 +3299,7 @@ function linksPane(p){
           <span>${esc(hostOf(i.url)||'photo')}</span>
         </span>
         <span class="lacts">
+          ${!i.preview&&i.url?`<button data-lshot="${i.id}" title="Add your own photo">${svg('img',13,1.7)}</button>`:''}
           <button data-led="${i.id}" title="Settings">${svg('gear',13,1.6)}</button>
           <button data-ldel="${i.id}" title="Delete">${svg('trash',13,1.7)}</button>
         </span>
@@ -3654,26 +3669,7 @@ function bindShared(){
     const sec=document.getElementById('sharedRefs');
     if(sec) sec.classList.toggle('collapsed');
   });
-  document.querySelectorAll('.lcard[href]').forEach(a=>a.addEventListener('click',e=>{
-    if(e.metaKey||e.ctrlKey||e.shiftKey) return;
-    const emb=embedOf(a.getAttribute('href'));
-    if(!emb) return;                       // не видео — уходим по ссылке как обычно
-    e.preventDefault();
-    const el=document.createElement('div');
-    el.className='lb refprev';
-    el.innerHTML=`<div class="embed-box ${emb.wide?'wide':'tall'}">
-        <iframe src="${esc(emb.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-          allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-      <div class="lb-bar">
-        <button data-go>${svg('link',14,1.9)} Open the link</button>
-        <button data-close>${svg('x',14,2)} Close</button>
-      </div>`;
-    el.addEventListener('click',ev=>{
-      if(ev.target===el||ev.target.closest('[data-close]')) return el.remove();
-      if(ev.target.closest('[data-go]')) window.open(a.getAttribute('href'),'_blank','noopener');
-    });
-    document.body.appendChild(el);
-  }));
+
 }
 
 async function tryShared(){
@@ -3847,6 +3843,21 @@ function refPreview(p,item){
   document.body.appendChild(el);
 }
 
+async function retryMissingPreviews(p){
+  const items=linksOf(p).filter(i=>i.url&&!i.preview&&!i._triedMeta);
+  if(!items.length) return;
+  const batch=items.slice(0,6);          // не бьём по квоте разом всей папкой
+  for(const it of batch){
+    it._triedMeta=true;                  // не пытаться повторно в этой сессии
+    try{
+      const meta=await fetchMeta(it.url);
+      if(meta.image){ it.preview=meta.image; if(st.openId===p.id) renderProject() }
+      if(meta.title&&it.text===shortUrl(it.url)){ it.text=meta.title; if(st.openId===p.id) renderProject() }
+      if(meta.image||meta.title) saveProject(p,true);
+    }catch(e){}
+  }
+}
+
 function bindLinks(p){
   const la=$('#lAdd'); if(!la) return;
   const add=async()=>{
@@ -3896,33 +3907,36 @@ function bindLinks(p){
   const box=$('#links'); if(!box) return;
   bindRowScroll(box);
   bindRefDrag(box,p);
+  retryMissingPreviews(p);
   box.addEventListener('keydown',e=>{
     if(e.key!=='Enter'&&e.key!==' ') return;
     const shot=e.target.closest('[data-shot]');
     if(shot&&!e.target.closest('button')){ e.preventDefault(); shot.click() }
   });
   box.addEventListener('click',async e=>{
-    const opener=e.target.closest('a[data-ref]');
-    if(opener&&!e.target.closest('[data-led]')&&!e.target.closest('[data-ldel]')){
-      if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return;   // новая вкладка — как обычно
-      if(isPhone()) return;                                        // на телефоне сразу наружу
-      e.preventDefault();
-      const item=(p.tasks||[]).find(x=>x.id===opener.dataset.ref);
-      if(item) refPreview(p,item);
-      return;
-    }
     const shot=e.target.closest('[data-shot]');
     if(shot&&!e.target.closest('[data-led]')&&!e.target.closest('[data-ldel]')){
       const ph=st.linkShots[shot.dataset.id];
       if(ph) lightbox(ph,ph.url);
       return;
     }
-    const ed=e.target.closest('[data-led]'), dl=e.target.closest('[data-ldel]');
-    if(!ed&&!dl) return;
+    const ed=e.target.closest('[data-led]'), dl=e.target.closest('[data-ldel]'),
+          ls=e.target.closest('[data-lshot]');
+    if(!ed&&!dl&&!ls) return;
     e.preventDefault(); e.stopPropagation();
-    const key=ed?ed.dataset.led:dl.dataset.ldel;
+    const key=ed?ed.dataset.led:dl?dl.dataset.ldel:ls.dataset.lshot;
     const item=(p.tasks||[]).find(x=>x.id===key); if(!item) return;
     if(ed) return linkEdit(p,item);
+    if(ls){
+      const inp=$('#wishPick');
+      inp.onchange=async ev=>{
+        const f=ev.target.files[0]; ev.target.value='';
+        if(!f) return;
+        if(await setItemPhoto(p.id,item.id,f)) renderProject();
+      };
+      inp.click();
+      return;
+    }
     const ph=(await photosOf(p.id)).filter(x=>x.item===key);
     for(const o of ph) await delPhotoDB(o.id);
     p.tasks=p.tasks.filter(x=>x.id!==key);
