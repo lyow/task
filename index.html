@@ -370,7 +370,6 @@ body.board-open{overflow:hidden}
 .idea:hover{border-color:var(--line-2);transform:translateY(-2px)}
 .idea::after{content:'';position:absolute;left:0;top:14px;bottom:14px;width:2px;border-radius:2px;
   background:var(--iris);opacity:.55}
-.idea-text{flex:1;font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .idea-edit{width:100%;min-height:74px;resize:vertical;padding:9px 11px;border-radius:10px;
   border:1px solid var(--line-2);background:var(--panel-2);font-size:13.5px;line-height:1.55}
 .idea-edit:focus{outline:none;border-color:var(--violet)}
@@ -1131,7 +1130,45 @@ body.light .row-nav{background:rgba(255,255,255,.9)}
 .cap-t.t-ideas.on{background:linear-gradient(100deg,#8B6BFF,#4FD4FF)}
 .cap-t.t-want.on{background:linear-gradient(100deg,#3FE9A4,#A8FF4D)}
 .cap-t.t-todo.on{background:linear-gradient(100deg,#FF5AE0,#B478FF)}
-.cap-t.t-proj.on{background:linear-gradient(100deg,#FFC155,#FF9F45)}
+.cap-t.t-proj.on{background:linear-gradient(100deg,#FFC155,#FF9F45)}.folders{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.fol{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;
+  color:var(--soft);font-size:12.5px;box-shadow:inset 0 0 0 1px var(--line);transition:.14s;position:relative}
+.fol:hover{color:var(--txt);box-shadow:inset 0 0 0 1px var(--line-2)}
+.fol>span:not(.fdot):not(.fol-edit){font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--dim)}
+.fol.on{color:#08080B;box-shadow:none;background:linear-gradient(100deg,#8B6BFF,#4FD4FF)}
+.fol.on>span{color:rgba(8,8,11,.6)}
+.fol.on .fdot{background:rgba(8,8,11,.35)}
+.fol.c-violet.on{background:linear-gradient(100deg,#8B6BFF,#B478FF)}
+.fol.c-cyan.on{background:linear-gradient(100deg,#4FD4FF,#7FE2FF)}
+.fol.c-magenta.on{background:linear-gradient(100deg,#FF5AE0,#FF8AE9)}
+.fol.c-mint.on{background:linear-gradient(100deg,#3FE9A4,#7DF3C4)}
+.fol.c-amber.on{background:linear-gradient(100deg,#FFC155,#FFD489)}
+.fol.c-lime.on{background:linear-gradient(100deg,#A8FF4D,#C9FF8A)}
+.fol.arch{color:var(--dim)}
+.fol.add{color:var(--dim);box-shadow:inset 0 0 0 1px transparent;border:1px dashed var(--line)}
+.fol.add:hover{color:var(--txt);border-color:var(--line-2)}
+.fol-edit{opacity:0;display:inline-flex;margin-left:-2px;transition:.14s}
+.fol:hover .fol-edit{opacity:.7}
+.fol-edit:hover{opacity:1}
+.fdot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.fdot.c-violet{background:#8B6BFF}.fdot.c-cyan{background:#4FD4FF}.fdot.c-magenta{background:#FF5AE0}
+.fdot.c-mint{background:#3FE9A4}.fdot.c-amber{background:#FFC155}.fdot.c-lime{background:#A8FF4D}
+
+.idea-top{display:flex;gap:11px;align-items:flex-start;flex:1;min-width:0}
+.idea-thumb{flex:0 0 auto;width:42px;height:42px;border-radius:11px;background:var(--panel-2) center/cover no-repeat;
+  box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;justify-content:center;color:var(--dim)}
+.idea-thumb.has{box-shadow:inset 0 0 0 1px var(--line-2)}
+.idea-fav{width:18px;height:18px;border-radius:5px}
+.idea-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.idea-title{font-size:13.5px;line-height:1.35;font-weight:500;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.idea-host{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;letter-spacing:.06em;color:var(--violet);text-decoration:none;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.idea-host:hover{color:var(--cyan)}
+.idea.has-link::after{background:var(--iris)}
+@media (max-width:760px){.folders{gap:6px}.fol{padding:9px 12px}.fol-edit{opacity:.7}}
+
 /* ─── движение ─── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes popIn{0%{opacity:0;transform:scale(.86)}62%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
@@ -1871,7 +1908,7 @@ function toast(m,opt){
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',qbar:{},chipsOpen:false,boardOpen:{},refOpen:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')!=='0',qbar:{},ideaFolder:'',chipsOpen:false,boardOpen:{},refOpen:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'read',todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -2611,28 +2648,169 @@ function ago(ts){
   return ru(new Date(ts).toISOString().slice(0,10));
 }
 
+const ARCHIVE='__archive';
+const FOLDER_COLORS=['violet','cyan','magenta','mint','amber','lime'];
+const foldersOf=p=>(p.tasks||[]).filter(t=>t.kind==='folder');
+const ideasOf=p=>(p.tasks||[]).filter(t=>t.kind!=='folder');
+const folderName=(p,id)=>{
+  if(id===ARCHIVE) return 'Archive';
+  const f=foldersOf(p).find(x=>x.id===id);
+  return f?f.text:'';
+};
+
+function newFolder(p){
+  const el=document.createElement('div');
+  el.className='sheet-wrap';
+  let color=FOLDER_COLORS[0];
+  el.innerHTML=`<div class="sheet">
+    <div class="sheet-head"><span>New folder</span><button data-close>${svg('x',15,2)}</button></div>
+    <label class="f"><span>Name</span><input id="fName" placeholder="e.g. content, shop, watch later"></label>
+    <div class="f"><span>Colour</span>
+      <div class="sk-colors">${FOLDER_COLORS.map((c,i)=>
+        `<button data-fc="${c}" class="sk-dot c-${c} ${i===0?'on':''}"></button>`).join('')}</div>
+    </div>
+    <div class="sheet-foot"><button class="opt" id="fSave" style="width:100%">Create</button></div>
+  </div>`;
+  const close=()=>el.remove();
+  el.addEventListener('click',async e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    const c=e.target.closest('[data-fc]');
+    if(c){ color=c.dataset.fc; el.querySelectorAll('[data-fc]').forEach(b=>b.classList.toggle('on',b.dataset.fc===color)); return }
+    if(e.target.closest('#fSave')){
+      const name=el.querySelector('#fName').value.trim();
+      if(!name) return el.querySelector('#fName').focus();
+      p.tasks=p.tasks||[];
+      p.tasks.push({id:uid(),kind:'folder',text:name,cat:color,done:false,created:Date.now()});
+      saveProject(p,true); close(); renderProject();
+      toast('Folder created',{sub:name});
+    }
+  });
+  document.body.appendChild(el);
+  setTimeout(()=>{const n=el.querySelector('#fName'); if(n) n.focus()},30);
+}
+
+function editFolder(p,f){
+  const el=document.createElement('div');
+  el.className='sheet-wrap';
+  let color=f.cat||'violet';
+  el.innerHTML=`<div class="sheet">
+    <div class="sheet-head"><span>Folder</span><button data-close>${svg('x',15,2)}</button></div>
+    <label class="f"><span>Name</span><input id="fName" value="${esc(f.text)}"></label>
+    <div class="f"><span>Colour</span>
+      <div class="sk-colors">${FOLDER_COLORS.map(c=>
+        `<button data-fc="${c}" class="sk-dot c-${c} ${c===color?'on':''}"></button>`).join('')}</div>
+    </div>
+    <div class="sheet-foot two">
+      <button class="opt" id="fSave">Save</button>
+      <button class="danger" id="fDel">${svg('trash',13,1.8)} Delete</button>
+    </div>
+  </div>`;
+  const close=()=>el.remove();
+  el.addEventListener('click',e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    const c=e.target.closest('[data-fc]');
+    if(c){ color=c.dataset.fc; el.querySelectorAll('[data-fc]').forEach(b=>b.classList.toggle('on',b.dataset.fc===color)); return }
+    if(e.target.closest('#fSave')){
+      f.text=el.querySelector('#fName').value.trim()||f.text;
+      f.cat=color;
+      saveProject(p,true); close(); renderProject();
+      return;
+    }
+    if(e.target.closest('#fDel')){
+      const inside=ideasOf(p).filter(i=>i.cat===f.id).length;
+      if(!confirm(inside?`Delete "${f.text}"? The ${inside} item${inside===1?'':'s'} inside go back to All.`:`Delete "${f.text}"?`)) return;
+      ideasOf(p).forEach(i=>{ if(i.cat===f.id) i.cat='' });
+      p.tasks=p.tasks.filter(x=>x.id!==f.id);
+      if(st.ideaFolder===f.id) st.ideaFolder='';
+      saveProject(p,true); close(); renderProject();
+      toast('Folder deleted');
+    }
+  });
+  document.body.appendChild(el);
+}
+
+function pickFolder(p,cb){
+  const list=foldersOf(p);
+  const el=document.createElement('div');
+  el.className='sheet-wrap';
+  el.innerHTML=`<div class="sheet">
+    <div class="sheet-head"><span>Move to</span><button data-close>${svg('x',15,2)}</button></div>
+    <div class="pick-list">
+      <button data-f="">${svg('spark',14,1.8)} All ideas</button>
+      ${list.map(f=>`<button data-f="${f.id}"><span class="fdot c-${f.cat||'violet'}"></span>${esc(f.text)}</button>`).join('')}
+      <button data-f="${ARCHIVE}">${svg('arch',14,1.7)} Archive</button>
+    </div>
+    ${list.length?'':'<p class="hint" style="margin:12px 0 0">No folders yet — create one from the row at the top.</p>'}
+  </div>`;
+  const close=()=>el.remove();
+  el.addEventListener('click',e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    const b=e.target.closest('[data-f]');
+    if(b){ close(); cb(b.dataset.f) }
+  });
+  document.body.appendChild(el);
+}
+
+function ideaTitle(i){
+  if(i.text&&i.text.trim()) return i.text.trim();
+  if(i.url) return shortUrl(i.url);
+  return 'Untitled';
+}
+
 function ideasPane(p){
-  const items=(p.tasks||[]).slice().reverse();
+  const all=ideasOf(p);
+  const folders=foldersOf(p);
+  const cur=st.ideaFolder||'';
+  const inbox=all.filter(i=>!i.cat);
+  const archived=all.filter(i=>i.cat===ARCHIVE);
+  const shown=(cur===''?inbox:cur===ARCHIVE?archived:all.filter(i=>i.cat===cur)).slice().reverse();
+  const countOf=id=>id===''?inbox.length:id===ARCHIVE?archived.length:all.filter(i=>i.cat===id).length;
+
   return `<section class="pane wide">
-    <h2 class="pane-h">Ideas <span class="count">${items.length}</span></h2>
+    <h2 class="pane-h">Ideas <span class="count">${all.length}</span></h2>
+
+    <div class="folders" id="folders">
+      <button class="fol ${cur===''?'on':''}" data-fol="">${svg('spark',12,1.9)} All <span>${inbox.length}</span></button>
+      ${folders.map(f=>`<button class="fol c-${f.cat||'violet'} ${cur===f.id?'on':''}" data-fol="${f.id}">
+        <span class="fdot c-${f.cat||'violet'}"></span>${esc(f.text)} <span>${countOf(f.id)}</span>
+        <span class="fol-edit" data-fedit="${f.id}">${svg('gear',11,1.7)}</span>
+      </button>`).join('')}
+      <button class="fol arch ${cur===ARCHIVE?'on':''}" data-fol="${ARCHIVE}">${svg('arch',12,1.7)} Archive <span>${archived.length}</span></button>
+      <button class="fol add" id="folAdd">${svg('plus',12,2.4)} New folder</button>
+    </div>
+
     <div class="task-add">
-      <input id="taskInput" placeholder="Write it down before it evaporates">
+      <input id="taskInput" placeholder="${cur&&cur!==ARCHIVE?'Add to '+esc(folderName(p,cur)):'Paste a link or write it down'}">
       <button id="taskAdd">${svg('plus',15,2.4)}</button>
     </div>
-    ${items.length?`<div class="ideas" id="ideas">${items.map(i=>`
-      <div class="idea" data-id="${i.id}">
-        <div class="idea-text">${linkify(i.text)}</div>
+
+    ${shown.length?`<div class="ideas" id="ideas">${shown.map(i=>{
+      const host=hostOf(i.url);
+      const img=i.preview||'';
+      return `<div class="idea ${i.url?'has-link':''}" data-id="${i.id}">
+        <div class="idea-top">
+          <span class="idea-thumb ${img?'has':''}" ${img?`style="background-image:url('${esc(img)}')"`:''}>
+            ${img?'':(host?`<img class="idea-fav" src="${esc(favOf(i.url))}" alt="" onerror="this.style.display='none'">`:svg('spark',15,1.8))}
+          </span>
+          <span class="idea-main">
+            <b class="idea-title">${esc(ideaTitle(i))}</b>
+            ${host?`<a class="idea-host" href="${esc(i.url)}" target="_blank" rel="noopener">${esc(host)} ${svg('link',9,2)}</a>`:''}
+          </span>
+        </div>
         <div class="idea-foot">
-          <span class="idea-date">${ago(i.created)}</span>
+          <span class="idea-date">${ago(i.created)}${i.cat&&i.cat!==ARCHIVE&&cur===''?' · '+esc(folderName(p,i.cat)):''}</span>
           <div class="idea-acts">
-            <button data-mk="${i.id}" title="Turn this into its own project">${svg('plus',11,2.4)} project</button>
-            <button data-mv="${i.id}" title="Move into an existing project">${svg('arrow',11,2)} move</button>
+            <button data-ifol="${i.id}" title="Move to a folder">${svg('arch',11,1.7)}</button>
+            <button data-mk="${i.id}" title="Turn this into its own project">${svg('plus',11,2.4)}</button>
+            <button data-mv="${i.id}" title="Move into an existing project">${svg('arrow',11,2)}</button>
             <button data-ied="${i.id}" title="Edit">${svg('pen',11,1.8)}</button>
             <button data-idel="${i.id}" title="Delete">${svg('x',11,2.4)}</button>
           </div>
         </div>
-      </div>`).join('')}</div>`
-    :`<p class="hint" style="margin-top:18px;max-width:60ch">Empty. Anything you catch — a name, a link, half a thought — throw it in here. Deciding what it becomes is a separate job for a separate day.</p>`}
+      </div>`}).join('')}</div>`
+    :`<p class="hint" style="margin-top:18px;max-width:60ch">${cur===ARCHIVE?'Archive is empty.'
+      :cur?'Nothing in this folder yet.'
+      :'Empty. Paste a link while scrolling at night — it lands here with a preview, and you sort it into folders later.'}</p>`}
   </section>`;
 }
 
@@ -2971,6 +3149,19 @@ function autoThumb(u){
   if(yt) return 'https://img.youtube.com/vi/'+yt[1]+'/hqdefault.jpg';
   return '';
 }
+async function fetchMeta(u){
+  const out={image:autoThumb(u)||'',title:''};
+  try{
+    const r=await fetch('https://api.microlink.io/?url='+encodeURIComponent(u));
+    const j=await r.json();
+    const d=(j&&j.data)||{};
+    if(!out.image&&d.image&&d.image.url) out.image=d.image.url;
+    if(d.title) out.title=String(d.title).trim().slice(0,90);
+    else if(d.description) out.title=String(d.description).trim().slice(0,90);
+  }catch(e){}
+  return out;
+}
+
 async function fetchPreview(u){
   const direct=autoThumb(u);
   if(direct) return direct;
@@ -3758,14 +3949,23 @@ function pickProject(cb){
 }
 
 function bindIdeas(p){
+  const fol=$('#folders');
+  if(fol) fol.addEventListener('click',e=>{
+    const ed=e.target.closest('[data-fedit]');
+    if(ed){ e.stopPropagation(); const f=foldersOf(p).find(x=>x.id===ed.dataset.fedit); if(f) editFolder(p,f); return }
+    if(e.target.closest('#folAdd')) return newFolder(p);
+    const b=e.target.closest('[data-fol]');
+    if(b){ st.ideaFolder=b.dataset.fol; renderProject() }
+  });
   const box=$('#ideas'); if(!box) return;
   box.addEventListener('click',async e=>{
     if(e.target.closest('a')) return;
     const mk=e.target.closest('[data-mk]'), mv=e.target.closest('[data-mv]'),
-          ed=e.target.closest('[data-ied]'), dl=e.target.closest('[data-idel]');
-    const id=(mk||mv||ed||dl||{}).dataset;
+          ed=e.target.closest('[data-ied]'), dl=e.target.closest('[data-idel]'),
+          fo=e.target.closest('[data-ifol]');
+    const id=(mk||mv||ed||dl||fo||{}).dataset;
     if(!id) return;
-    const key=mk?id.mk:mv?id.mv:ed?id.ied:id.idel;
+    const key=mk?id.mk:mv?id.mv:ed?id.ied:fo?id.ifol:id.idel;
     const idea=(p.tasks||[]).find(x=>x.id===key); if(!idea) return;
 
     if(mk){
@@ -3791,6 +3991,14 @@ function bindIdeas(p){
       });
       return;
     }
+    if(fo){
+      pickFolder(p,fid=>{
+        idea.cat=fid;
+        saveProject(p,true); renderProject(); renderSide();
+        toast(fid===ARCHIVE?'Archived':fid?'Moved':'Back to All',{sub:fid?folderName(p,fid):''});
+      });
+      return;
+    }
     if(dl){
       p.tasks=p.tasks.filter(x=>x.id!==key);
       saveProject(p,true); renderProject(); renderSide();
@@ -3798,7 +4006,7 @@ function bindIdeas(p){
     }
     if(ed){
       const card=box.querySelector(`.idea[data-id="${key}"]`); if(!card) return;
-      const holder=card.querySelector('.idea-text'); if(!holder||card.querySelector('.idea-edit')) return;
+      const holder=card.querySelector('.idea-main'); if(!holder||card.querySelector('.idea-edit')) return;
       const ta=document.createElement('textarea');
       ta.className='idea-edit'; ta.value=idea.text;
       holder.replaceWith(ta); ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length);
@@ -3999,11 +4207,31 @@ function bindProject(p){
   const add=()=>{
     const i=$('#taskInput'); if(!i) return;
     const v=i.value.trim(); if(!v) return;
-    p.tasks=p.tasks||[]; p.tasks.push({id:uid(),text:v,done:false,created:Date.now()});
+    p.tasks=p.tasks||[];
+    const item={id:uid(),text:v,done:false,created:Date.now()};
+    if(p.id===INBOX){
+      URL_RE.lastIndex=0;
+      const m=v.match(URL_RE);
+      if(m){
+        let u=m[0]; if(!/^https?:/i.test(u)) u='https://'+u;
+        item.url=u;
+        item.text=v.replace(m[0],'').trim();
+        if(!item.text) item.text=shortUrl(u);
+      }
+      const f=st.ideaFolder;
+      if(f&&f!==ARCHIVE) item.cat=f;
+    }
+    p.tasks.push(item);
     const moved=touchProject(p);
     i.value=''; saveProject(p,true);
     if(moved){ sortProjects(); toast('Moved to In progress') }
     renderProject(); renderSide();
+    if(item.url) fetchMeta(item.url).then(meta=>{
+      let changed=false;
+      if(meta.image&&!item.preview){ item.preview=meta.image; changed=true }
+      if(meta.title&&(!item.text||item.text===shortUrl(item.url))){ item.text=meta.title; changed=true }
+      if(changed){ saveProject(p,true); if(st.openId===p.id) renderProject() }
+    });
   };
   const ta=$('#taskAdd'), ti=$('#taskInput');
   if(ta) ta.addEventListener('click',add);
@@ -4849,8 +5077,18 @@ async function saveCapture(target,text,url,file){
     p.tasks.push({id:uid(),text:text||shortUrl(url)||'Untitled',cat:st.todoCat||'other',url:url||'',note:'',done:false,created:Date.now()});
     saveProject(p,true); what='Added to To do';
   }else{
-    const body=[text,url].filter(Boolean).join(' ');
-    p.tasks.push({id:uid(),kind:p.id===INBOX?undefined:'task',text:body,done:false,created:Date.now()});
+    const it={id:uid(),kind:p.id===INBOX?undefined:'task',text:text||'',done:false,created:Date.now()};
+    if(p.id===INBOX&&url){
+      it.url=url;
+      if(!it.text) it.text=shortUrl(url);
+      fetchMeta(url).then(meta=>{
+        let ch=false;
+        if(meta.image&&!it.preview){ it.preview=meta.image; ch=true }
+        if(meta.title&&(!it.text||it.text===shortUrl(url))){ it.text=meta.title; ch=true }
+        if(ch){ saveProject(p,true); if(st.openId===p.id) renderProject() }
+      });
+    }else if(url){ it.text=[text,url].filter(Boolean).join(' ') }
+    p.tasks.push(it);
     if(!SPECIAL(p.id)) touchProject(p);
     saveProject(p,true);
     what=p.id===INBOX?'Saved to Ideas':'Task added';
