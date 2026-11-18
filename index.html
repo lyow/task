@@ -2138,6 +2138,32 @@ b,strong{font-weight:600}
 .net-dot{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--s2);border:1px solid var(--line);color:var(--soft);white-space:nowrap}
 .net-dot.off{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 35%,var(--line))}
 .ideas-pane>.ideas-more{order:9}
+
+.rep-row.rep-6{grid-template-columns:repeat(3,1fr)}
+.rep-n{display:flex;align-items:center;gap:8px;margin:-4px 0 14px;font-size:14px;color:var(--soft)}
+.rep-n input{width:64px;height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:#0A0A0D;color:var(--txt);font-size:16px}
+.rep-n b{font-weight:500;color:var(--dim)}
+
+.sp-att{display:inline-flex;font-style:normal;color:var(--dim);margin-left:6px;vertical-align:-1px}
+.sp-rcpt-box{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sp-rcpt-img img{display:block;width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.sp-rcpt-wait{font-style:normal;font-size:12px;color:var(--dim)}
+#eNote{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0A0A0D;color:var(--txt);font:inherit;font-size:16px;resize:vertical}
+.bud-list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.bud-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:0 6px 0 12px;font-size:14px}
+.bud-row+.bud-row{border-top:1px solid var(--line)}
+.bud-row input{width:120px;height:36px;padding:0 10px;border-radius:9px;border:1px solid var(--line);background:#0A0A0D;color:var(--txt);text-align:right;font-size:16px;font-variant-numeric:tabular-nums}
+.sp-grp-bar.bud{background:var(--lime)}
+.sp-grp-bar.bud.near{background:var(--amber)}
+.sp-grp-bar.bud.over{background:var(--magenta);max-width:calc(100% - 28px)}
+.g-near{color:var(--amber)!important}
+
+.mic-btn{flex:0 0 auto;width:48px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;background:var(--s2);border:1px solid var(--line);color:var(--soft);box-shadow:inset 0 1px 0 var(--edge)}
+.mic-btn:hover{color:var(--txt);background:var(--s3)}
+.mic-btn.rec{color:var(--on);background:var(--magenta);border-color:transparent;animation:micPulse 1.2s ease-in-out infinite}
+@keyframes micPulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--magenta) 25%,transparent)}}
+.jot .mic-btn,.sp-add .mic-btn{height:56px;border-radius:14px;background:var(--bg);border-color:transparent}
+.cap-row .mic-btn{height:48px}
 </style>
 </head>
 <body class="side-open">
@@ -2609,7 +2635,8 @@ const I={
   pen:'<path d="M4 20h4L19 9a2.1 2.1 0 10-3-3L5 17z"/>',
   arch:'<rect x="3" y="4" width="18" height="4.5" rx="1.6"/><path d="M5 8.5V19a1.5 1.5 0 001.5 1.5h11A1.5 1.5 0 0019 19V8.5M10 12.5h4"/>',
   star:'<path d="M12 3.7l2.6 5.5 6 .85-4.35 4.2 1.05 6-5.3-2.85L6.7 20.25l1.05-6L3.4 10.05l6-.85z"/>',
-  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>'
+  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  mic:'<path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>'
 };
 const svg=(k,s,w)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||1.7}" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;
 
@@ -2676,13 +2703,33 @@ function setLay(t,k,v){
 }
 const setDue=(t,d)=>setLay(t,'due',d);
 const repOf=t=>(t&&t.kind!=='sticky'&&layObj(t).rep)||'';
+/* повтор: day, week, month, wd (будни), dN (каждые N дней), wN (каждые N недель), mD (каждый месяц D-го) */
 function nextDue(d,rep){
   const x=new Date((d&&d>=ld()?d:ld())+'T12:00:00');
+  let m;
   if(rep==='day') x.setDate(x.getDate()+1);
   else if(rep==='week') x.setDate(x.getDate()+7);
   else if(rep==='month') x.setMonth(x.getMonth()+1);
+  else if(rep==='wd'){ do{ x.setDate(x.getDate()+1) }while(x.getDay()===0||x.getDay()===6) }
+  else if((m=/^d(\d+)$/.exec(rep))) x.setDate(x.getDate()+Math.max(1,+m[1]));
+  else if((m=/^w(\d+)$/.exec(rep))) x.setDate(x.getDate()+7*Math.max(1,+m[1]));
+  else if((m=/^m(\d+)$/.exec(rep))){ const D=+m[1]; x.setDate(1); x.setMonth(x.getMonth()+1); x.setDate(Math.min(D,new Date(x.getFullYear(),x.getMonth()+1,0).getDate())) }
   return ld(x);
 }
+/* первый срок для «каждый месяц 15-го» и «по будням»: ближайший подходящий день, начиная с сегодня */
+function firstDue(rep){
+  const x=new Date(ld()+'T12:00:00'); let m;
+  if(rep==='wd'){ while(x.getDay()===0||x.getDay()===6) x.setDate(x.getDate()+1); return ld(x) }
+  if((m=/^m(\d+)$/.exec(rep))){ const D=+m[1], dim=new Date(x.getFullYear(),x.getMonth()+1,0).getDate(); if(x.getDate()<=Math.min(D,dim)){ x.setDate(Math.min(D,dim)); return ld(x) } return nextDue(ld(),rep) }
+  return ld();
+}
+function repLabel(rep){ let m;
+  if(!rep) return '';
+  if(rep==='day') return 'every day'; if(rep==='week') return 'every week'; if(rep==='month') return 'every month'; if(rep==='wd') return 'weekdays';
+  if((m=/^d(\d+)$/.exec(rep))) return +m[1]===1?'every day':'every '+m[1]+' days';
+  if((m=/^w(\d+)$/.exec(rep))) return +m[1]===1?'every week':'every '+m[1]+' weeks';
+  if((m=/^m(\d+)$/.exec(rep))) return 'monthly on the '+ordN(+m[1]);
+  return '' }
 /* сразу после отметки «сделано»: повторяющаяся задача не закрывается, а переезжает на следующий срок */
 function rollRepeat(t){
   const rep=repOf(t); if(!t.done||!rep) return false;
@@ -3237,6 +3284,7 @@ function renderAll(){
       <div class="jot-tabs" id="capTo">${jots.map(j=>`<button class="jot-tab ${jot.id===j.id?'on':''}" data-to="${j.id}">${j.label}</button>`).join('')}</div>
       <div class="capture">
         <input id="cap" placeholder="${jot.ph}" autocomplete="off" enterkeyhint="done">
+        ${micBtn('#cap')}
         <button id="capShot" title="Add a photo to Ideas">${svg('img',17,1.7)}</button>
         <button id="capBtn">Add</button>
       </div>
@@ -4051,7 +4099,7 @@ function todoPane(p){
           </div>
         </div>
         ${exp?`<div class="tdmore">
-          ${i.done?'':`<button class="td-when" data-due="${p.id}|${i.id}">${svg('clock',13,1.9)} ${dueOf(i)?esc(dueLabel(dueOf(i)))+({day:' · every day',week:' · every week',month:' · every month'}[repOf(i)]||''):'Add a date or repeat'}</button>`}
+          ${i.done?'':`<button class="td-when" data-due="${p.id}|${i.id}">${svg('clock',13,1.9)} ${dueOf(i)?esc(dueLabel(dueOf(i)))+(repOf(i)?' · '+repLabel(repOf(i)):''):'Add a date or repeat'}</button>`}
           <div class="tdlink">
             <input data-tdurl="${i.id}" placeholder="https:// — where to watch, buy or read it" value="${esc(i.url||'')}">
             <button data-tdopen="${i.id}">${svg('link',12,1.9)} open</button>
@@ -6714,12 +6762,19 @@ function parseQuick(raw){
   if(m){ price=parseFloat(m[1].replace(',','.')); text=text.slice(0,m.index).trim() }
   // «…завтра» / «…today» в конце — срок для задач
   let due='', task=full, rep='';
-  const rw=full.match(/(?:^|\s)(every day|daily|every week|weekly|every month|monthly|каждый день|ежедневно|каждую неделю|еженедельно|каждый месяц|ежемесячно)$/i);
+  const R2=[[/(?:^|\s)(?:every|each)\s+(\d+)\s*days?$/i,m=>'d'+m[1]],[/(?:^|\s)(?:every|each)\s+(\d+)\s*weeks?$/i,m=>'w'+m[1]],
+    [/(?:^|\s)every other day$/i,()=>'d2'],[/(?:^|\s)every other week$/i,()=>'w2'],[/(?:^|\s)(?:on\s+)?(?:every\s+)?weekdays?$/i,()=>'wd'],
+    [/(?:^|\s)(?:monthly|every month)\s+on\s+the\s+(\d{1,2})(?:st|nd|rd|th)?$/i,m=>'m'+m[1]],[/(?:^|\s)on\s+the\s+(\d{1,2})(?:st|nd|rd|th)?\s+of\s+every\s+month$/i,m=>'m'+m[1]],
+    [/(?:^|\s)каждые\s+(\d+)\s*(?:дня|дней|день)$/i,m=>'d'+m[1]],[/(?:^|\s)каждые\s+(\d+)\s*(?:недели|недель)$/i,m=>'w'+m[1]],
+    [/(?:^|\s)через день$/i,()=>'d2'],[/(?:^|\s)через неделю каждую$/i,()=>'w2'],[/(?:^|\s)(?:по будням|каждый будний день)$/i,()=>'wd'],
+    [/(?:^|\s)(?:каждое|каждого)\s+(\d{1,2})(?:-?е|-?го)?\s*(?:число|числа)?(?:\s+каждого месяца)?$/i,m=>'m'+m[1]],[/(?:^|\s)(\d{1,2})(?:-?го)?\s+числа\s+каждого месяца$/i,m=>'m'+m[1]]];
+  for(const [re,f] of R2){ const m=full.match(re); if(m){ rep=f(m); task=full.slice(0,m.index).trim()||full; break } }
+  const rw=rep?null:full.match(/(?:^|\s)(every day|daily|every week|weekly|every month|monthly|каждый день|ежедневно|каждую неделю|еженедельно|каждый месяц|ежемесячно)$/i);
   if(rw){ const w=rw[1].toLowerCase(); rep=/day|daily|день|ежедн/.test(w)?'day':/week|недел/.test(w)?'week':'month'; task=full.slice(0,rw.index).trim()||full }
   const nd=nlDate(task); if(nd){ due=nd.due; task=nd.rest||task }
   const dw=null;
   if(dw){ due=ldPlus(DUE_WORDS[dw[1].toLowerCase()]); task=task.slice(0,dw.index).trim()||task }
-  if(rep&&!due) due=ld();
+  if(rep&&!due) due=firstDue(rep);
   return {text,full,task,due,rep,price,url,forced};
 }
 
@@ -6787,7 +6842,7 @@ async function saveCapture(target,text,url,file,extra){
   sortProjects(); renderSide();
   if(st.openId===p.id) renderProject();
   else if(!st.openId&&!st.focus&&!st.hist&&!st.review) renderAll();
-  const subl=[ex.due?'due '+dueLabel(ex.due):'',ex.rep?{day:'every day',week:'every week',month:'every month'}[ex.rep]:'',p.id===WANT&&ex.price?money(ex.price):''].filter(Boolean).join(' · ');
+  const subl=[ex.due?'due '+dueLabel(ex.due):'',ex.rep?repLabel(ex.rep):'',p.id===WANT&&ex.price?money(ex.price):''].filter(Boolean).join(' · ');
   toast(what,{sub:subl,action:'Open',onAction:()=>openProject(target)});
 }
 
@@ -6818,6 +6873,7 @@ async function openCapture(){
     <textarea id="capText" placeholder="…or just write it down" rows="2"></textarea>
     <div class="cap-row">
       <button class="cap-photo" id="capPhoto">${svg('img',17,1.7)} <span id="cpPhotoLabel">Photo</span></button>
+      ${micBtn('#capText')}
       <button class="cap-send" id="capSend">${svg('plus',17,2.6)} Save</button>
     </div>
     <div class="cap-label">Where</div>
@@ -7246,6 +7302,8 @@ function spendEdit(it){
     </div>
     ${exp&&!g?`<div class="sp-kind"><button type="button" class="${wantInc?'':'on'}" data-ekind="0">Expense</button><button type="button" class="${wantInc?'on':''}" data-ekind="1">Income</button></div>`:''}
     <div class="f"><span>Category</span><div id="eGrid">${catGrid(pick,'data-ec',wantInc)}</div></div>
+    ${exp&&!g?`<label class="f"><span>Note</span><textarea id="eNote" rows="2" placeholder="What it was for, warranty, who paid…">${esc(it.note||'')}</textarea></label>
+    <div class="f sp-rcpt"><span>Receipt</span><div id="eRcpt" class="sp-rcpt-box">${L0.rcpt?'<i class="sp-rcpt-wait">Loading…</i>':''}<button type="button" class="ghost-btn" data-ercpt>${svg('img',14,1.8)} ${L0.rcpt?'Replace photo':'Add a photo'}</button>${L0.rcpt?`<button type="button" class="ghost-btn" data-ercptdel>${svg('trash',14,1.8)} Remove</button>`:''}</div></div>`:''}
     ${exp&&!g?`<button type="button" class="sp-rep ${wantRep?'on':''}" data-erep>${svg(wantRep?'boxOk':'box',15,1.9)} Monthly${wantRep?' · next '+esc(MON[nextCharge(it).getMonth()]+' '+nextCharge(it).getDate()):''}</button>`:''}
     <div class="sheet-foot sp-foot">
       <button type="button" class="danger" data-edel>${exp?svg('trash',14,1.8)+' Delete':svg('box',14,1.8)+' Not bought'}</button>
@@ -7259,6 +7317,16 @@ function spendEdit(it){
     if(e.target===el||e.target.closest('[data-close]')) return close();
     const c=e.target.closest('[data-ec]');
     if(c){ pick=c.dataset.ec; el.querySelectorAll('[data-ec]').forEach(b=>b.classList.toggle('on',b===c)); return }
+    if(e.target.closest('[data-ercpt]')){
+      const inp=$('#wishPick');
+      inp.onchange=async ev=>{ const f=ev.target.files[0]; ev.target.value=''; if(!f) return;
+        toast('Saving the photo…'); await setWishPhoto(it.id,f); setLayRaw(it,{rcpt:1}); saveProject(p,true); close(); refreshView(); spendEdit(it); toast('Receipt saved') };
+      inp.click(); return;
+    }
+    if(e.target.closest('[data-ercptdel]')){
+      (async()=>{ for(const o of (await photosOf(WANT)).filter(x=>x.item===it.id)) await delPhotoDB(o.id); setLayRaw(it,{rcpt:undefined}); saveProject(p,true); close(); refreshView(); spendEdit(it); toast('Receipt removed') })();
+      return;
+    }
     const kb=e.target.closest('[data-ekind]');
     if(kb){ wantInc=kb.dataset.ekind==='1'; el.querySelectorAll('[data-ekind]').forEach(b=>b.classList.toggle('on',b===kb));
       pick=wantInc?(incomeCat(it.text)||'incother'):(recognise(it.text).cat||'other'); el.querySelector('#eGrid').innerHTML=catGrid(pick,'data-ec',wantInc); return }
@@ -7276,6 +7344,7 @@ function spendEdit(it){
     const nm=el.querySelector('#eName').value.trim();
     const dv=el.querySelector('#eDate').value, cu=el.querySelector('#eCur').value;
     if(nm) it.text=nm;
+    const nt=el.querySelector('#eNote'); if(nt) it.note=nt.value.trim()||null;
     if(g){ const i=Math.max(0,num('#eIn')||0), o=Math.max(0,num('#eOut')||0); setLayRaw(it,{gin:i,gout:o}); it.price=Math.max(0,i-o) }
     else{ const v=num('#eAmt'); if(v>0) it.price=v }
     if(/^\d{4}-\d\d-\d\d$/.test(dv)&&dv!==ld(d)){ const [y,m,dd]=dv.split('-').map(Number); it.doneAt=new Date(y,m-1,dd,12).getTime() }
@@ -7287,6 +7356,8 @@ function spendEdit(it){
     saveProject(p,true); close(); refreshView();
   });
   document.body.appendChild(el);
+  if(L0.rcpt) photosOf(WANT).then(list=>{ const ph=list.find(x=>x.item===it.id); const box=el.querySelector('#eRcpt'); if(!box) return; const w=box.querySelector('.sp-rcpt-wait'); if(w) w.remove();
+    if(ph&&ph.url){ const a=document.createElement('a'); a.href=ph.url; a.target='_blank'; a.rel='noopener'; a.className='sp-rcpt-img'; a.innerHTML=`<img src="${esc(ph.url)}" alt="Receipt">`; box.prepend(a) } }).catch(()=>{});
 }
 /* часто повторяющиеся траты — одной кнопкой ещё раз на сегодня (без казино и без ежемесячных) */
 function spendFrequent(){
@@ -7355,6 +7426,23 @@ function spendMenu(btn,k,month){
     }catch(err){ aiFail(err) }
   });
 }
+/* бюджет: общий на месяц и, по желанию, на каждую группу — в одном месте */
+function budgetSheet(){
+  const gb=lsMap('pm:budgets'), total=Number(LS.get('pm:budget'))||0;
+  const el=document.createElement('div'); el.className='sheet-wrap';
+  el.innerHTML=`<form class="sheet bud-sheet"><div class="sheet-head"><span>Monthly budget</span><button type="button" data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    <label class="f"><span>Whole month, ${esc(curSym())}</span><input id="bTotal" inputmode="decimal" value="${total||''}" placeholder="No limit" autocomplete="off"></label>
+    <div class="f"><span>By group (optional)</span><div class="bud-list">${GROUPS.filter(G=>G.id!=='other').map(G=>`<label class="bud-row"><span>${SCAT[G.cats[0]].e} ${G.l}</span>
+      <input data-bg="${G.id}" inputmode="decimal" value="${gb[G.id]||''}" placeholder="—" autocomplete="off"></label>`).join('')}</div></div>
+    <button type="submit" class="gate-go">Save</button></form>`;
+  const num=v=>{ const n=parseFloat(String(v||'').replace(/[^\d.,]/g,'').replace(',','.')); return n>0?n:0 };
+  el.addEventListener('click',e=>{ if(e.target===el||e.target.closest('[data-close]')) el.remove() });
+  el.querySelector('form').addEventListener('submit',e=>{ e.preventDefault();
+    const t=num(el.querySelector('#bTotal').value); LS.set('pm:budget',t?String(t):'');
+    const o={}; el.querySelectorAll('[data-bg]').forEach(i=>{ const n=num(i.value); if(n) o[i.dataset.bg]=n }); LS.set('pm:budgets',JSON.stringify(o));
+    el.remove(); renderSpend(); toast('Budget saved') });
+  document.body.appendChild(el); setTimeout(()=>el.querySelector('#bTotal').focus(),30);
+}
 function renderSpend(){
   $('#crumb').textContent='Spending';
   spendRoll();
@@ -7399,9 +7487,10 @@ function renderSpend(){
   const view=LS.get('pm:spView')||'group';
   const open=lsMap('pm:spOpen');
   const row=e=>`<button class="sp-row" data-sp="${e.t.id}">${spIcon(e.t)}
-      <span class="sp-main"><span class="sp-name">${esc(spName(e.t))}${layObj(e.t).rep?'<i class="sp-rep-mark" title="Monthly">↻</i>':''}</span><small>${SCAT[e.cat].l}${e.g?' · session':''}${view==='group'?' · '+dayLabel(e.at):''}</small></span>
+      <span class="sp-main"><span class="sp-name">${esc(spName(e.t))}${layObj(e.t).rep?'<i class="sp-rep-mark" title="Monthly">↻</i>':''}${e.t.note||layObj(e.t).rcpt?`<i class="sp-att" title="${layObj(e.t).rcpt?'Has a receipt':'Has a note'}">${svg(layObj(e.t).rcpt?'img':'pen',11,2)}</i>`:''}</span><small>${SCAT[e.cat].l}${e.g?' · session':''}${view==='group'?' · '+dayLabel(e.at):''}</small></span>
       <span class="sp-amtc"><b class="${entryCls(e.t)}">${entryAmt(e.t)}</b>${e.cur&&e.main!=null?`<small>≈ ${money2(e.g?Math.abs(e.main):e.main)}</small>`:''}</span></button>`;
   /* по группам: строка группы → категории → записи */
+  const gbud=lsMap('pm:budgets');
   const groupHtml=()=>{
     const gs=GROUPS.map(G=>{ const es=month.filter(e=>!e.inc&&G.cats.indexOf(e.cat)>=0); return {G,es,s:monthSum(es)} }).filter(x=>x.es.length).sort((a,b)=>b.s.v-a.s.v);
     const ies=month.filter(e=>e.inc);
@@ -7426,9 +7515,9 @@ function renderSpend(){
         <button class="sp-grp-h" data-grp="${G.id}" aria-expanded="${isOpen}">
           <span class="sp-stack">${lead.map(x=>`<i>${x}</i>`).join('')}</span>
           <span class="sp-grp-n"><b>${G.l}</b><small>${es.length} ${es.length===1?'entry':'entries'}</small></span>
-          <span class="sp-grp-v"><b>${gOnly&&!s.v?'–':sumLabel(s)}</b>${total?`<small>${Math.round(s.v/total*100)}%</small>`:''}</span>
+          <span class="sp-grp-v"><b>${gOnly&&!s.v?'–':sumLabel(s)}</b>${gbud[G.id]?`<small class="${s.v>gbud[G.id]?'g-loss':s.v>=gbud[G.id]*.85?'g-near':''}">of ${money(gbud[G.id])}</small>`:total?`<small>${Math.round(s.v/total*100)}%</small>`:''}</span>
           <span class="sp-chev">${svg('chev',13,2.2)}</span>
-          <i class="sp-grp-bar" style="width:${s.v/top*100}%"></i>
+          ${gbud[G.id]?`<i class="sp-grp-bar bud ${s.v>gbud[G.id]?'over':s.v>=gbud[G.id]*.85?'near':''}" style="width:${Math.min(100,s.v/gbud[G.id]*100)}%"></i>`:`<i class="sp-grp-bar" style="width:${s.v/top*100}%"></i>`}
         </button>
         ${isOpen?cats.map(x=>{
           const isG=x.c==='gambling', gn=isG?x.es.reduce((n,e)=>n+(e.main==null?0:(e.net>0?e.main:-e.main)),0):0;
@@ -7450,6 +7539,7 @@ function renderSpend(){
         ${freq.length&&!st.spNeed?`<div class="sp-freq">${freq.map(e=>`<button data-again="${e.t.id}">${spIcon(e.t)}${esc(spName(e.t))} <b>${amtStr(e.amt,e.cur)}</b></button>`).join('')}</div>`:''}
         <div class="sp-add">
           <input id="spIn" placeholder="taxi 1000 · claude 200$ · +500 salary" autocomplete="off" enterkeyhint="done" aria-label="What you paid or got, and how much">
+          ${micBtn('#spIn')}
           <button class="sp-go" id="spGo">Add</button>
         </div>
       </div>
@@ -7476,7 +7566,7 @@ function renderSpend(){
         ${gam.length?`<span class="sp-gline ${Math.abs(gNetM)<0.5?'g-even':gNetM>0?'g-win':'g-loss'}">🎰 Gambling: ${Math.abs(gNetM)<0.5?'even':(gNetM>0?'+':'−')+money2(Math.abs(gNetM))} this month${gNetM>0?' · not counted as spending':''}</span>`:''}
         ${budget?`<div class="sp-budget ${ratio>1?'over':ratio>=.85?'near':''}"><i style="width:${Math.min(100,ratio*100)}%"></i>${off===0?`<s style="left:${Math.min(100,new Date().getDate()/new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate()*100)}%" title="Where an even pace would be today"></s>`:''}</div>
           <button class="sp-blabel" id="spBudget">${ratio>1?`${money(Math.round(total-budget))} over the ${money(budget)} budget`:`${money(Math.round(budget-total))} left of ${money(budget)}`}</button>`
-        :`<button class="sp-blabel" id="spBudget">Set a monthly budget</button>`}
+        :`<button class="sp-blabel" id="spBudget">${Object.keys(gbud).length?'Budgets by group · edit':'Set a monthly budget'}</button>`}
       </div>
       <div class="sp-bars">${bars.map(b=>`<button class="sp-bar ${b.kk===k?'on':''}" data-mk="${b.kk}" ${b.kk>nk?'disabled':''} title="${name(b.kk)}: ${money(Math.round(b.v))}">
         <span class="sp-col">${budget?`<em style="bottom:${(budget/max)*100}%"></em>`:''}${b.inc?`<u class="${b.inc>max?'cap':''}" style="bottom:${Math.min(100,b.inc/max*100)}%" title="Income ${money(Math.round(b.inc))}"></u>`:''}<i style="height:${b.v?Math.max(3,(b.v/max)*100):0}%"></i></span>
@@ -7563,19 +7653,7 @@ function renderSpend(){
   if(sm) sm.addEventListener('click',e=>{ e.stopPropagation(); spendMenu(sm,k,month) });
   v.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{ LS.set('pm:spView',b.dataset.view); renderSpend() }));
   v.querySelectorAll('[data-grp]').forEach(b=>b.addEventListener('click',()=>{ const o=lsMap('pm:spOpen'); if(o[b.dataset.grp]) delete o[b.dataset.grp]; else o[b.dataset.grp]=1; LS.set('pm:spOpen',JSON.stringify(o)); renderSpend() }));
-  $('#spBudget').addEventListener('click',e=>{
-    const b=e.currentTarget, inp2=document.createElement('input');
-    inp2.className='sp-bin'; inp2.inputMode='decimal'; inp2.placeholder='Monthly budget, empty to remove';
-    inp2.value=budget||''; b.replaceWith(inp2); inp2.focus(); inp2.select();
-    let done=false;
-    const save=keep=>{
-      if(done) return; done=true;
-      if(keep){ const n=parseFloat(String(inp2.value).replace(/[^\d.,]/g,'').replace(',','.')); LS.set('pm:budget',n>0?String(n):'') }
-      renderSpend();
-    };
-    inp2.addEventListener('keydown',ev=>{ if(ev.key==='Enter') save(true); if(ev.key==='Escape') save(false) });
-    inp2.addEventListener('blur',()=>save(true));
-  });
+  $('#spBudget').addEventListener('click',()=>budgetSheet());
   v.querySelectorAll('[data-sp]').forEach(b=>b.addEventListener('click',()=>{
     const it=(wantP().tasks||[]).find(x=>x.id===b.dataset.sp); if(it) spendEdit(it);
   }));
@@ -7794,8 +7872,9 @@ function pickDue(pr,task){
       <button data-d="${ldPlus(7)}">In a week</button>
       <input type="date" id="dueDate" value="${esc(cur)}" aria-label="Pick a date">
     </div>
-    <div class="rep-row">${[['','Once'],['day','Daily'],['week','Weekly'],['month','Monthly']]
+    <div class="rep-row rep-6">${[['','Once'],['day','Daily'],['wd','Weekdays'],['week','Weekly'],['w2','Every 2 weeks'],['month','Monthly']]
       .map(([k,l])=>`<button data-rep="${k}" class="${repOf(task)===k?'on':''}">${l}</button>`).join('')}</div>
+    <label class="rep-n">Every <input type="number" min="2" max="365" inputmode="numeric" id="repN" value="${/^d\d+$/.test(repOf(task))?repOf(task).slice(1):''}" placeholder="N"> days${repOf(task)&&!/^(day|wd|week|w2|month)$/.test(repOf(task))?` <b>· now ${esc(repLabel(repOf(task)))}</b>`:''}</label>
     ${cur?`<button class="danger" data-d="">No date</button>`:''}
   </div>`;
   let dirty=false;
@@ -7818,6 +7897,7 @@ function pickDue(pr,task){
     const b=e.target.closest('[data-d]'); if(b) apply(b.dataset.d);
   });
   el.querySelector('#dueDate').addEventListener('change',e=>{ if(e.target.value) apply(e.target.value) });
+  el.querySelector('#repN').addEventListener('change',e=>{ const n=parseInt(e.target.value,10); if(n>=2){ setLay(task,'rep','d'+n); if(!dueOf(task)) setDue(task,ld()); saveProject(pr,true); dirty=true; el.querySelectorAll('[data-rep]').forEach(x=>x.classList.remove('on')); toast('Every '+n+' days') } });
   document.body.appendChild(el);
 }
 document.addEventListener('click',e=>{
@@ -7881,6 +7961,29 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){ const ex=cur.querySelector('[data-tdexp],[data-taskexp]'); if(ex){ e.preventDefault(); ex.click() } return }
   if(e.key==='Escape') cur.classList.remove('kfocus');
 },true);
+/* голосом: заполняет поле, ничего не отправляет само; язык — как у системы, долгое нажатие переключает ru/en */
+const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+const voiceLang=()=>LS.get('pm:voiceLang')||(/^ru/i.test(navigator.language||'')?'ru-RU':'en-US');
+function micBtn(target){ return SpeechRec?`<button type="button" class="mic-btn" data-mic="${target}" title="Speak (hold to switch language)" aria-label="Speak">${svg('mic',17,1.8)}</button>`:'' }
+let micRec=null;
+(()=>{
+  let held=null, longPress=false;
+  document.addEventListener('pointerdown',e=>{ const b=e.target.closest('[data-mic]'); if(!b) return; longPress=false;
+    held=setTimeout(()=>{ longPress=true; const l=voiceLang()==='ru-RU'?'en-US':'ru-RU'; LS.set('pm:voiceLang',l); toast(l==='ru-RU'?'Voice: Russian':'Voice: English') },650) });
+  document.addEventListener('pointerup',()=>clearTimeout(held));
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('[data-mic]'); if(!b||!SpeechRec) return;
+    e.preventDefault(); if(longPress){ longPress=false; return }
+    if(micRec){ micRec.stop(); return }
+    const field=document.querySelector(b.dataset.mic); if(!field) return;
+    const base=field.value.trim();
+    const rec=new (window.SpeechRecognition||window.webkitSpeechRecognition)(); rec.lang=voiceLang(); rec.interimResults=true; rec.continuous=false;
+    rec.onresult=ev=>{ let t=''; for(const r of ev.results) t+=r[0].transcript; field.value=(base?base+' ':'')+t.trim(); field.dispatchEvent(new Event('input',{bubbles:true})) };
+    rec.onend=()=>{ micRec=null; b.classList.remove('rec'); field.focus() };
+    rec.onerror=ev=>{ micRec=null; b.classList.remove('rec'); if(ev.error==='not-allowed') toast('Microphone is blocked',{kind:'warn',sub:'Allow it for this site in the browser settings'}) };
+    micRec=rec; b.classList.add('rec'); try{ rec.start() }catch(err){ micRec=null; b.classList.remove('rec') }
+  });
+})();
 /* галочка: короткий всплеск в цвете раздела, только когда отмечаем сделанным */
 document.addEventListener('click',e=>{
   const c=e.target.closest('.check'); if(!c) return;
@@ -8066,7 +8169,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:28';
+const APP_VER='19 Nov 03:31';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
