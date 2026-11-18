@@ -1841,6 +1841,88 @@ input:focus-visible,textarea:focus-visible{outline:none}
 .head{margin-bottom:20px}
 .lede{font-size:14.5px}
 body:has(.sheet-wrap) .fab-wrap,body:has(.pmenu) .fab-wrap{display:none}
+/* spending */
+.btn-nav.spend{--acc:var(--lime)}
+.btn-nav.want{gap:9px}
+.btn-nav.spend .ncount{font-size:12.5px}
+.jot-tab[data-to=spent],.jot[data-to=spent]{--jc:var(--lime)}
+.jot[data-to=spent] #capShot{display:none}
+.sp{max-width:980px;margin:0 auto}
+.sp-add{display:flex;gap:8px}
+.sp-add input{flex:1;min-width:0;padding:15px 17px;border-radius:14px;border:1px solid var(--line-2);background:var(--panel);font-size:16px;color:var(--txt)}
+.sp-add input:focus{outline:none;border-color:color-mix(in srgb,var(--lime) 55%,transparent)}
+.sp-go{padding:0 24px;border-radius:14px;background:var(--lime);color:var(--on);font-size:15px;font-weight:700}
+.sp-cats{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.sp-cats .chip{min-height:34px}
+.sp-hero{margin:28px 0 8px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.sp-month{display:flex;align-items:center;gap:6px;font-size:14.5px;font-weight:600;color:var(--soft)}
+.sp-month button{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--soft)}
+.sp-month button:hover:not(:disabled){background:var(--raise);color:var(--txt)}
+.sp-month button:disabled{opacity:.3}
+#spPrev svg{transform:rotate(180deg)}
+.sp-month span{min-width:96px;text-align:center}
+.sp-total{font-family:var(--display);font-size:52px;font-weight:600;letter-spacing:-.03em;line-height:1.05;font-variant-numeric:tabular-nums}
+.sp-diff{font-size:14px;color:var(--soft)}
+.sp-budget{width:100%;max-width:420px;height:4px;border-radius:4px;background:var(--line);margin-top:10px;overflow:hidden}
+.sp-budget i{display:block;height:100%;border-radius:4px;background:var(--lime);transition:width .4s ease}
+.sp-budget.near i{background:var(--amber)}
+.sp-budget.over i{background:var(--magenta)}
+.sp-blabel{font-size:13px;color:var(--dim);padding:4px 0}
+.sp-blabel:hover{color:var(--txt)}
+.sp-bin{width:260px;max-width:100%;margin-top:6px;padding:9px 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-size:14px;color:var(--txt)}
+.sp-budget.near+.sp-blabel{color:var(--amber)}
+.sp-budget.over+.sp-blabel{color:var(--magenta)}
+.sp-bars{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:18px 0 26px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.sp-bar{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 2px;border-radius:10px;color:var(--dim)}
+.sp-bar:hover:not(:disabled){background:var(--raise);color:var(--txt)}
+.sp-bar:disabled{opacity:.35}
+.sp-col{position:relative;width:100%;max-width:44px;height:84px;display:flex;align-items:flex-end}
+.sp-col i{display:block;width:100%;border-radius:6px 6px 3px 3px;background:var(--line-2);transition:height .3s}
+.sp-col em{position:absolute;left:-4px;right:-4px;height:0;border-top:1px dashed var(--dim);opacity:.6}
+.sp-bar.on .sp-col i{background:var(--lime)}
+.sp-bar.on{color:var(--txt)}
+.sp-bar small{font-size:12.5px;font-weight:600}
+.sp-v{font-size:12px;font-variant-numeric:tabular-nums}
+.sp-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+.sp-day{margin-bottom:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.sp-day-h{display:flex;justify-content:space-between;align-items:baseline;padding:11px 14px 8px;font-size:13.5px}
+.sp-day-h b{font-weight:600}
+.sp-day-h span{color:var(--soft);font-variant-numeric:tabular-nums}
+.sp-row{width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;min-height:44px;border-top:1px solid var(--line);text-align:left}
+.sp-row:hover{background:var(--panel-2)}
+.sp-name{flex:1;min-width:0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-cat{font-size:12.5px;color:var(--dim);white-space:nowrap}
+.sp-row b{font-weight:600;font-variant-numeric:tabular-nums}
+.sp-bycat{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.sp-crow{position:relative;display:flex;justify-content:space-between;gap:10px;padding:9px 0 12px;font-size:14px}
+.sp-crow b{font-weight:600;font-variant-numeric:tabular-nums}
+.sp-crow i{position:absolute;left:0;bottom:4px;height:3px;border-radius:3px;background:var(--line-2)}
+.sp-crow:first-of-type i{background:var(--lime)}
+.sp-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sp-sheet .sp-cats{margin:0}
+.sp-newcat{width:110px!important;padding:7px 11px!important;border-radius:999px!important;font-size:13.5px}
+.sp-foot{display:flex;gap:8px}
+.sp-foot .danger{width:auto;flex:1}
+.sp-save{flex:1;width:auto}
+.paid-pop{position:fixed;z-index:160;left:0;right:0;margin:0 auto;bottom:calc(22px + env(safe-area-inset-bottom));
+  width:min(440px,calc(100vw - 20px));display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-radius:16px;
+  background:var(--panel-2);border:1px solid var(--line-2);box-shadow:0 24px 60px -20px #000;animation:pmenuIn .14s ease}
+.paid-pop>span{flex:1;min-width:0;font-size:14px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.paid-pop b{color:var(--txt);font-weight:600}
+.paid-pop input{width:92px;padding:10px 11px;border-radius:10px;border:1px solid var(--line-2);background:var(--bg);font-size:15px;color:var(--txt)}
+.paid-go{min-height:40px;padding:0 14px;border-radius:10px;background:var(--lime);color:var(--on);font-weight:700}
+.paid-x{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--dim)}
+.paid-x:hover{background:var(--raise);color:var(--txt)}
+body:has(.paid-pop) .fab-wrap{display:none}
+@media (max-width:760px){
+  .sp-grid{grid-template-columns:minmax(0,1fr)}
+  .sp-total{font-size:44px}
+  .sp-bars{gap:2px;padding:10px 6px}
+  .sp-col{height:64px}
+  .sp-go{padding:0 18px}
+  .sp-month button{width:40px;height:40px}
+  .sp-cats .chip{min-height:40px}
+}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -1892,6 +1974,10 @@ body:has(.sheet-wrap) .fab-wrap,body:has(.pmenu) .fab-wrap{display:none}
     <button class="btn-nav want" id="btnWant">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.7" cy="19.8" r="1.4"/><circle cx="17.6" cy="19.8" r="1.4"/><path d="M2.5 3.5h2.7l2.6 11.3h11L21 7.3H6.2"/></svg>
       Wishlist <span class="ncount" id="wcount">0</span>
+    </button>
+    <button class="btn-nav spend" id="btnSpend">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h3"/></svg>
+      Spending <span class="ncount" id="scount"></span>
     </button>
     <button class="btn-nav todo" id="btnTodo">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M4 12h16M4 17.5h10"/><path d="M18.5 16.5l1.6 1.6 3-3.2"/></svg>
@@ -2381,7 +2467,8 @@ const CATS=[{id:'other',label:'Tasks'},{id:'read',label:'Read'},{id:'watch',labe
 const catLabel=c=>(CATS.find(x=>x.id===(c||'other'))||{label:c}).label;
 const JOT=[{id:INBOX,label:'Idea',ph:'A thought or a link you don’t want to lose'},
            {id:TODO,label:'Task',ph:'What needs doing?'},
-           {id:WANT,label:'To buy',ph:'What do you want? Put the price at the end'}];
+           {id:WANT,label:'To buy',ph:'What do you want? Put the price at the end'},
+           {id:'spent',label:'Spent',ph:'What did you pay for? Like “coffee 300”'}];
 const CURS=['$','€','֏','₽','£'];
 const curSym=()=>LS.get('pm:cur')||'$';
 const money=n=>curSym()+Number(n).toLocaleString('en-US',{maximumFractionDigits:2});
@@ -2665,6 +2752,8 @@ function renderSide(){
   $('#btnTodo').classList.toggle('on',st.openId===TODO);
   $('#btnIdeas').classList.toggle('on',st.openId===INBOX);
   $('#btnWant').classList.toggle('on',st.openId===WANT);
+  $('#btnSpend').classList.toggle('on',!!st.spend);
+  const sc=$('#scount'); if(sc){ const v=spendMonth(0); sc.textContent=v?moneyShort(v):'' }
   const hd=$('#tHideDone'), ta=$('#tArchive');
   if(hd){ hd.innerHTML=svg(st.hideDone?'boxOk':'box',14,1.9)+' Hide finished'; hd.classList.toggle('on',st.hideDone); }
   if(ta) ta.innerHTML=svg('arch',14,1.7)+' Archive · '+an;
@@ -2966,6 +3055,13 @@ function renderAll(){
   if(cap){
     const send=async()=>{
       const raw=cap.value.trim(); if(!raw) return;
+      if(st.capTo==='spent'){
+        const it=addExpense(raw,LS.get('pm:ecat')||'');
+        if(!it) return;
+        cap.value=''; spentToast(it); renderSide();
+        const c3=$('#cap'); if(c3) c3.focus();
+        return;
+      }
       cap.value='';
       if(st.capTo==='auto'&&aiKey()){
         toast('Sorting…');
@@ -3025,7 +3121,7 @@ function historyEvents(days){
       ev.push({at:p.doneAt,kind:'proj',text:p.name,src:'project finished',pid:p.id});
     (p.tasks||[]).forEach(t=>{
       if(!t.doneAt||t.doneAt<from) return;
-      if(p.id===WANT) ev.push({at:t.doneAt,kind:'wish',text:t.text,src:t.price?'bought · '+money(t.price):'bought',pid:p.id});
+      if(p.id===WANT) ev.push({at:t.doneAt,kind:'wish',text:t.text,src:(isExp(t)?'spent':'bought')+(t.price?' · '+money(t.price):''),pid:p.id});
       else if(p.id===TODO) ev.push({at:t.doneAt,kind:'todo',text:t.text,src:(t.cat||'other')+' · done',pid:p.id});
       else if(p.id===INBOX) return;
       else ev.push({at:t.doneAt,kind:'task',text:t.text,src:p.name,pid:p.id});
@@ -3529,7 +3625,7 @@ function ideasPane(p){
 }
 
 function wishPane(p){
-  const items=(p.tasks||[]);
+  const items=(p.tasks||[]).filter(i=>!isExp(i));
   const open=items.filter(i=>!i.done), got=items.filter(i=>i.done);
   const sum=open.reduce((n,i)=>n+(Number(i.price)||0),0);
   const f=st.wantFilter==='done'?'done':'open';
@@ -3984,7 +4080,9 @@ function bindWish(p){
     if(!key) return;
     const item=(p.tasks||[]).find(x=>x.id===key); if(!item) return;
     if(op){ window.open(item.url,'_blank','noopener'); return }
-    if(tg){ item.done=!item.done; item.doneAt=item.done?Date.now():null; saveProject(p,true); renderProject(); renderSide(); return }
+    if(tg){ item.done=!item.done; item.doneAt=item.done?Date.now():null; saveProject(p,true); renderProject(); renderSide();
+      if(item.done&&!(Number(item.price)>0)) askPaid(p,item);
+      return }
     if(ed){ itemEdit(p,item,true); return }
     if(dl){
       const ph=(await photosOf(WANT)).filter(x=>x.item===key);
@@ -6282,12 +6380,232 @@ function openQuick(prefill){
   input.focus();
 }
 
+/* ───────── spending: bought wishes plus quick expenses ─────────
+   a quick expense is a wishlist item that is born done, with layout.exp=1 and an optional layout.ecat */
+const isExp=t=>!!layObj(t).exp;
+const ECATS=['Food','Home','Transport','Fun','Health'];
+const MONL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const wantP=()=>st.projects.find(x=>x.id===WANT);
+const monthKey=ms=>{const d=new Date(ms);return d.getFullYear()*12+d.getMonth()};
+const nowKey=()=>monthKey(Date.now());
+const moneyShort=n=>n>=10000?curSym()+(n/1000).toLocaleString('en-US',{maximumFractionDigits:n>=100000?0:1})+'k':money(Math.round(n));
+const money2=n=>{n=Math.round(n*100)/100;return Number.isInteger(n)?money(n):curSym()+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
+const catOf=t=>layObj(t).ecat||(isExp(t)?'Other':'Wishlist');
+function spendEntries(){
+  const p=wantP(); if(!p) return [];
+  return (p.tasks||[]).filter(t=>t.done&&t.doneAt&&Number(t.price)>0)
+    .map(t=>({t,at:Number(t.doneAt),amt:Number(t.price),cat:catOf(t)}));
+}
+function spendMonth(off){ const k=nowKey()-off; return spendEntries().filter(e=>monthKey(e.at)===k).reduce((n,e)=>n+e.amt,0) }
+function spendCats(){
+  const used=[]; spendEntries().sort((a,b)=>b.at-a.at).forEach(e=>{ if(isExp(e.t)&&used.indexOf(e.cat)<0) used.push(e.cat) });
+  ECATS.forEach(c=>{ if(used.indexOf(c)<0) used.push(c) });
+  return used.filter(c=>c!=='Other'&&c!=='Wishlist').slice(0,8);
+}
+/* «coffee 300», «300 coffee», «300» */
+function parseSpend(raw){
+  const t=String(raw||'').trim();
+  const q=parseQuick(t);
+  if(q.price!=null&&q.text) return {text:q.text,price:q.price};
+  const m=t.match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/);
+  if(m) return {text:m[2].trim(),price:parseFloat(m[1].replace(',','.'))};
+  return {text:t,price:null};
+}
+function addExpense(raw,cat,at){
+  const p=wantP(); if(!p) return null;
+  const r=parseSpend(raw);
+  if(!(r.price>0)){ toast('Add an amount, like “coffee 300”'); return null }
+  const it={id:uid(),text:r.text||cat||'Expense',price:r.price,url:'',done:true,doneAt:at||Date.now(),created:Date.now()};
+  setLay(it,'exp',1); if(cat) setLay(it,'ecat',cat);
+  p.tasks=p.tasks||[]; p.tasks.push(it);
+  saveProject(p,true); blip('add');
+  return it;
+}
+function dropExpense(it){
+  const p=wantP(); if(!p) return;
+  const at=p.tasks.indexOf(it); if(at<0) return;
+  p.tasks.splice(at,1); saveProject(p,true);
+  return ()=>{ p.tasks.splice(Math.min(at,p.tasks.length),0,it); saveProject(p,true); refreshView() };
+}
+function spentToast(it){
+  toast(money2(it.price)+' · '+catOf(it),{action:'Undo',onAction:()=>{ dropExpense(it); refreshView() }});
+}
+/* отметили покупку без цены — спрашиваем, сколько заплатили */
+function askPaid(p,item){
+  const old=document.querySelector('.paid-pop'); if(old) old.remove();
+  const el=document.createElement('form');
+  el.className='paid-pop';
+  el.innerHTML=`<span>Paid for <b>${esc(item.text||'it')}</b>?</span>
+    <input id="paidIn" inputmode="decimal" placeholder="${curSym()}" autocomplete="off" aria-label="Price paid">
+    <button type="submit" class="paid-go">Save</button>
+    <button type="button" class="paid-x" aria-label="Skip">${svg('x',14,2.2)}</button>`;
+  const close=()=>{ el.remove(); clearTimeout(t) };
+  let t=setTimeout(close,12000);
+  el.addEventListener('submit',e=>{
+    e.preventDefault();
+    const v=parseFloat(String(el.querySelector('#paidIn').value).replace(',','.'));
+    if(v>0){ item.price=v; setLay(item,'approx',''); saveProject(p,true); refreshView(); toast('Saved '+money(v)) }
+    close();
+  });
+  el.querySelector('.paid-x').addEventListener('click',close);
+  el.addEventListener('input',()=>{ clearTimeout(t) });
+  el.addEventListener('keydown',e=>{ if(e.key==='Escape') close() });
+  document.body.appendChild(el);
+  setTimeout(()=>{ const i=el.querySelector('#paidIn'); if(i) i.focus() },30);
+}
+function spendEdit(it){
+  const p=wantP(); if(!p) return;
+  const exp=isExp(it);
+  const d=new Date(it.doneAt||Date.now());
+  const cats=spendCats(); const cur=layObj(it).ecat||'';
+  const el=document.createElement('div');
+  el.className='sheet-wrap';
+  el.innerHTML=`<form class="sheet sp-sheet">
+    <div class="sheet-head"><span>${exp?'Expense':'Bought'}</span><button type="button" data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    <label class="f"><span>Name</span><input id="eName" value="${esc(it.text||'')}" autocomplete="off"></label>
+    <div class="sp-two">
+      <label class="f"><span>Amount</span><input id="eAmt" inputmode="decimal" value="${esc(String(it.price||''))}" autocomplete="off"></label>
+      <label class="f"><span>Date</span><input id="eDate" type="date" value="${ld(d)}"></label>
+    </div>
+    <div class="f"><span>Category</span>
+      <div class="sp-cats">${(exp?[]:['Wishlist']).concat(cats).concat(cur&&cats.indexOf(cur)<0?[cur]:[]).map(c=>`<button type="button" class="chip ${(cur||(exp?'':'Wishlist'))===c?'on':''}" data-ec="${esc(c)}">${esc(c)}</button>`).join('')}
+        <input id="eCat" class="sp-newcat" placeholder="New…" autocomplete="off" aria-label="New category"></div>
+    </div>
+    <div class="sheet-foot sp-foot">
+      <button type="button" class="danger" data-edel>${exp?svg('trash',14,1.8)+' Delete':svg('box',14,1.8)+' Not bought'}</button>
+      <button type="submit" class="gate-go sp-save">Save</button>
+    </div>
+  </form>`;
+  let pick=cur||(exp?'':'Wishlist');
+  const close=()=>el.remove();
+  el.addEventListener('click',e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    const c=e.target.closest('[data-ec]');
+    if(c){ pick=c.dataset.ec; el.querySelectorAll('[data-ec]').forEach(b=>b.classList.toggle('on',b===c)); el.querySelector('#eCat').value=''; return }
+    if(e.target.closest('[data-edel]')){
+      close();
+      if(exp){ const undo=dropExpense(it); refreshView(); toast('Deleted',{action:'Undo',onAction:undo}) }
+      else{ const was=it.doneAt; it.done=false; it.doneAt=null; saveProject(p,true); refreshView();
+        toast('Back on the wishlist',{action:'Undo',onAction:()=>{ it.done=true; it.doneAt=was; saveProject(p,true); refreshView() }}) }
+    }
+  });
+  el.querySelector('form').addEventListener('submit',e=>{
+    e.preventDefault();
+    const nm=el.querySelector('#eName').value.trim();
+    const v=parseFloat(String(el.querySelector('#eAmt').value).replace(',','.'));
+    const dv=el.querySelector('#eDate').value;
+    const nc=el.querySelector('#eCat').value.trim();
+    const cat=nc||pick;
+    if(nm) it.text=nm;
+    if(v>0) it.price=v;
+    if(/^\d{4}-\d\d-\d\d$/.test(dv)&&dv!==ld(d)){ const [y,m,dd]=dv.split('-').map(Number); it.doneAt=new Date(y,m-1,dd,12).getTime() }
+    setLay(it,'ecat',cat&&cat!=='Wishlist'?cat:'');
+    setLay(it,'approx','');
+    saveProject(p,true); close(); refreshView();
+  });
+  document.body.appendChild(el);
+  setTimeout(()=>{ const a=el.querySelector('#eAmt'); if(a) a.focus() },30);
+}
+function renderSpend(){
+  $('#crumb').textContent='Spending';
+  const all=spendEntries();
+  const nk=nowKey(), off=Math.max(0,st.spMonth||0), k=nk-off;
+  const inK=kk=>all.filter(e=>monthKey(e.at)===kk);
+  const sumK=kk=>inK(kk).reduce((n,e)=>n+e.amt,0);
+  const yr=kk=>Math.floor(kk/12), mo=kk=>kk%12;
+  const name=kk=>MONL[mo(kk)]+(yr(kk)!==yr(nk)?' '+yr(kk):'');
+  const list=inK(k).sort((a,b)=>b.at-a.at);
+  const total=sumK(k), prev=sumK(k-1);
+  const budget=Number(LS.get('pm:budget'))||0;
+  const end=Math.max(k,nk-0);
+  const win=[]; for(let i=5;i>=0;i--) win.push(Math.min(end,k+5)-i);
+  const bars=win.map(kk=>({kk,v:sumK(kk)}));
+  const max=Math.max(1,...bars.map(b=>b.v),budget);
+  const days=[]; list.forEach(e=>{ const dk=dayKey(e.at); let g=days.find(x=>x.k===dk); if(!g){ g={k:dk,at:e.at,items:[],sum:0}; days.push(g) } g.items.push(e); g.sum+=e.amt });
+  const cats={}; list.forEach(e=>{ cats[e.cat]=(cats[e.cat]||0)+e.amt });
+  const catList=Object.keys(cats).sort((a,b)=>cats[b]-cats[a]);
+  const lastCat=LS.get('pm:ecat')||'';
+  const diff=total-prev;
+  const ratio=budget?total/budget:0;
+  $('#view').innerHTML=`
+    <div class="sp">
+      <div class="sp-add">
+        <input id="spIn" placeholder="What did you pay for? Like “coffee 300”" autocomplete="off" enterkeyhint="done">
+        <button class="sp-go" id="spGo">Add</button>
+      </div>
+      <div class="sp-cats" id="spCats">${spendCats().map(c=>`<button class="chip ${lastCat===c?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      <div class="sp-hero">
+        <div class="sp-month">
+          <button id="spPrev" aria-label="Earlier month">${svg('chev',14,2.2)}</button>
+          <span>${name(k)}</span>
+          <button id="spNext" aria-label="Later month" ${off===0?'disabled':''}>${svg('chev',14,2.2)}</button>
+        </div>
+        <b class="sp-total">${money2(total)}</b>
+        <span class="sp-diff">${prev?(Math.abs(diff)<0.5?'Same as '+MONL[mo(k-1)]:`${money(Math.round(Math.abs(diff)))} ${diff>0?'more':'less'} than ${MONL[mo(k-1)]}`):(total?'Nothing in '+MONL[mo(k-1)]:'Nothing spent yet')}</span>
+        ${budget?`<div class="sp-budget ${ratio>1?'over':ratio>=.85?'near':''}"><i style="width:${Math.min(100,ratio*100)}%"></i></div>
+          <button class="sp-blabel" id="spBudget">${ratio>1?`${money(Math.round(total-budget))} over the ${money(budget)} budget`:`${money(Math.round(budget-total))} left of ${money(budget)}`}</button>`
+        :`<button class="sp-blabel" id="spBudget">Set a monthly budget</button>`}
+      </div>
+      <div class="sp-bars">${bars.map(b=>`<button class="sp-bar ${b.kk===k?'on':''}" data-mk="${b.kk}" ${b.kk>nk?'disabled':''} title="${name(b.kk)}: ${money(Math.round(b.v))}">
+        <span class="sp-col">${budget?`<em style="bottom:${(budget/max)*100}%"></em>`:''}<i style="height:${b.v?Math.max(3,(b.v/max)*100):0}%"></i></span>
+        <small>${MON[mo(b.kk)]}</small><span class="sp-v">${b.v?moneyShort(b.v):'–'}</span></button>`).join('')}</div>
+      ${list.length?`<div class="sp-grid">
+        <section class="sp-days">${days.map(g=>`<div class="sp-day">
+          <div class="sp-day-h"><b>${dayLabel(g.at)}</b><span>${money2(g.sum)}</span></div>
+          ${g.items.map(e=>`<button class="sp-row" data-sp="${e.t.id}">
+            <span class="sp-name">${esc(e.t.text||e.cat)}</span>
+            <span class="sp-cat">${esc(e.cat)}</span>
+            <b>${money2(e.amt)}</b></button>`).join('')}
+        </div>`).join('')}</section>
+        <section class="sp-bycat"><h2 class="pane-h">By category</h2>${catList.map(c=>`<div class="sp-crow">
+          <span>${esc(c)}</span><b>${money(Math.round(cats[c]))}</b>
+          <i style="width:${(cats[c]/total)*100}%"></i></div>`).join('')}</section>
+      </div>`:`<p class="empty-line">${off?'Nothing recorded in '+name(k)+'.':'Nothing yet this month. Type what you paid for above, or tick a wish as bought.'}</p>`}
+    </div>`;
+  const inp=$('#spIn');
+  const add=()=>{
+    const it=addExpense(inp.value,LS.get('pm:ecat')||'');
+    if(!it) return;
+    st.spMonth=0; renderSpend(); renderSide(); spentToast(it);
+    const i2=$('#spIn'); if(i2) i2.focus();
+  };
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') add() });
+  $('#spGo').addEventListener('click',add);
+  $('#spCats').addEventListener('click',e=>{
+    const c=e.target.closest('[data-cat]'); if(!c) return;
+    const on=LS.get('pm:ecat')===c.dataset.cat;
+    LS.set('pm:ecat',on?'':c.dataset.cat);
+    $('#spCats').querySelectorAll('[data-cat]').forEach(b=>b.classList.toggle('on',!on&&b===c));
+    inp.focus();
+  });
+  $('#spPrev').addEventListener('click',()=>{ st.spMonth=off+1; renderSpend() });
+  $('#spNext').addEventListener('click',()=>{ st.spMonth=Math.max(0,off-1); renderSpend() });
+  $('#view').querySelectorAll('[data-mk]').forEach(b=>b.addEventListener('click',()=>{ st.spMonth=nk-Number(b.dataset.mk); renderSpend() }));
+  $('#spBudget').addEventListener('click',e=>{
+    const b=e.currentTarget, inp2=document.createElement('input');
+    inp2.className='sp-bin'; inp2.inputMode='decimal'; inp2.placeholder='Monthly budget, empty to remove';
+    inp2.value=budget||''; b.replaceWith(inp2); inp2.focus(); inp2.select();
+    let done=false;
+    const save=keep=>{
+      if(done) return; done=true;
+      if(keep){ const n=parseFloat(String(inp2.value).replace(/[^\d.,]/g,'').replace(',','.')); LS.set('pm:budget',n>0?String(n):'') }
+      renderSpend();
+    };
+    inp2.addEventListener('keydown',ev=>{ if(ev.key==='Enter') save(true); if(ev.key==='Escape') save(false) });
+    inp2.addEventListener('blur',()=>save(true));
+  });
+  $('#view').querySelectorAll('[data-sp]').forEach(b=>b.addEventListener('click',()=>{
+    const p=wantP(); const it=p&&(p.tasks||[]).find(x=>x.id===b.dataset.sp); if(it) spendEdit(it);
+  }));
+}
+
 /* ───────── events ───────── */
 let hashLock=false;
 function currentHash(){
   if(st.openId) return '#p/'+st.openId;
   if(st.hist) return '#history';
   if(st.review) return '#review';
+  if(st.spend) return '#spending';
   if(st.focus) return '#focus';
   return '#all';
 }
@@ -6302,12 +6620,13 @@ function applyHash(){
   const h=(location.hash||'').replace(/^#\/?/,'');
   if(h.indexOf('p/')===0){
     const id=h.slice(2);
-    if(st.projects.some(x=>x.id===id)){ st.openId=id; st.focus=false; st.hist=false; st.review=false; return }
+    if(st.projects.some(x=>x.id===id)){ st.openId=id; st.focus=false; st.hist=false; st.review=false; st.spend=false; return }
   }
   st.openId=null;
   st.focus=(h==='focus');
   st.hist=(h==='history');
   st.review=(h==='review');
+  st.spend=(h==='spending');
 }
 window.addEventListener('hashchange',()=>{
   if(hashLock||!ME) return;
@@ -6323,6 +6642,7 @@ function pageTitle(){
   if(st.openId){ const p=cur(); return p&&p.name?p.name:'Project' }
   if(st.hist) return 'History';
   if(st.review) return 'Review';
+  if(st.spend) return 'Spending';
   if(st.focus) return 'Focus';
   if(st.query.trim()) return 'Search';
   return 'All projects';
@@ -6334,6 +6654,7 @@ function route(){
   if(st.openId) renderProject();
   else if(st.hist) renderHistory();
   else if(st.review) renderReview();
+  else if(st.spend) renderSpend();
   else if(st.focus) renderFocus();
   else if(st.query.trim()) renderSearch();
   else renderAll();
@@ -6341,8 +6662,8 @@ function route(){
   const v=$('#view');
   if(v){ v.scrollTop=0; v.classList.remove('view-in'); void v.offsetWidth; v.classList.add('view-in') }
 }
-function resetViews(){ st.openId=null; st.focus=false; st.hist=false; st.review=false }
-function openProject(id){st.openId=id;st.focus=false;st.hist=false;st.review=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
+function resetViews(){ st.openId=null; st.focus=false; st.hist=false; st.review=false; st.spend=false }
+function openProject(id){st.openId=id;st.focus=false;st.hist=false;st.review=false;st.spend=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
 
 document.addEventListener('click',e=>{
   if(st.dragRow) return;
@@ -6453,7 +6774,7 @@ document.addEventListener('click',e=>{
 
 /* срок: один общий выбор даты для любых списков */
 function refreshView(){
-  if(st.openId) renderProject(); else if(st.focus) renderFocus(); else if(!st.hist&&!st.review) renderAll();
+  if(st.openId) renderProject(); else if(st.spend) renderSpend(); else if(st.focus) renderFocus(); else if(!st.hist&&!st.review) renderAll();
   renderSide();
 }
 function pickDue(pr,task){
@@ -6563,6 +6884,8 @@ $('#archLink').addEventListener('click',()=>{resetViews();st.filter='archived';i
 $('#btnIdeas').addEventListener('click',()=>{openProject(INBOX)});
 $('#btnWant').addEventListener('click',()=>{openProject(WANT)});
 $('#btnTodo').addEventListener('click',()=>{openProject(TODO)});
+$('#btnSpend').addEventListener('click',()=>{resetViews();st.spend=true;st.query='';const qq=$('#q');if(qq)qq.value='';
+  if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}route()});
 function openHistory(){
   resetViews(); st.hist=true; st.query=''; const qq=$('#q'); if(qq) qq.value='';
   if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
