@@ -2149,6 +2149,9 @@ b,strong{font-weight:600}
 .decide-acts button:hover{background:var(--s3);color:var(--txt)}
 .decide-more{margin:0;padding:10px 14px;border-top:1px solid var(--line);font-size:13px;color:var(--dim)}
 @media (max-width:760px){.decide-acts button{min-height:40px}}
+
+.trash-acts button{display:inline-flex;align-items:center;gap:5px;width:auto!important;padding:0 9px!important;font-size:12px;font-weight:600}
+.trash-age{font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body class="side-open">
@@ -2543,6 +2546,27 @@ async function purgePhoto(id,path){     // теперь уже насовсем
   }catch(e){ await enqueue({kind:'photoPurge',pid:id,path}) }
 }
 
+/* корзина фото: через 30 дней после удаления — насовсем (пользователь согласился). Раз в день, при открытии,
+   только онлайн и без неотправленных изменений; без отметки времени — ставим её сейчас и ничего не трогаем */
+const TRASH_DAYS=30;
+function trashLeft(at){ const t=Number(at); if(!(t>1e12)) return 'clears in 30 days';
+  const d=Math.ceil((t+TRASH_DAYS*864e5-Date.now())/864e5); return d<=0?'clears today':d===1?'clears tomorrow':'clears in '+d+' days' }
+async function trashSweep(force){
+  if(!sb||!ME||!netOk||pendingCount) return null;
+  if(!force&&LS.get('pm:trashSweep')===ld()) return null;
+  try{
+    const {data,error}=await sb.from('photos').select('*');
+    if(error) return null;
+    const now=Date.now(); let purged=0, stamped=0;
+    for(const r of (data||[]).filter(x=>x.deleted_at)){
+      const t=Number(r.deleted_at);
+      if(!(t>1e12)){ const u=await sb.from('photos').upsert(Object.assign({},r,{deleted_at:now})); if(!u.error) stamped++; continue }
+      if(now-t>TRASH_DAYS*864e5){ await purgePhoto(r.id,r.path); purged++ }
+    }
+    LS.set('pm:trashSweep',ld());
+    return {purged,stamped};
+  }catch(e){ console.error(e); return null }
+}
 async function trashOf(pid){
   if(!sb||!ME) return [];
   try{
@@ -5150,51 +5174,13 @@ async function openTrash(p){
     ${list.length?`<div class="trash-grid">${list.map(ph=>`
       <div class="trash-item" data-tid="${ph.id}">
         <img src="${esc(ph.url||'')}" alt="">
-        <span class="trash-age">${ago(ph.deletedAt)}</span>
+        <span class="trash-age">${trashLeft(ph.deletedAt)}</span>
         <div class="trash-acts">
-          <button data-restore="${ph.id}" title="Restore">${svg('arrow',13,2)}</button>
-          <button data-purge="${ph.id}" data-path="${esc(ph.path||'')}" title="Delete for good">${svg('trash',13,1.8)}</button>
+          <button data-restore="${ph.id}" title="Restore">${svg('arrow',13,2)} Restore</button>
+          <button data-purge="${ph.id}" data-path="${esc(ph.path||'')}" title="Delete now">${svg('trash',13,1.8)} Delete now</button>
         </div>
       </div>`).join('')}</div>
-      <p class="hint" style="margin-top:12px">Deleted photos stay here until you remove them.</p>`
-    :`<p class="hint" style="margin:0">Nothing deleted recently.</p>`}
-  </div>`;
-  const close=()=>el.remove();
-  el.addEventListener('click',async e=>{
-    if(e.target===el||e.target.closest('[data-close]')) return close();
-    const r=e.target.closest('[data-restore]'), g=e.target.closest('[data-purge]');
-    if(r){
-      await restorePhoto(r.dataset.restore);
-      close(); dropCover(p.id);
-      await loadPhotos(p.id); paintBoard();
-      toast('Restored');
-      return;
-    }
-    if(g){
-      if(!confirm('Delete this photo for good?')) return;
-      await purgePhoto(g.dataset.purge,g.dataset.path);
-      close(); openTrash(p);
-    }
-  });
-  document.body.appendChild(el);
-}
-
-async function openTrash(p){
-  const list=await trashOf(p.id);
-  const el=document.createElement('div');
-  el.className='sheet-wrap';
-  el.innerHTML=`<div class="sheet" style="max-width:520px">
-    <div class="sheet-head"><span>Recently deleted</span><button data-close>${svg('x',15,2)}</button></div>
-    ${list.length?`<div class="trash-grid">${list.map(ph=>`
-      <div class="trash-item" data-tid="${ph.id}">
-        <img src="${esc(ph.url||'')}" alt="">
-        <span class="trash-age">${ago(ph.deletedAt)}</span>
-        <div class="trash-acts">
-          <button data-restore="${ph.id}" title="Restore">${svg('arrow',13,2)}</button>
-          <button data-purge="${ph.id}" data-path="${esc(ph.path||'')}" title="Delete for good">${svg('trash',13,1.8)}</button>
-        </div>
-      </div>`).join('')}</div>
-      <p class="hint" style="margin-top:12px">Deleted photos stay here until you remove them.</p>`
+      <p class="hint" style="margin-top:12px">Cleared 30 days after you delete.</p>`
     :`<p class="hint" style="margin:0">Nothing deleted recently.</p>`}
   </div>`;
   const close=()=>el.remove();
@@ -8049,7 +8035,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:35';
+const APP_VER='19 Nov 03:36';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
@@ -8197,6 +8183,7 @@ async function afterLogin(){
     /* «важное» теперь — это закреплённое; флаг в данных остаётся как был */
     st.projects.forEach(p=>{ if(p.important&&!p.pinned&&!SPECIAL(p.id)){ p.pinned=true; saveProject(p,true) } }); sortProjects();
     loadRates().then(c=>{ if(c){ renderSide(); if(st.spend) renderSpend() } });
+    setTimeout(()=>{ trashSweep() },5000);
     if(/[?&]shared=1/.test(location.search)) openShared();
     else setTimeout(()=>{ showDigest(); checkRemind() },700);
   }catch(e){
