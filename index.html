@@ -1533,6 +1533,7 @@ body:has(.digest) .fab-wrap{display:none}
 
 /* spending */
 .jot-tab[data-to=spent],.jot[data-to=spent]{--jc:var(--lime)}
+.jot-tab[data-to=journal],.jot[data-to=journal]{--jc:var(--amber)}
 .jot[data-to=spent] #capShot{display:none}
 .sp{max-width:1040px;margin:0 auto}
 .sp-addwrap{display:flex;flex-direction:column;gap:10px}
@@ -2157,6 +2158,99 @@ b,strong{font-weight:600}
 .app-ver:hover{color:var(--soft)}
 .app-ver.new{color:var(--lime);font-weight:600}
 h1.p-title{margin:0;font-family:var(--display)}
+
+.nav-sep{display:block;height:1px;margin:6px 10px;background:var(--line)}
+#btnCal svg{color:var(--cyan)}
+#btnJrn svg{color:var(--amber)}
+/* calendar */
+.cal{max-width:1180px;margin:0 auto}
+.cal-add{margin-bottom:12px}
+.cal-soon{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.cal-soon button{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-radius:999px;background:var(--s1);border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--edge);font-size:13.5px;color:var(--txt)}
+.cal-soon button b{font-weight:600;color:var(--amber)}
+.cal-head{display:flex;align-items:center;gap:8px;margin:6px 0 12px}
+.cal-head b{font-family:var(--display);font-size:22px;font-weight:600;letter-spacing:-.02em;min-width:190px;text-align:center}
+.cal-head>button:not(.ghost-btn){width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--soft)}
+.cal-head>button:not(.ghost-btn):hover{background:var(--s2);color:var(--txt)}
+#calPrev svg{transform:rotate(180deg)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;background:var(--s1);box-shadow:var(--sh-card)}
+.cal-wd{padding:8px 10px;font-size:12px;font-weight:600;color:var(--dim);border-bottom:1px solid var(--line)}
+.cal-cell{min-height:104px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px;cursor:pointer;min-width:0}
+.cal-cell:nth-child(7n){border-right:0}
+.cal-cell:hover{background:rgba(255,255,255,.02)}
+.cal-cell.out{opacity:.45}
+.cal-cell.sel{background:var(--s2);box-shadow:inset 0 0 0 1px var(--line-2)}
+.cal-cell.drop{box-shadow:inset 0 0 0 2px var(--lime)}
+.cal-n{font-size:12.5px;font-weight:600;color:var(--soft);font-variant-numeric:tabular-nums;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
+.cal-cell.today .cal-n{background:var(--lime);color:var(--on)}
+.cal-ev{display:flex;align-items:center;gap:5px;min-width:0;padding:2px 6px;border-radius:6px;font-size:12px;line-height:16px;background:var(--s3);color:var(--txt)}
+.cal-ev>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cal-ev i{font-style:normal;flex:0 0 auto;font-size:11px}
+.cal-ev .sp-ic{flex:0 0 16px;width:16px;height:16px;border-radius:4px}
+.cal-ev .sp-ic>i{font-size:10px}
+.cal-ev em{font-style:normal;color:var(--dim)}
+.cal-ev b{font-weight:600}
+.cal-ev.ev-task{cursor:grab}
+.cal-ev.ev-rep{background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--soft)}
+.cal-ev.ev-date{background:color-mix(in srgb,var(--amber) 14%,var(--s3))}
+.cal-more{font-size:11.5px;color:var(--dim);padding-left:6px}
+.cal-day{margin-top:16px;background:var(--s1);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-card);overflow:hidden}
+.cal-day-h{display:flex;align-items:baseline;gap:8px;padding:12px 14px 6px}
+.cal-day-h b{font-size:15px;font-weight:600}
+.cal-day-h small{font-size:12.5px;color:var(--dim)}
+.cal-row{display:flex;align-items:center;gap:12px;min-height:48px;padding:6px 14px;cursor:pointer}
+.cal-row+.cal-row{border-top:1px solid var(--line)}
+.cal-row:hover{background:rgba(255,255,255,.025)}
+.cal-ic{flex:0 0 22px;display:inline-flex;justify-content:center;font-size:16px}
+.cal-ic .sp-ic{flex-basis:30px;width:30px;height:30px}
+.cal-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;font-size:15px}
+.cal-txt small{font-size:12.5px;color:var(--dim)}
+.cal-none{margin:0;padding:6px 14px 14px;font-size:13.5px;color:var(--dim)}
+.cal-agenda .cal-day:first-child{margin-top:0}
+@media (max-width:760px){.cal-row{min-height:52px}}
+
+/* dates elsewhere */
+.date-chips,.dg-dates{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+.dg-dates{margin:0;padding:4px 12px 8px}
+.date-chip{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border-radius:999px;background:var(--s1);border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--edge);font-size:13.5px;color:var(--txt);max-width:100%}
+.date-chip b{font-weight:600;color:var(--amber);white-space:nowrap}
+.day .date-chip{min-height:30px;font-size:13px}
+.day .date-chip b{font-family:inherit;font-size:inherit;letter-spacing:0}
+/* journal */
+.jr{max-width:760px;margin:0 auto}
+.jr-week{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;margin-bottom:12px;box-shadow:var(--sh-card)}
+.jr-week>div{background:var(--s1);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.jr-week b{font-family:var(--display);font-size:22px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.jr-week small{font-size:12.5px;color:var(--dim)}
+.jr-search{display:flex;align-items:center;gap:8px;height:42px;padding:0 12px;border-radius:12px;background:var(--s1);border:1px solid var(--line);margin-bottom:16px;color:var(--dim)}
+.jr-search input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--txt);font-size:15px}
+.jr-day{background:var(--s1);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-card);padding:12px 14px 10px;margin-bottom:10px}
+.jr-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.jr-h b{font-size:15.5px;font-weight:600}
+.jr-h small{font-size:12.5px;color:var(--dim)}
+.jr-money{margin-left:auto;font-size:13px;color:var(--soft);font-variant-numeric:tabular-nums;padding:2px 6px;border-radius:6px}
+.jr-money:hover{background:var(--s2)}
+.jr-money b{font-weight:600;color:var(--mint)}
+.jr-note{display:flex;align-items:flex-start;gap:6px;margin-top:8px}
+.jr-note textarea{flex:1;min-width:0;resize:none;overflow:hidden;min-height:38px;padding:8px 10px;border-radius:10px;background:var(--s2);border:1px solid transparent;color:var(--txt);font:inherit;font-size:15px;line-height:1.45}
+.jr-note textarea:focus{outline:0;border-color:var(--line-2)}
+.jr-note textarea:placeholder-shown{background:transparent;border-color:var(--line)}
+.jr-ph{flex:0 0 38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--dim)}
+.jr-ph:hover{background:var(--s2);color:var(--txt)}
+.jr-img{position:relative;margin-top:8px;width:160px;max-width:100%}
+.jr-img.big{width:100%}
+.jr-img img{display:block;width:100%;border-radius:10px;cursor:zoom-in}
+.jr-img.big img{cursor:zoom-out}
+.jr-img button{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;display:flex;align-items:center;justify-content:center}
+.jr-list{list-style:none;margin:8px 0 0;padding:0}
+.jr-list li{display:flex;align-items:baseline;gap:9px;padding:5px 2px;font-size:14.5px;cursor:pointer;border-radius:6px;min-width:0}
+.jr-list li:hover{background:rgba(255,255,255,.025)}
+.jr-list li i{font-style:normal;flex:0 0 18px;text-align:center;font-size:13px;color:var(--mint)}
+.jr-list li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jr-list li small{margin-left:auto;flex:0 0 auto;font-size:12.5px;color:var(--dim);padding-left:8px}
+.jr-more{font-size:13px;color:var(--soft);padding:4px 2px}
+.jr-older{display:block;margin:6px auto 0}
+.cap-t.t-note.on{background:var(--amber);color:#111;border-color:transparent}
 </style>
 </head>
 <body class="side-open">
@@ -2181,25 +2275,36 @@ h1.p-title{margin:0;font-family:var(--display)}
   </div>
 
   <nav class="nav">
-    <button class="btn-nav focus" id="btnFocus">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.7l2.6 5.5 6 .85-4.35 4.2 1.05 6-5.3-2.85L6.7 20.25l1.05-6L3.4 10.05l6-.85z"/></svg>
-      Today <span class="ncount" id="fcount">0</span>
-    </button>
-    <button class="btn-nav ideas" id="btnIdeas">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>
-      Ideas <span class="ncount" id="icount">0</span>
-    </button>
-    <button class="btn-nav want" id="btnWant">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.7" cy="19.8" r="1.4"/><circle cx="17.6" cy="19.8" r="1.4"/><path d="M2.5 3.5h2.7l2.6 11.3h11L21 7.3H6.2"/></svg>
-      Wishlist <span class="ncount" id="wcount">0</span>
-    </button>
-    <button class="btn-nav spend" id="btnSpend">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h3"/></svg>
-      Spending <span class="ncount" id="scount"></span>
-    </button>
-    <button class="btn-nav todo" id="btnTodo">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M4 12h16M4 17.5h10"/><path d="M18.5 16.5l1.6 1.6 3-3.2"/></svg>
-      To do <span class="ncount" id="tcount">0</span>
+    <button class="btn-nav focus" id="btnFocus">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.7l2.6 5.5 6 .85-4.35 4.2 1.05 6-5.3-2.85L6.7 20.25l1.05-6L3.4 10.05l6-.85z"/></svg>
+      Today <span class="ncount" id="fcount">0</span>
+    </button>
+    <button class="btn-nav cal" id="btnCal">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      Calendar <span class="ncount" id="calcount"></span>
+    </button>
+    <i class="nav-sep" aria-hidden="true"></i>
+    <button class="btn-nav ideas" id="btnIdeas">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>
+      Ideas <span class="ncount" id="icount">0</span>
+    </button>
+    <button class="btn-nav todo" id="btnTodo">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M4 12h16M4 17.5h10"/><path d="M18.5 16.5l1.6 1.6 3-3.2"/></svg>
+      To do <span class="ncount" id="tcount">0</span>
+    </button>
+    <i class="nav-sep" aria-hidden="true"></i>
+    <button class="btn-nav want" id="btnWant">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.7" cy="19.8" r="1.4"/><circle cx="17.6" cy="19.8" r="1.4"/><path d="M2.5 3.5h2.7l2.6 11.3h11L21 7.3H6.2"/></svg>
+      Wishlist <span class="ncount" id="wcount">0</span>
+    </button>
+    <button class="btn-nav spend" id="btnSpend">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h3"/></svg>
+      Spending <span class="ncount" id="scount"></span>
+    </button>
+    <i class="nav-sep" aria-hidden="true"></i>
+    <button class="btn-nav jrn" id="btnJrn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h11a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5H6z"/><path d="M6 3.5v17M9.5 8h5.5M9.5 11.5h5.5"/></svg>
+      Journal
     </button>
   </nav>
 
@@ -2208,6 +2313,8 @@ h1.p-title{margin:0;font-family:var(--display)}
   </div>
   <div class="side-tools" id="sideTools" style="display:none">
     <button class="tool" id="tSound"></button>
+    <button class="tool" id="tCal"></button>
+    <button class="tool" id="tJrn"></button>
     <button class="tool" id="tAi"></button>
     <button class="tool" id="tResort">Sort automatically again</button>
     <button class="tool" id="tRemind"></button>
@@ -2310,7 +2417,7 @@ const localPhotos=()=>req(tx('photos').getAll());
 /* ───────── cloud data layer ───────── */
 const tasksOf=p=>(p.tasks||[]).filter(t=>t.kind!=='link'&&t.kind!=='sticky'&&t.kind!=='quick');
 const linksOf=p=>(p.tasks||[]).filter(t=>t.kind==='link');
-const KIND_OF=pid=>pid===INBOX?'idea':pid===WANT?'wish':pid===TODO?'todo':'task';
+const KIND_OF=pid=>pid===INBOX?'idea':pid===WANT?'wish':pid===TODO?'todo':pid===DATES?'date':pid===JOURNAL?'jnote':'task';
 
 function projectRow(p){
   return {id:p.id,user_id:ME.id,name:p.name||'',status:p.status||'idle',
@@ -2687,7 +2794,8 @@ const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 const INBOX='inbox';
 const WANT='wishlist';
 const TODO='todolist';
-const SPECIAL=id=>id===INBOX||id===WANT||id===TODO;
+const DATES='dates', JOURNAL='journal';
+const SPECIAL=id=>id===INBOX||id===WANT||id===TODO||id===DATES||id===JOURNAL;
 const CATS=[{id:'other',label:'Tasks'},{id:'read',label:'Read'},{id:'watch',label:'Watch'},{id:'go',label:'Go'},{id:'learn',label:'Learn'}];
 const catLabel=c=>(CATS.find(x=>x.id===(c||'other'))||{label:c}).label;
 const JOT=[{id:INBOX,label:'Idea',ph:'A thought or a link you don’t want to lose'},
@@ -2818,6 +2926,8 @@ const hotList=()=>{const out=[];
 const ACCS=['violet','cyan','magenta','mint','amber','lime'];
 const tintOf=p=>p.color||ACCS[[...String(p.id)].reduce((n,c)=>(n*31+c.charCodeAt(0))>>>0,7)%ACCS.length];
 const starCount=()=>starred().reduce((n,g)=>n+g.items.filter(t=>!t.done).length,0);
+const makeDates=()=>({id:DATES,name:'Dates',status:'idle',important:false,startDate:'',created:0,updated:Date.now(),tasks:[],notes:''});
+const makeJournal=()=>({id:JOURNAL,name:'Journal',status:'idle',important:false,startDate:'',created:0,updated:Date.now(),tasks:[],notes:''});
 const makeTodo=()=>({id:TODO,name:'To do',status:'idle',important:false,startDate:'',created:0,updated:Date.now(),tasks:[],notes:''});
 const makeWant=()=>({id:WANT,name:'Wishlist',status:'idle',important:false,startDate:'',created:0,updated:Date.now(),tasks:[],notes:''});
 const makeInbox=()=>({id:INBOX,name:'Ideas',status:'idle',important:false,startDate:'',created:0,updated:Date.now(),tasks:[],notes:''});
@@ -2995,7 +3105,7 @@ const dueCount=()=>dueItems().length;
 function showDigest(force){
   if(!force&&LS.get('pm:digest')===ld()) return;
   if(document.querySelector('.digest,.sheet-wrap,.qa-wrap,.cap-wrap')) return;
-  const list=dueItems(); if(!list.length) return;
+  const list=dueItems(), dal=dateAlerts(); if(!list.length&&!dal.length) return;
   LS.set('pm:digest',ld());
   const t0=ld();
   const el=document.createElement('section');
@@ -3005,7 +3115,8 @@ function showDigest(force){
       <button class="dg-later" data-dgl title="Move to tomorrow">Tomorrow</button>
       <button class="dg-done" data-dgd aria-label="Done">${svg('boxOk',16,2)}</button>
     </div>`;
-  el.innerHTML=`<div class="dg-head"><b>Today</b><span class="dg-n">${list.length}</span><button class="dg-x" aria-label="Close">${svg('x',14,2.2)}</button></div>
+  el.innerHTML=`<div class="dg-head"><b>Today</b><span class="dg-n">${list.length+dal.length}</span><button class="dg-x" aria-label="Close">${svg('x',14,2.2)}</button></div>
+    ${dal.length?`<div class="dg-dates">${dal.map(a=>`<button class="date-chip" data-fdate="${a.t.id}">${(DK[layObj(a.t).dk]||DK.date).e} ${esc(a.t.text)} <b>${whenLabel(a.d)}</b></button>`).join('')}</div>`:''}
     <div class="dg-list">${list.slice(0,6).map(row).join('')}</div>
     ${list.length>6?`<button class="dg-more" data-dgall>${list.length-6} more in Today</button>`:''}`;
   const close=()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),160) };
@@ -3019,7 +3130,7 @@ function showDigest(force){
     else if(e.target.closest('[data-dgl]')) setDue(t,ldPlus(1));
     else return;
     saveProject(pr,true); r.classList.add('gone');
-    setTimeout(()=>{ r.remove(); if(!el.querySelector('.dg-row')){ close(); toast('All clear for today') } },180);
+    setTimeout(()=>{ r.remove(); if(!el.querySelector('.dg-row,.date-chip')){ close(); toast('All clear for today') } },180);
     refreshView();
   });
   el.addEventListener('keydown',e=>{ if(e.key==='Escape') close() });
@@ -3056,7 +3167,7 @@ function renderSide(){
   syncBadge();
   const list=sideVisible();
   $('#sideLabel').textContent='Projects · '+list.length;
-  $('#btnAll').classList.toggle('on',st.openId===null&&!st.focus&&!st.hist&&!st.spend&&!st.query.trim());
+  $('#btnAll').classList.toggle('on',st.openId===null&&!st.focus&&!st.hist&&!st.spend&&!st.cal&&!st.jrn&&!st.query.trim());
   const fb=$('#btnFocus'), fc=$('#fcount');
   if(fb) fb.classList.toggle('on',st.focus);
   if(fc) fc.textContent=starCount();
@@ -3072,8 +3183,13 @@ function renderSide(){
   $('#btnIdeas').classList.toggle('on',st.openId===INBOX);
   $('#btnWant').classList.toggle('on',st.openId===WANT);
   $('#btnSpend').classList.toggle('on',!!st.spend);
+  $('#btnCal').classList.toggle('on',!!st.cal); $('#btnJrn').classList.toggle('on',!!st.jrn);
+  $('#btnCal').hidden=LS.get('pm:calOff')==='1'; $('#btnJrn').hidden=LS.get('pm:jrnOff')==='1';
+  const cc=$('#calcount'); if(cc){ const a=dateAlerts(); cc.textContent=a.length?a.length:'' }
   const sc=$('#scount'); if(sc){ const v=spendMonth(0); sc.textContent=v?moneyShort(v):'' }
   const trs=$('#tResort'); if(trs) trs.hidden=!st.manual;
+  [['tCal','pm:calOff','Calendar'],['tJrn','pm:jrnOff','Journal']].forEach(([id,k,l])=>{ const b=$('#'+id); if(!b) return; const on=LS.get(k)!=='1';
+    b.innerHTML=svg(on?'boxOk':'box',14,1.9)+' '+l; b.classList.toggle('on',on); b.title=on?'Hide this section (entries are kept)':'Show this section again' });
   const ts=$('#tSound'), sOn=LS.get('pm:sound')!=='0';
   if(ts){ ts.innerHTML=svg(sOn?'boxOk':'box',14,1.9)+' Sounds'; ts.classList.toggle('on',sOn) }
   const ta2=$('#tAi');
@@ -3300,12 +3416,14 @@ function renderAll(){
   const list=(st.filter==='all'||st.filter==='archived')?base:base.filter(p=>p.status===st.filter);
   const n=s=>st.projects.filter(p=>!SPECIAL(p.id)&&!p.archived&&p.status===s).length;
   const chips=[{id:'all',label:'All'},...STATUSES.map(s=>({id:s.id,label:s.short,n:n(s.id)})),{id:'archived',label:'Archive',n:archivedCount()}];
-  const jots=JOT;
+  const jots=LS.get('pm:jrnOff')==='1'?JOT:JOT.concat([{id:JOURNAL,label:'Note',ph:'One line about today'}]);
   const jot=jots.find(j=>j.id===st.capTo)||JOT[0];
+  if(jot.id!==st.capTo&&st.capTo===JOURNAL) st.capTo=INBOX;
   $('#view').innerHTML=`
     ${(()=>{const s=doneStats(), d=new Date();
       return `<div class="day"><b>${WEEK[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}</b>
         ${s.today?`<span class="day-done">${svg('boxOk',14,2)} ${s.today} done today</span>`:''}
+        ${(()=>{ const a=dateAlerts()[0]; return a?`<button class="date-chip" data-fdate="${a.t.id}">${(DK[layObj(a.t).dk]||DK.date).e} ${esc(a.t.text)} <b>${whenLabel(a.d)}</b></button>`:'' })()}
         ${(()=>{ const m=monthSum(spendEntries().filter(e=>monthKey(e.at)===nowKey())); if(!m.v&&!m.inc) return '';
           return `<button class="home-money" id="homeMoney">${MONL[new Date().getMonth()]}: spent ${m.approx?'≈ ':''}${money2(m.v)}${m.inc?` · <span class="${m.inc-m.v>=0?'g-win':'g-loss'}">${m.inc-m.v>=0?'left':'over'} ${m.approx||m.iapprox?'≈ ':''}${money2(Math.abs(m.inc-m.v))}</span>`:''}</button>` })()}</div>`})()}
     <div class="jot" data-to="${jot.id}">
@@ -3392,12 +3510,14 @@ function renderAll(){
   if(vm) vm.addEventListener('click',()=>{st.listView=!st.listView;LS.set('pm:list',st.listView?'1':'0');renderAll()});
   const cs=$('#capShot');
   if(cs) cs.addEventListener('click',()=>{
-    photoSourcePick(async f=>{ if(f) await photoToIdeas(f) });
+    photoSourcePick(async f=>{ if(!f) return; if(st.capTo===JOURNAL){ await jrnWrite('',f); toast('Photo added to today',{sub:'Journal',action:'Open',onAction:()=>goView('jrn')}); return } await photoToIdeas(f) });
   });
   const cap=$('#cap');
   if(cap){
     const send=async()=>{
       const raw=cap.value.trim(); if(!raw) return;
+      if(st.capTo===JOURNAL){ await jrnWrite(raw); cap.value=''; blip('add');
+        toast('Added to today’s note',{sub:'Journal',action:'Open',onAction:()=>goView('jrn')}); const c4=$('#cap'); if(c4) c4.focus(); return }
       if(st.capTo==='spent'){
         const it=addExpense(raw);
         if(!it) return;
@@ -3638,9 +3758,10 @@ function renderFocus(){
   $('#view').innerHTML=`
     <header class="head">
       <h1>Today</h1>
-      <p class="lede">${total?`${doneN} of ${total} done.`:'Nothing for today. Star a task or give it a date and it shows up here.'}</p>
+      <p class="lede">${total?`${doneN} of ${total} done.`:dateAlerts().length?'Nothing to do today — dates coming up below.':'Nothing for today. Star a task or give it a date and it shows up here.'}</p>
       ${late.length?`<button class="ghost-btn plan-day" id="planDay">${svg('clock',14,1.9)} Move ${late.length} overdue to today</button>`:''}
     </header>
+    ${(()=>{ const dal=dateAlerts(); return dal.length?`<div class="date-chips">${dal.map(a=>`<button class="date-chip" data-fdate="${a.t.id}">${(DK[layObj(a.t).dk]||DK.date).e} ${esc(a.t.text)} <b>${whenLabel(a.d)}</b></button>`).join('')}</div>`:'' })()}
     ${total?`<div id="focusWrap" class="focus-wrap">${groups.map(g=>`
       <div class="fgroup">
         <div class="fgroup-h"><span class="dot" data-s="${g.p.status}"></span><button data-open="${g.p.id}">${esc(g.p.name)}</button></div>
@@ -6429,8 +6550,12 @@ function openPalette(prefill){
   const go=fn=>()=>{ if(window.innerWidth<900) document.body.classList.remove('side-open'); fn() };
   const NAV=[['Today','star',go(()=>{ resetViews(); st.focus=true; route() })],['Ideas','spark',go(()=>openProject(INBOX))],['Wishlist','cart',go(()=>openProject(WANT))],
     ['Spending','arch',go(()=>{ resetViews(); st.spend=true; route() })],['To do','boxOk',go(()=>openProject(TODO))],['All projects','box',go(()=>{ resetViews(); route() })],
-    ['History','clock',go(openHistory)]].map(([l,ic,run])=>({l,ic,run,k:'Go to'}));
+    ['History','clock',go(openHistory)],
+    ...(LS.get('pm:calOff')==='1'?[]:[['Calendar','clock',go(()=>goView('cal'))]]),
+    ...(LS.get('pm:jrnOff')==='1'?[]:[['Journal','box',go(()=>goView('jrn'))]])].map(([l,ic,run])=>({l,ic,run,k:'Go to'}));
   const ACT=[['New project','plus',newProject],['Add expense or income','arch',go(()=>{ resetViews(); st.spend=true; route(); setTimeout(()=>{ const i=$('#spIn'); if(i) i.focus() },80) })],
+    ...(LS.get('pm:calOff')==='1'?[]:[['Add a date (birthday, expiry…)','clock',go(()=>{ goView('cal'); setTimeout(()=>{ const i=$('#calIn'); if(i) i.focus() },80) })]]),
+    ...(LS.get('pm:jrnOff')==='1'?[]:[['Write today’s note','box',go(()=>{ goView('jrn'); setTimeout(()=>{ const i=document.querySelector('[data-jnote]'); if(i) i.focus() },160) })]]),
     ['Settings','gear',openSettingsSheet],['Export backup','arch',exportData],['Restore from backup','arrow',()=>$('#jsonPick').click()],
     ['Keyboard shortcuts','box',openKeys]].map(([l,ic,run])=>({l,ic,run,k:'Action'}));
   const PRJ=st.projects.filter(p=>!SPECIAL(p.id)&&!p.archived).map(p=>({l:p.name||'Untitled',ic:'idle',run:go(()=>openProject(p.id)),k:'Project'}));
@@ -6594,7 +6719,7 @@ async function replaceAll(data){
     st.projects=data.projects;
     if(!st.projects.some(p=>p.id===INBOX)){const ib=makeInbox();await putProject(ib);st.projects.push(ib)}
     if(!st.projects.some(p=>p.id===WANT)){const wl=makeWant();await putProject(wl);st.projects.push(wl)}
-    if(!st.projects.some(p=>p.id===TODO)){const td=makeTodo();await putProject(td);st.projects.push(td)}
+    if(!st.projects.some(p=>p.id===TODO)){const td=makeTodo();await putProject(td);st.projects.push(td)}if(!st.projects.some(p=>p.id===DATES)){const dt=makeDates();await putProject(dt);st.projects.push(dt)}if(!st.projects.some(p=>p.id===JOURNAL)){const jr=makeJournal();await putProject(jr);st.projects.push(jr)}
     sortProjects();
     st.openId=null; route(); toast('Backup loaded');
   }catch(e){console.error(e);toast('That file did not work')}
@@ -6723,6 +6848,8 @@ async function openCapture(preText,preFile){
   let file=null, clip='';
   const targets=recentTargets();
   targets.splice(3,0,{id:'spent',label:'Money',cls:'t-spent'});
+  if(LS.get('pm:jrnOff')!=='1') targets.splice(4,0,{id:JOURNAL,label:'Note',cls:'t-note'});
+  if(st.jrn) target=JOURNAL;
 
   const el=document.createElement('div');
   el.className='cap-wrap';
@@ -6789,6 +6916,7 @@ async function openCapture(preText,preFile){
   const submit=async()=>{
     const text=ta.value.trim();
     if(!text&&!clip&&!file){ ta.focus(); return }
+    if(target===JOURNAL){ close(); await jrnWrite([text,clip].filter(Boolean).join(' '),file); toast('Added to today’s note',{sub:'Journal'}); refreshView(); return }
     if(target==='spent'){
       const it=addExpense(text); if(!it){ ta.focus(); return }
       close(); spentToast(it); refreshView(); return;
@@ -7525,12 +7653,292 @@ function renderSpend(){
   const aw=v.querySelector('.sp-addwrap');
   if(aw&&isPhone()) v.querySelector('.sp').style.setProperty('--sp-pad',(aw.offsetHeight+24)+'px');
 }
+/* ───────── calendar: everything that has a date, in one place ─────────
+   Own entries (birthdays, anniversaries, expiry dates) live in the built-in "dates" list:
+   kind 'date', layout {date:'YYYY-MM-DD', yearly:1?, dk:'birthday'|'expiry'|'date', ahead:N}.
+   Tasks, repeats and monthly money are read from their own sections; here they can only be done or moved. */
+const datesP=()=>st.projects.find(x=>x.id===DATES);
+const DK={birthday:{e:'🎂',l:'Birthday'},anniv:{e:'💍',l:'Anniversary'},expiry:{e:'📄',l:'Expires'},date:{e:'📌',l:'Date'}};
+const BDAY_RE=/(день рожд|днюх|\bдр\b|birthday|bday|b-day)/i, ANNIV_RE=/(годовщин|anniversary)/i, EXP_RE=/(страхов|insurance|виз[аы]|visa|паспорт|passport|прав[аы]\b|licen[cs]e|истека|expire|продлить|renew|срок действия|до\s*$|until\s*$)/i;
+function dateKind(text){ return BDAY_RE.test(text)?'birthday':ANNIV_RE.test(text)?'anniv':EXP_RE.test(text)?'expiry':'date' }
+/* следующий раз, когда наступает дата (для ежегодных — в этом или следующем году) */
+function dateNext(it,from){
+  const L=layObj(it), d=L.date; if(!d) return null;
+  const f=from||ld();
+  if(!L.yearly) return d>=f?d:null;
+  const md=d.slice(5); let y=+f.slice(0,4);
+  let c=y+'-'+md; if(c<f) c=(y+1)+'-'+md;
+  if(md==='02-29'&&!(new Date(+c.slice(0,4),1,29).getDate()===29)) c=c.slice(0,5)+'02-28';
+  return c;
+}
+function daysTo(day){ return Math.round((new Date(day+'T12:00')-new Date(ld()+'T12:00'))/864e5) }
+/* что скоро: свои даты за N дней (по умолчанию 7) и в сам день */
+function dateAlerts(){
+  if(LS.get('pm:calOff')==='1') return [];
+  const p=datesP(); if(!p) return [];
+  return (p.tasks||[]).map(t=>{ const n=dateNext(t); if(!n) return null; const d=daysTo(n), a=Number(layObj(t).ahead)||7; return d>=0&&d<=a?{t,day:n,d}:null }).filter(Boolean).sort((a,b)=>a.d-b.d);
+}
+const whenLabel=d=>d===0?'today':d===1?'tomorrow':'in '+d+' days';
+/* все события за период [a..b] */
+function calEvents(a,b){
+  const out=[];
+  st.projects.forEach(p=>{ if(p.archived||p.id===DATES||p.id===JOURNAL) return;
+    (p.tasks||[]).forEach(t=>{
+      if(t.done||t.kind==='sticky'||t.kind==='link'||t.kind==='quick') return;
+      const d=dueOf(t); if(!d) return;
+      if(d>=a&&d<=b) out.push({day:d,type:'task',p,t});
+      const r=repOf(t); if(!r) return;
+      let n=d, g=0; while(g++<60){ n=nextDue(n,r); if(n>b) break; if(n>=a) out.push({day:n,type:'rep',p,t}) }
+    }) });
+  (wantP()?wantP().tasks:[]).filter(t=>isExp(t)&&layObj(t).rep==='month').forEach(t=>{
+    let x=nextCharge(t), g=0;
+    while(g++<24){ const d=ld(x); if(d>b) break; if(d>=a) out.push({day:d,type:'money',t}); x=new Date(x.getFullYear(),x.getMonth()+1,Math.min(layObj(t).rday||x.getDate(),new Date(x.getFullYear(),x.getMonth()+2,0).getDate())) }
+  });
+  const dp=datesP();
+  (dp?dp.tasks:[]).forEach(t=>{ const L=layObj(t); if(!L.date) return;
+    if(!L.yearly){ if(L.date>=a&&L.date<=b) out.push({day:L.date,type:'date',t}); return }
+    for(let y=+a.slice(0,4); y<=+b.slice(0,4); y++){ const c=y+L.date.slice(4); if(c>=a&&c<=b) out.push({day:c,type:'date',t}) }
+  });
+  const order={date:0,task:1,rep:2,money:3};
+  return out.sort((x,y)=>x.day.localeCompare(y.day)||order[x.type]-order[y.type]);
+}
+function evIcon(e){
+  if(e.type==='date') return (DK[layObj(e.t).dk]||DK.date).e;
+  if(e.type==='money') return spIcon(e.t);
+  return '';
+}
+function evText(e){
+  if(e.type==='date') return esc(e.t.text||'');
+  if(e.type==='money') return esc(spName(e.t))+' <b class="'+(isInc(e.t)?'g-win':'')+'">'+(isInc(e.t)?'+':'')+amtStr(Number(e.t.price),curOf(e.t))+'</b>';
+  return esc(e.t.text||'');
+}
+/* одна строка: «день рождения мамы 14 марта», «страховка до 20.01», «позвонить в банк в пятницу» */
+function calAdd(raw,day){
+  const txt=String(raw||'').trim(); if(!txt) return null;
+  const nd=nlDate(txt);
+  let text=(nd?nd.rest:txt).replace(/\s+(до|until|by|expires|истекает|на)$/i,'').trim()||txt;
+  const when=nd?nd.due:day;
+  if(!when){ toast('Add a date, like “14 March” or “20.01”',{kind:'warn'}); return null }
+  const dk=dateKind(txt);
+  if(dk==='date'&&!/(дата|date|событи|event|праздник|holiday)/i.test(txt)){
+    /* обычное дело с датой — в To do */
+    const td=st.projects.find(x=>x.id===TODO); const it={id:uid(),text,cat:'other',url:'',note:'',done:false,created:Date.now()};
+    setDue(it,when); const q=parseQuick(text); if(q.rep){ setLay(it,'rep',q.rep); it.text=q.task||text }
+    td.tasks.push(it); saveProject(td,true);
+    toast('Task on '+dueLabel(when),{sub:'To do',action:'Undo',onAction:()=>{ td.tasks=td.tasks.filter(x=>x.id!==it.id); saveProject(td,true); refreshView() }});
+    return it;
+  }
+  const p=datesP(); const it={id:uid(),kind:'date',text:text.charAt(0).toUpperCase()+text.slice(1),done:false,created:Date.now()};
+  setLay(it,'date',when); setLay(it,'dk',dk); if(dk==='birthday'||dk==='anniv') setLay(it,'yearly',1);
+  p.tasks.push(it); saveProject(p,true);
+  toast(DK[dk].e+' '+it.text,{sub:(dk==='birthday'||dk==='anniv'?'every year on ':'on ')+dueLabel(when)+' · reminded 7 days ahead',action:'Undo',onAction:()=>{ p.tasks=p.tasks.filter(x=>x.id!==it.id); saveProject(p,true); refreshView() }});
+  return it;
+}
+function dateEdit(it){
+  const p=datesP(), L=layObj(it);
+  const el=document.createElement('div'); el.className='sheet-wrap';
+  el.innerHTML=`<form class="sheet"><div class="sheet-head"><span>${(DK[L.dk]||DK.date).e} Date</span><button type="button" data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    <label class="f"><span>Name</span><input id="dName" value="${esc(it.text||'')}" autocomplete="off"></label>
+    <div class="sp-two"><label class="f"><span>Date</span><input id="dDate" type="date" value="${esc(L.date||'')}"></label>
+      <label class="f"><span>Remind days ahead</span><input id="dAhead" inputmode="numeric" value="${esc(String(L.ahead||7))}"></label></div>
+    <div class="sp-kind">${Object.keys(DK).map(k=>`<button type="button" class="${(L.dk||'date')===k?'on':''}" data-dk="${k}">${DK[k].e} ${DK[k].l}</button>`).join('')}</div>
+    <button type="button" class="sp-rep ${L.yearly?'on':''}" data-dy>${svg(L.yearly?'boxOk':'box',15,1.9)} Every year</button>
+    <div class="sheet-foot sp-foot"><button type="button" class="danger" data-ddel>${svg('trash',14,1.8)} Delete</button><button type="submit" class="gate-go sp-save">Save</button></div></form>`;
+  let dk=L.dk||'date', yearly=!!L.yearly;
+  const close=()=>el.remove();
+  el.addEventListener('click',e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    const k=e.target.closest('[data-dk]'); if(k){ dk=k.dataset.dk; el.querySelectorAll('[data-dk]').forEach(b=>b.classList.toggle('on',b===k)); return }
+    const y=e.target.closest('[data-dy]'); if(y){ yearly=!yearly; y.classList.toggle('on',yearly); y.innerHTML=svg(yearly?'boxOk':'box',15,1.9)+' Every year'; return }
+    if(e.target.closest('[data-ddel]')){ const at=p.tasks.indexOf(it); p.tasks.splice(at,1); saveProject(p,true); close(); refreshView();
+      toast('Deleted',{action:'Undo',onAction:()=>{ p.tasks.splice(at,0,it); saveProject(p,true); refreshView() }}) }
+  });
+  el.querySelector('form').addEventListener('submit',e=>{ e.preventDefault();
+    const nm=el.querySelector('#dName').value.trim(), dv=el.querySelector('#dDate').value, ah=parseInt(el.querySelector('#dAhead').value,10);
+    if(nm) it.text=nm; if(/^\d{4}-\d\d-\d\d$/.test(dv)) setLay(it,'date',dv);
+    setLay(it,'dk',dk); setLay(it,'yearly',yearly?1:''); setLay(it,'ahead',ah>=0&&ah!==7?ah:'');
+    saveProject(p,true); close(); refreshView() });
+  document.body.appendChild(el);
+}
+function renderCalendar(){
+  $('#crumb').textContent='Calendar';
+  const phone=isPhone();
+  const base=new Date(); base.setDate(1); base.setMonth(base.getMonth()+(st.calOff||0));
+  const y=base.getFullYear(), m=base.getMonth(), dim=new Date(y,m+1,0).getDate();
+  const first=ld(new Date(y,m,1)), last=ld(new Date(y,m,dim));
+  const sel=st.calDay||ld();
+  const lead=(new Date(y,m,1).getDay()+6)%7;
+  const gridFrom=ld(new Date(y,m,1-lead)), gridTo=ld(new Date(y,m,dim+(6-(new Date(y,m,dim).getDay()+6)%7)));
+  const evs=calEvents(phone?ld():gridFrom,phone?ldPlus(60):gridTo);
+  const byDay={}; evs.forEach(e=>{ (byDay[e.day]=byDay[e.day]||[]).push(e) });
+  const chip=e=>`<span class="cal-ev ev-${e.type}" ${e.type==='task'?`draggable="true" data-drag="${e.p.id}|${e.t.id}"`:''} data-ev="${e.type}|${(e.p&&e.p.id)||''}|${e.t.id}">${evIcon(e)?`<i>${evIcon(e)}</i>`:''}<span>${evText(e)}</span>${e.type==='rep'?'<em>↻</em>':''}</span>`;
+  const row=e=>`<div class="cal-row" data-ev="${e.type}|${(e.p&&e.p.id)||''}|${e.t.id}">
+      ${e.type==='task'?`<button class="check" data-calt="${e.p.id}|${e.t.id}" aria-label="Done">${svg('box',17,1.8)}</button>`:`<span class="cal-ic">${evIcon(e)||(e.type==='rep'?'↻':'')}</span>`}
+      <span class="cal-txt">${evText(e)}<small>${e.type==='task'?esc(e.p.id===TODO?'To do':e.p.name):e.type==='rep'?'repeats · '+esc(repLabel(repOf(e.t))):e.type==='money'?(isInc(e.t)?'income':'monthly charge'):((DK[layObj(e.t).dk]||DK.date).l+(layObj(e.t).yearly?' · every year':''))}</small></span>
+      ${e.type==='task'?`<button class="due" data-due="${e.p.id}|${e.t.id}" title="Move">${svg('clock',12,2)}</button>`:''}
+    </div>`;
+  const dayList=(day,list)=>`<div class="cal-day"><div class="cal-day-h"><b>${capF(dueLabel(day))}</b><small>${WEEK[new Date(day+'T12:00').getDay()]}</small></div>${list.map(row).join('')}</div>`;
+  const cells=[]; for(let d=new Date(gridFrom+'T12:00'); ld(d)<=gridTo; d.setDate(d.getDate()+1)) cells.push(ld(d));
+  const alerts=dateAlerts();
+  $('#view').innerHTML=`<div class="cal">
+    <div class="sp-add cal-add"><input id="calIn" placeholder="${phone?'Mom’s birthday 14 March':'Mom’s birthday 14 March · insurance until 20.01 · a task on '+esc(dueLabel(sel))}" autocomplete="off" enterkeyhint="done" aria-label="Add a date">${micBtn('#calIn')}<button class="sp-go" id="calGo">Add</button></div>
+    ${alerts.length?`<div class="cal-soon">${alerts.map(a=>`<button data-ev="date||${a.t.id}">${(DK[layObj(a.t).dk]||DK.date).e} ${esc(a.t.text)} <b>${whenLabel(a.d)}</b></button>`).join('')}</div>`:''}
+    ${phone?`<div class="cal-agenda">${Object.keys(byDay).length?Object.keys(byDay).sort().map(d=>dayList(d,byDay[d])).join(''):'<p class="empty-line">Nothing dated in the next two months.</p>'}</div>`
+    :`<div class="cal-head"><button id="calPrev" aria-label="Earlier month">${svg('chev',14,2.2)}</button><b>${MONL[m]} ${y}</b><button id="calNext" aria-label="Later month">${svg('chev',14,2.2)}</button>${st.calOff?'<button class="ghost-btn" id="calToday">Today</button>':''}</div>
+    <div class="cal-grid">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(w=>`<span class="cal-wd">${w}</span>`).join('')}
+      ${cells.map(d=>{ const l=byDay[d]||[]; return `<div class="cal-cell ${d<first||d>last?'out':''} ${d===ld()?'today':''} ${d===sel?'sel':''}" data-day="${d}">
+        <span class="cal-n">${+d.slice(8)}</span>${l.slice(0,3).map(chip).join('')}${l.length>3?`<span class="cal-more">+${l.length-3}</span>`:''}</div>` }).join('')}</div>
+    ${dayList(sel,byDay[sel]||[]).replace('</div></div>','</div>'+((byDay[sel]||[]).length?'':'<p class="cal-none">Nothing on this day yet — type above to add.</p>')+'</div>')}`}
+  </div>`;
+  const inp=$('#calIn');
+  const add=()=>{ const it=calAdd(inp.value,phone?null:sel); if(it){ inp.value=''; renderCalendar(); renderSide() } };
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') add() });
+  $('#calGo').addEventListener('click',add);
+  const v=$('#view');
+  const pv=$('#calPrev'), nx=$('#calNext'), tdy=$('#calToday');
+  if(pv) pv.addEventListener('click',()=>{ st.calOff=(st.calOff||0)-1; renderCalendar() });
+  if(nx) nx.addEventListener('click',()=>{ st.calOff=(st.calOff||0)+1; renderCalendar() });
+  if(tdy) tdy.addEventListener('click',()=>{ st.calOff=0; st.calDay=ld(); renderCalendar() });
+  v.querySelector('.cal').addEventListener('click',e=>{
+    const ck=e.target.closest('[data-calt]');
+    if(ck){ const [pid,tid]=ck.dataset.calt.split('|'); const pr=st.projects.find(x=>x.id===pid), t=pr&&pr.tasks.find(x=>x.id===tid); if(t) rowDone({p:pr,t}); return }
+    if(e.target.closest('[data-due]')) return;
+    const ev=e.target.closest('[data-ev]');
+    if(ev){ const [type,pid,tid]=ev.dataset.ev.split('|');
+      if(type==='date'){ const it=(datesP().tasks||[]).find(x=>x.id===tid); if(it) dateEdit(it); return }
+      if(type==='money'){ const it=(wantP().tasks||[]).find(x=>x.id===tid); if(it) spendEdit(it); return }
+      if(type==='task'||type==='rep'){ if(e.target.closest('.cal-cell')){ const c=e.target.closest('.cal-cell'); st.calDay=c.dataset.day; renderCalendar(); return } openProject(pid); setTimeout(()=>flashItem(tid),200); return }
+    }
+    const c=e.target.closest('[data-day]'); if(c){ st.calDay=c.dataset.day; renderCalendar(); const i2=$('#calIn'); if(i2) i2.focus() }
+  });
+  /* перенос дела на другой день перетаскиванием (компьютер) */
+  v.querySelectorAll('[data-drag]').forEach(x=>x.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain',x.dataset.drag); e.dataTransfer.effectAllowed='move' }));
+  v.querySelectorAll('.cal-cell').forEach(c=>{
+    c.addEventListener('dragover',e=>{ e.preventDefault(); c.classList.add('drop') });
+    c.addEventListener('dragleave',()=>c.classList.remove('drop'));
+    c.addEventListener('drop',e=>{ e.preventDefault(); c.classList.remove('drop');
+      const [pid,tid]=(e.dataTransfer.getData('text/plain')||'').split('|'); const pr=st.projects.find(x=>x.id===pid), t=pr&&pr.tasks.find(x=>x.id===tid); if(!t) return;
+      const was=dueOf(t); setDue(t,c.dataset.day); saveProject(pr,true); renderCalendar(); renderSide();
+      toast('Moved to '+dueLabel(c.dataset.day),{action:'Undo',onAction:()=>{ setDue(t,was); saveProject(pr,true); refreshView() }}) });
+  });
+}
+
+/* ───────── journal: the day as it happened ─────────
+   Mostly writes itself from what is already stored (done, added, money); nothing is copied.
+   Own data: one note per day in the built-in "journal" list — kind 'jnote', layout {day:'YYYY-MM-DD'}, plus an optional photo (pid journal). */
+const jrnP=()=>st.projects.find(x=>x.id===JOURNAL);
+const capF=s=>String(s||'').charAt(0).toUpperCase()+String(s||'').slice(1);
+const noteOf=day=>{ const p=jrnP(); return p?(p.tasks||[]).find(t=>layObj(t).day===day):null };
+async function jrnWrite(text,file,day){
+  const p=jrnP(); if(!p) return null; day=day||ld();
+  let n=noteOf(day); const txt=String(text||'').trim();
+  if(!n){ if(!txt&&!file) return null; n={id:uid(),kind:'jnote',text:txt,done:false,created:Date.now()}; setLay(n,'day',day); p.tasks.push(n) }
+  else if(txt) n.text=n.text?n.text+'\n'+txt:txt;
+  if(file){ try{
+    for(const o of (await photosOf(JOURNAL)).filter(x=>x.item===n.id)) await delPhotoDB(o.id);
+    await putPhoto({id:uid(),pid:JOURNAL,item:n.id,name:file.name||'photo',blob:await compress(file,1400,.78),created:Date.now()});
+  }catch(e){ console.error(e); toast('Could not attach that photo') } }
+  saveProject(p,true); return n;
+}
+/* всё по дням: сделано, добавлено, деньги, заметка */
+function jrnCollect(){
+  const D={}, at=day=>D[day]||(D[day]={day,done:[],ideas:[],wishes:[],spent:0,earned:0,nMoney:0,note:null});
+  const dk=ms=>ld(new Date(Number(ms)));
+  st.projects.forEach(p=>{ if(p.id===DATES||p.id===JOURNAL) return;
+    (p.tasks||[]).forEach(t=>{
+      const money=p.id===WANT&&(isExp(t)||isInc(t)||isGamble(t));
+      if(t.done&&t.doneAt&&!money&&t.kind!=='sticky') at(dk(t.doneAt)).done.push({p,t});
+      if(t.created&&p.id===INBOX) at(dk(t.created)).ideas.push({p,t});
+      if(t.created&&p.id===WANT&&!money) at(dk(t.created)).wishes.push({p,t});
+    }) });
+  spendEntries().forEach(e=>{ const d=at(dk(e.at)); d.nMoney++; d.spent+=e.spend||0; d.earned+=e.inc?(e.main||0):(e.win||0) });
+  const jp=jrnP(); (jp?jp.tasks:[]).forEach(t=>{ const d=layObj(t).day; if(d) at(d).note=t });
+  return D;
+}
+const jrnText=d=>[d.note&&d.note.text,...d.done.map(x=>x.t.text),...d.ideas.map(x=>x.t.text),...d.wishes.map(x=>x.t.text)].filter(Boolean).join(' ').toLowerCase();
+function jrnHead(day){
+  const dt=new Date(day+'T12:00'), rel=day===ld()?'Today':day===ldPlus(-1)?'Yesterday':'';
+  const full=WEEK[dt.getDay()]+', '+dt.getDate()+' '+MONL[dt.getMonth()]+(dt.getFullYear()!==new Date().getFullYear()?' '+dt.getFullYear():'');
+  return rel?`<b>${rel}</b><small>${full}</small>`:`<b>${full}</b>`;
+}
+async function renderJournal(){
+  $('#crumb').textContent='Journal';
+  const D=jrnCollect(), q=(st._jq||'').trim().toLowerCase(), span=st._jDays||14;
+  const today=ld();
+  /* неделя с понедельника */
+  const mon=ldPlus(-((new Date().getDay()+6)%7));
+  const wk={done:0,ideas:0,spent:0,earned:0,notes:0};
+  Object.values(D).forEach(d=>{ if(d.day>=mon&&d.day<=today){ wk.done+=d.done.length; wk.ideas+=d.ideas.length+d.wishes.length; wk.spent+=d.spent; wk.earned+=d.earned; wk.notes+=d.note?1:0 } });
+  let days;
+  if(q) days=Object.values(D).filter(d=>jrnText(d).includes(q)).map(d=>d.day).sort().reverse();
+  else{ days=[]; for(let i=0;i<span;i++){ const k=ldPlus(-i); if(i===0||D[k]) days.push(k) } }
+  const older=!q&&Object.keys(D).some(k=>k<ldPlus(-span+1));
+  let urls={}; try{ (st._jUrls||[]).forEach(u=>URL.revokeObjectURL(u)); st._jUrls=[];
+    (await photosOf(JOURNAL)).forEach(ph=>{ const u=URL.createObjectURL(ph.blob); st._jUrls.push(u); urls[ph.item]=u }) }catch(e){}
+  if(!st.jrn) return;
+  const li=(ic,x,sub)=>`<li data-jgo="${x.p.id}|${x.t.id}"><i>${ic}</i><span>${esc(x.t.text||'Untitled')}</span>${sub?`<small>${esc(sub)}</small>`:''}</li>`;
+  const card=day=>{ const d=D[day]||{day,done:[],ideas:[],wishes:[],spent:0,earned:0,nMoney:0,note:null};
+    const all=[...d.done.map(x=>li('✓',x,x.p.id===TODO?'':x.p.id===WANT?'bought':x.p.id===INBOX?'':x.p.name)),...d.ideas.map(x=>li('💡',x,'')),...d.wishes.map(x=>li('🎁',x,'wish'))];
+    const open=st._jOpen===day, shown=open?all:all.slice(0,6);
+    const ph=d.note&&urls[d.note.id];
+    return `<section class="jr-day" data-jday="${day}">
+      <header class="jr-h">${jrnHead(day)}${d.nMoney?`<button class="jr-money" data-jmoney title="Open Spending">${d.spent?'−'+money(Math.round(d.spent)):''}${d.spent&&d.earned?' ':''}${d.earned?'<b>+'+money(Math.round(d.earned))+'</b>':''}</button>`:''}</header>
+      <div class="jr-note"><textarea rows="1" data-jnote placeholder="${day===today?'One line about today':'Add a line'}" aria-label="Note for ${esc(day)}">${esc(d.note?d.note.text:'')}</textarea>
+        <button class="jr-ph" data-jph title="${ph?'Change photo':'Add a photo'}" aria-label="Photo">${svg('img',16,1.8)}</button></div>
+      ${ph?`<div class="jr-img"><img src="${ph}" alt="" data-jimg><button data-jphx title="Remove photo" aria-label="Remove photo">${svg('x',14,2.2)}</button></div>`:''}
+      ${all.length?`<ul class="jr-list">${shown.join('')}</ul>${all.length>shown.length?`<button class="jr-more" data-jopen>${all.length-shown.length} more</button>`:''}`:(day===today?'':'')}
+    </section>` };
+  $('#view').innerHTML=`<div class="jr">
+    <div class="jr-week">
+      <div><b>${wk.done}</b><small>done this week</small></div>
+      <div><b>${wk.ideas}</b><small>ideas and wishes saved</small></div>
+      <div><b>${money(Math.round(wk.spent))}</b><small>spent</small></div>
+      ${wk.earned?`<div><b class="g-win">+${money(Math.round(wk.earned))}</b><small>earned</small></div>`:''}
+    </div>
+    <div class="jr-search"><span>${svg('search',15,2)}</span><input id="jrQ" value="${esc(st._jq||'')}" placeholder="Search all days" autocomplete="off" aria-label="Search the journal"></div>
+    ${days.length?days.map(card).join(''):`<p class="empty-line">Nothing found for “${esc(q)}”.</p>`}
+    ${older?`<button class="ghost-btn jr-older" id="jrOlder">Show earlier days</button>`:''}
+  </div>`;
+  const v=$('#view'), qi=$('#jrQ');
+  let tm; qi.addEventListener('input',()=>{ clearTimeout(tm); tm=setTimeout(()=>{ st._jq=qi.value; renderJournal().then(()=>{ const z=$('#jrQ'); if(z){ z.focus(); z.setSelectionRange(z.value.length,z.value.length) } }) },220) });
+  const ob=$('#jrOlder'); if(ob) ob.addEventListener('click',()=>{ st._jDays=span+14; renderJournal() });
+  const fit=ta=>{ ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px' };
+  v.querySelectorAll('[data-jnote]').forEach(ta=>{ fit(ta);
+    ta.addEventListener('input',()=>fit(ta));
+    ta.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ta.blur() } });
+    ta.addEventListener('change',async()=>{ const day=ta.closest('[data-jday]').dataset.jday, n=noteOf(day), val=ta.value.trim(), p=jrnP();
+      if(n){ if(val){ n.text=val; saveProject(p,true) } else { const hasPh=(await photosOf(JOURNAL)).some(x=>x.item===n.id); if(hasPh){ n.text=''; saveProject(p,true) } else { p.tasks=p.tasks.filter(x=>x!==n); saveProject(p,true) } } }
+      else if(val) await jrnWrite(val,null,day);
+      renderSide() });
+  });
+  v.querySelector('.jr').addEventListener('click',e=>{
+    const day=(e.target.closest('[data-jday]')||{}).dataset?.jday;
+    if(e.target.closest('[data-jopen]')){ st._jOpen=day; renderJournal(); return }
+    if(e.target.closest('[data-jmoney]')){ resetViews(); st.spend=true; route(); return }
+    if(e.target.closest('[data-jph]')){ photoSourcePick(async f=>{ if(!f) return; await jrnWrite('',f,day); renderJournal() }); return }
+    const im=e.target.closest('[data-jimg]'); if(im){ im.parentNode.classList.toggle('big'); return }
+    if(e.target.closest('[data-jphx]')){ (async()=>{ const n=noteOf(day), p=jrnP(); const gone=(await photosOf(JOURNAL)).filter(x=>x.item===n.id);
+        for(const o of gone) await delPhotoDB(o.id); renderJournal();
+        toast('Photo removed',{action:'Undo',onAction:async()=>{ for(const o of gone) await putPhoto(o); renderJournal() }}) })(); return }
+    const g=e.target.closest('[data-jgo]');
+    if(g){ const [pid,tid]=g.dataset.jgo.split('|'); openProject(pid); setTimeout(()=>flashItem(tid),200) }
+  });
+}
+
 /* ───────── events ───────── */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-fdate]'); if(!b) return;
+  const it=((datesP()||{}).tasks||[]).find(x=>x.id===b.dataset.fdate); if(!it) return;
+  const dg=b.closest('.digest'); if(dg) dg.remove();
+  dateEdit(it);
+});
 let hashLock=false;
 function currentHash(){
   if(st.openId) return '#p/'+st.openId;
   if(st.hist) return '#history';
   if(st.spend) return '#spending';
+  if(st.cal) return '#calendar';
+  if(st.jrn) return '#journal';
   if(st.focus) return '#focus';
   return '#all';
 }
@@ -7545,12 +7953,14 @@ function applyHash(){
   const h=(location.hash||'').replace(/^#\/?/,'');
   if(h.indexOf('p/')===0){
     const id=h.slice(2);
-    if(st.projects.some(x=>x.id===id)){ st.openId=id; st.focus=false; st.hist=false; st.spend=false; return }
+    if(st.projects.some(x=>x.id===id)){ st.openId=id; st.focus=false; st.hist=false; st.spend=false; st.cal=false; st.jrn=false; return }
   }
   st.openId=null;
   st.focus=(h==='focus');
   st.hist=(h==='history');
   st.spend=(h==='spending');
+  st.cal=(h==='calendar'&&LS.get('pm:calOff')!=='1');
+  st.jrn=(h==='journal'&&LS.get('pm:jrnOff')!=='1');
 }
 window.addEventListener('hashchange',()=>{
   if(hashLock||!ME) return;
@@ -7566,6 +7976,8 @@ function pageTitle(){
   if(st.openId){ const p=cur(); return p&&p.name?p.name:'Project' }
   if(st.hist) return 'History';
   if(st.spend) return 'Spending';
+  if(st.cal) return 'Calendar';
+  if(st.jrn) return 'Journal';
   if(st.focus) return 'Today';
   if(st.query.trim()) return 'Search';
   return 'Home';
@@ -7577,6 +7989,8 @@ function route(){
   if(st.openId) renderProject();
   else if(st.hist) renderHistory();
   else if(st.spend) renderSpend();
+  else if(st.cal) renderCalendar();
+  else if(st.jrn) renderJournal();
   else if(st.focus) renderFocus();
   else if(st.query.trim()) renderSearch();
   else renderAll();
@@ -7601,8 +8015,8 @@ function markNew(p){
     const el=document.querySelector(`#view [data-id="${t.id}"],#view [data-task="${t.id}"],#view [data-sp="${t.id}"]`);
     if(el) el.classList.add('new-in') } });
 }
-function resetViews(){ st.openId=null; st.focus=false; st.hist=false; st.spend=false }
-function openProject(id){st.openId=id;st.focus=false;st.hist=false;st.spend=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
+function resetViews(){ st.openId=null; st.focus=false; st.hist=false; st.spend=false; st.cal=false; st.jrn=false }
+function openProject(id){if(id===DATES||id===JOURNAL){ resetViews(); st[id===DATES?'cal':'jrn']=true; if(window.innerWidth<900)document.body.classList.remove('side-open'); route(); return }st.openId=id;st.focus=false;st.hist=false;st.spend=false;st.cal=false;st.jrn=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
 
 document.addEventListener('click',e=>{
   if(st.dragRow) return;
@@ -7718,7 +8132,7 @@ document.addEventListener('click',e=>{
 
 /* срок: один общий выбор даты для любых списков */
 function refreshView(){
-  if(st.openId) renderProject(); else if(st.spend) renderSpend(); else if(st.focus) renderFocus(); else if(!st.hist) renderAll();
+  if(st.openId) renderProject(); else if(st.spend) renderSpend(); else if(st.cal) renderCalendar(); else if(st.jrn) renderJournal(); else if(st.focus) renderFocus(); else if(!st.hist) renderAll();
   renderSide();
 }
 function pickDue(pr,task){
@@ -7952,6 +8366,10 @@ $('#archLink').addEventListener('click',()=>{resetViews();st.filter='archived';i
 $('#btnIdeas').addEventListener('click',()=>{openProject(INBOX)});
 $('#btnWant').addEventListener('click',()=>{openProject(WANT)});
 $('#btnTodo').addEventListener('click',()=>{openProject(TODO)});
+const goView=k=>{ resetViews(); st[k]=true; st.query=''; const qq=$('#q'); if(qq) qq.value='';
+  if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()} route() };
+$('#btnCal').addEventListener('click',()=>goView('cal'));
+$('#btnJrn').addEventListener('click',()=>goView('jrn'));
 $('#btnSpend').addEventListener('click',()=>{resetViews();st.spend=true;st.query='';const qq=$('#q');if(qq)qq.value='';
   if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}route()});
 function openHistory(){
@@ -7962,7 +8380,7 @@ function openHistory(){
 function openSettingsSheet(){
   if(document.querySelector('.set-sheet')) return;
   renderSide();
-  const SECT=[['Display',['tSound','tCur']],['Reminders',['tRemind','tRemindRow','tPush']],['AI',['tAi']],
+  const SECT=[['Display',['tSound','tCur']],['Sections',['tCal','tJrn']],['Reminders',['tRemind','tRemindRow','tPush']],['AI',['tAi']],
     ['Your data',['tExport','tRestore','tFull']],['Projects',['tResort']]];
   const el=document.createElement('div'); el.className='sheet-wrap';
   el.innerHTML=`<div class="sheet set-sheet"><div class="sheet-head"><span>Settings</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
@@ -7986,6 +8404,8 @@ function openSettingsSheet(){
   new MutationObserver((m,o)=>{ if(!document.body.contains(el)){ const home=$('#sideTools'); el.querySelectorAll('.tool').forEach(n=>home.appendChild(n)); o.disconnect() } }).observe(document.body,{childList:true});
 }
 $('#tAi').addEventListener('click',openAiKey);
+[['tCal','pm:calOff','cal'],['tJrn','pm:jrnOff','jrn']].forEach(([id,k,v])=>$('#'+id).addEventListener('click',()=>{
+  const off=LS.get(k)!=='1'; LS.set(k,off?'1':'0'); if(off&&st[v]){ resetViews(); route() } else refreshView(); renderSide() }));
 $('#tSound').addEventListener('click',()=>{
   LS.set('pm:sound',LS.get('pm:sound')==='0'?'1':'0');
   renderSide(); blip('add');
@@ -8082,7 +8502,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:41';
+const APP_VER='19 Nov 03:51';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
@@ -8189,7 +8609,7 @@ async function reload(){
   }
   if(!st.projects.some(p=>p.id===INBOX)){const ib=makeInbox();await putProject(ib);st.projects.push(ib)}
   if(!st.projects.some(p=>p.id===WANT)){const wl=makeWant();await putProject(wl);st.projects.push(wl)}
-  if(!st.projects.some(p=>p.id===TODO)){const td=makeTodo();await putProject(td);st.projects.push(td)}
+  if(!st.projects.some(p=>p.id===TODO)){const td=makeTodo();await putProject(td);st.projects.push(td)}if(!st.projects.some(p=>p.id===DATES)){const dt=makeDates();await putProject(dt);st.projects.push(dt)}if(!st.projects.some(p=>p.id===JOURNAL)){const jr=makeJournal();await putProject(jr);st.projects.push(jr)}
   sortProjects();
   applyHash();
   route();
