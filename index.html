@@ -1936,6 +1936,8 @@ body:has(.paid-pop) .fab-wrap{display:none}
 .idea-edit-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
 .idea-edit-link{font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ai-btn:disabled{opacity:.7;cursor:progress}
+@keyframes flashHit{0%,60%{box-shadow:0 0 0 2px var(--lime)}100%{box-shadow:0 0 0 2px transparent}}
+#view .flash{animation:flashHit 1.8s ease;border-radius:12px}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -2386,7 +2388,7 @@ const photoSrc=ph=>ph.url||(ph.blob?URL.createObjectURL(ph.blob):'');
 
 /* ───────── helpers ───────── */
 const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>ld();
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const ru=d=>{if(!d)return '';const a=d.split('-');return MON[+a[1]-1]+' '+(+a[2])+', '+a[0]};
 const URL_RE=/(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
@@ -2490,7 +2492,7 @@ const money=n=>curSym()+Number(n).toLocaleString('en-US',{maximumFractionDigits:
 const ORD={active:0,idle:1,done:2};
 const nextStep=p=>tasksOf(p).find(t=>!t.done);
 const daysAgo=ms=>Math.floor((Date.now()-ms)/864e5);
-const dayStr=d=>d.toISOString().slice(0,10);
+const dayStr=d=>ld(d);
 const plusDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return dayStr(d)};
 const plusMonths=n=>{const d=new Date();d.setMonth(d.getMonth()+n);return dayStr(d)};
 const isDue=p=>!!p.revisit&&p.revisit<=dayStr(new Date());
@@ -3099,7 +3101,7 @@ function renderAll(){
       }
       const q=parseQuick(raw);
       const to=q.forced&&q.forced!=='proj'?q.forced:(st.capTo==='auto'?INBOX:st.capTo);
-      await saveCapture(to,to===WANT?q.text:to===TODO?q.task:q.full,q.url,null,{price:q.price,cat:'other',due:to===TODO?q.due:''});
+      await saveCapture(to,to===WANT?q.text:to===TODO?q.task:q.full,q.url,null,{price:q.price,cat:'other',due:to===TODO?q.due:'',rep:to===TODO?q.rep:''});
       const c=$('#cap'); if(c) c.focus();
     };
     $('#capBtn').addEventListener('click',send);
@@ -3274,9 +3276,9 @@ function searchHits(){
     if((p.name||'').toLowerCase().includes(q)) hits.push({k:'name',t:p.name});
     (p.tasks||[]).forEach(t=>{
       const kind=t.kind||(SPECIAL(p.id)?KIND_OF(p.id):'task');
-      if((t.text||'').toLowerCase().includes(q)) hits.push({k:kind,t:t.text,done:t.done});
-      if((t.note||'').toLowerCase().includes(q)) hits.push({k:'note',t:snippet(t.note,q,45)});
-      if((t.url||'').toLowerCase().includes(q)) hits.push({k:'link',t:t.url});
+      if((t.text||'').toLowerCase().includes(q)) hits.push({k:kind,t:t.text,done:t.done,id:t.id});
+      if((t.note||'').toLowerCase().includes(q)) hits.push({k:'note',t:snippet(t.note,q,45),id:t.id});
+      if((t.url||'').toLowerCase().includes(q)) hits.push({k:'link',t:t.url,id:t.id});
     });
     if((p.notes||'').toLowerCase().includes(q)) hits.push({k:'notes',t:snippet(p.notes,q,55)});
     if(hits.length) out.push({p,hits});
@@ -3300,7 +3302,7 @@ function renderSearch(){
         <span class="dot" data-s="${g.p.status}"></span>${esc(g.p.name)}
         <span class="scount">${g.hits.length}</span>
       </a>
-      ${g.hits.slice(0,8).map(h=>`<a class="srow ${h.done?'done':''}" href="#p/${g.p.id}" data-open="${g.p.id}">
+      ${g.hits.slice(0,8).map(h=>`<a class="srow ${h.done?'done':''}" href="#p/${g.p.id}" data-open="${g.p.id}" data-hit="${h.id||''}">
         <span class="skind">${KIND_LABEL[h.k]||h.k}</span>
         <span class="stext">${mark(h.t,q)}</span>
       </a>`).join('')}
@@ -3410,7 +3412,7 @@ function ago(ts){
   if(d<=0) return 'today';
   if(d===1) return 'yesterday';
   if(d<30) return d+' days ago';
-  return ru(new Date(ts).toISOString().slice(0,10));
+  return ru(ld(new Date(ts)));
 }
 
 const ARCHIVE='__archive';
@@ -4137,10 +4139,11 @@ function bindWish(p){
       return }
     if(ed){ itemEdit(p,item,true); return }
     if(dl){
-      const ph=(await photosOf(WANT)).filter(x=>x.item===key);
-      for(const o of ph) await delPhotoDB(o.id);
+      const at=p.tasks.indexOf(item); let back=false;
       p.tasks=p.tasks.filter(x=>x.id!==key);
       saveProject(p,true); renderProject(); renderSide();
+      toast('Deleted',{action:'Undo',onAction:()=>{ back=true; p.tasks.splice(Math.min(at,p.tasks.length),0,item); saveProject(p,true); refreshView() }});
+      setTimeout(async()=>{ if(back) return; try{ for(const o of (await photosOf(WANT)).filter(x=>x.item===key)) await delPhotoDB(o.id) }catch(e){} },6000);
     }
   });
 }
@@ -4203,7 +4206,9 @@ function bindTodo(p){
       window.open(item.url,'_blank','noopener'); return;
     }
     if(ex){ st.todoOpen=st.todoOpen===key?null:key; renderProject(); return }
-    if(tg){ item.done=!item.done; item.doneAt=item.done?Date.now():null; rollRepeat(item); saveProject(p,true); renderProject(); renderSide(); return }
+    if(tg){ const was=[item.done,item.doneAt,item.layout]; item.done=!item.done; item.doneAt=item.done?Date.now():null; const rolled=rollRepeat(item); saveProject(p,true); renderProject(); renderSide();
+      if(item.done&&!rolled) toast('Done',{action:'Undo',onAction:()=>{ item.done=was[0]; item.doneAt=was[1]; if(was[2]) item.layout=was[2]; else delete item.layout; saveProject(p,true); refreshView() }});
+      return }
     if(dl){ p.tasks=p.tasks.filter(x=>x.id!==key); saveProject(p,true); renderProject(); renderSide(); toast('Deleted',{action:'Undo',onAction:undo}); return }
     if(mk){
       const name=item.text.length>64?item.text.slice(0,64).trim()+'…':item.text;
@@ -6237,10 +6242,13 @@ function parseQuick(raw){
   const m=text.match(/\s(\d+(?:[.,]\d+)?)$/);
   if(m){ price=parseFloat(m[1].replace(',','.')); text=text.slice(0,m.index).trim() }
   // «…завтра» / «…today» в конце — срок для задач
-  let due='', task=full;
-  const dw=full.match(/(?:^|\s)(сегодня|завтра|послезавтра|today|tomorrow)$/i);
-  if(dw){ due=ldPlus(DUE_WORDS[dw[1].toLowerCase()]); task=full.slice(0,dw.index).trim()||full }
-  return {text,full,task,due,price,url,forced};
+  let due='', task=full, rep='';
+  const rw=full.match(/(?:^|\s)(every day|daily|every week|weekly|every month|monthly|каждый день|ежедневно|каждую неделю|еженедельно|каждый месяц|ежемесячно)$/i);
+  if(rw){ const w=rw[1].toLowerCase(); rep=/day|daily|день|ежедн/.test(w)?'day':/week|недел/.test(w)?'week':'month'; task=full.slice(0,rw.index).trim()||full }
+  const dw=task.match(/(?:^|\s)(сегодня|завтра|послезавтра|today|tomorrow)$/i);
+  if(dw){ due=ldPlus(DUE_WORDS[dw[1].toLowerCase()]); task=task.slice(0,dw.index).trim()||task }
+  if(rep&&!due) due=ld();
+  return {text,full,task,due,rep,price,url,forced};
 }
 
 function recentTargets(){
@@ -6286,6 +6294,7 @@ async function saveCapture(target,text,url,file,extra){
   }else if(p.id===TODO){
     const ni={id:uid(),text:text||shortUrl(url)||'Untitled',cat:ex.cat||st.todoCat||'other',url:url||'',note:'',done:false,created:Date.now()};
     if(ex.due) setDue(ni,ex.due);
+    if(ex.rep) setLay(ni,'rep',ex.rep);
     p.tasks.push(ni);
     saveProject(p,true); what='Added to To do';
   }else{
@@ -6309,7 +6318,8 @@ async function saveCapture(target,text,url,file,extra){
   sortProjects(); renderSide();
   if(st.openId===p.id) renderProject();
   else if(!st.openId&&!st.focus&&!st.hist&&!st.review) renderAll();
-  toast(what,{sub:nameFor(target),action:'Open',onAction:()=>openProject(target)});
+  const subl=[ex.due?'due '+dueLabel(ex.due):'',ex.rep?{day:'every day',week:'every week',month:'every month'}[ex.rep]:'',p.id===WANT&&ex.price?money(ex.price):''].filter(Boolean).join(' · ');
+  toast(what,{sub:subl,action:'Open',onAction:()=>openProject(target)});
 }
 
 async function setCapturePhoto(p,file){
@@ -6322,9 +6332,10 @@ async function setCapturePhoto(p,file){
 
 async function openCapture(){
   if(document.querySelector('.cap-wrap')) return;
-  let target=st.openId||INBOX;                       // внутри раздела — пишем в него
+  let target=st.spend?'spent':(st.openId||INBOX);                       // внутри раздела — пишем в него
   let file=null, clip='';
   const targets=recentTargets();
+  targets.splice(3,0,{id:'spent',label:'Spent',cls:'t-spent'});
 
   const el=document.createElement('div');
   el.className='cap-wrap';
@@ -6388,9 +6399,14 @@ async function openCapture(){
   const submit=async()=>{
     const text=ta.value.trim();
     if(!text&&!clip&&!file){ ta.focus(); return }
+    if(target==='spent'){
+      const it=addExpense(text,LS.get('pm:ecat')||''); if(!it){ ta.focus(); return }
+      close(); spentToast(it); refreshView(); return;
+    }
     close();
-    const q=target===WANT?parseQuick(text):null;      // в вишлисте число в конце — цена
-    await saveCapture(target,q?q.text:text,clip||(q?q.url:''),file,q?{price:q.price}:{cat:'other'});
+    const q=target===WANT||target===TODO?parseQuick(text):null;      // в вишлисте число в конце — цена, в делах — срок и повтор
+    if(target===TODO) await saveCapture(TODO,q.task,clip||q.url,file,{cat:'other',due:q.due,rep:q.rep});
+    else await saveCapture(target,q?q.text:text,clip||(q?q.url:''),file,q?{price:q.price}:{cat:'other'});
   };
   el.querySelector('#capSend').addEventListener('click',submit);
   ta.addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)) submit() });
@@ -6458,6 +6474,7 @@ function openQuick(prefill){
     else if(sel===INBOX) target.tasks.push({id:uid(),text,done:false,created:Date.now()});
     else { target.tasks.push({id:uid(),text,done:false,created:Date.now()}); touchProject(target) }
     if(dated&&q.due) setDue(target.tasks[target.tasks.length-1],q.due);
+    if(dated&&q.rep) setLay(target.tasks[target.tasks.length-1],'rep',q.rep);
     target.updated=Date.now();
     await putProject(target);
     toast('Added to '+target.name);
@@ -6520,6 +6537,8 @@ function addExpense(raw,cat,at){
   const p=wantP(); if(!p) return null;
   const r=parseSpend(raw);
   if(!(r.price>0)){ toast('Add an amount, like “coffee 300”'); return null }
+  const same=r.text&&(p.tasks||[]).slice().reverse().find(t=>isExp(t)&&layObj(t).ecat&&String(t.text||'').toLowerCase()===r.text.toLowerCase());
+  if(same) cat=layObj(same).ecat;                      /* то же название, что раньше, — та же категория */
   const it={id:uid(),text:r.text||cat||'Expense',price:r.price,url:'',done:true,doneAt:at||Date.now(),created:Date.now()};
   setLay(it,'exp',1); if(cat) setLay(it,'ecat',cat);
   p.tasks=p.tasks||[]; p.tasks.push(it);
@@ -6767,6 +6786,16 @@ function route(){
   const v=$('#view');
   if(v){ v.scrollTop=0; v.classList.remove('view-in'); void v.offsetWidth; v.classList.add('view-in') }
 }
+function flashItem(id){
+  const p=cur(); const it=p&&(p.tasks||[]).find(x=>x.id===id);
+  if(it&&it.done&&p.id===WANT&&st.wantFilter!=='done'){ st.wantFilter='done'; renderProject() }
+  if(it&&it.done&&p.id===TODO&&st.todoFilter!=='done'){ st.todoFilter='done'; renderProject() }
+  setTimeout(()=>{
+    const el=document.querySelector(`#view [data-id="${id}"],#view [data-task="${id}"],#view [data-ref="${id}"]`); if(!el) return;
+    el.scrollIntoView({block:'center',behavior:'smooth'}); el.classList.add('flash');
+    setTimeout(()=>el.classList.remove('flash'),1800);
+  },60);
+}
 function resetViews(){ st.openId=null; st.focus=false; st.hist=false; st.review=false; st.spend=false }
 function openProject(id){st.openId=id;st.focus=false;st.hist=false;st.review=false;st.spend=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
 
@@ -6776,7 +6805,11 @@ document.addEventListener('click',e=>{
   if(o){
     if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return;   // новая вкладка — пусть браузер сам
     e.preventDefault();
-    return openProject(o.dataset.open);
+    if(o.closest('.sgroup')){ st.query=''; const qq=$('#q'); if(qq) qq.value=''; }
+    const hid=o.dataset.hit;
+    openProject(o.dataset.open);
+    if(hid) setTimeout(()=>flashItem(hid),150);
+    return;
   }
   const s=e.target.closest('[data-set]');
   if(s){const p=st.projects.find(x=>x.id===s.dataset.set);if(p)setStatus(p,s.dataset.s);return}
