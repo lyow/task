@@ -1430,8 +1430,9 @@ kbd{font-size:11.5px}
 
 /* v3 — colour with a job, feedback on every press, today list */
 @property --sec{syntax:'<color>';inherits:true;initial-value:#D4FF3A}
-:root{--bg:#07070D;--panel:#0F0F19;--panel-2:#161624;--raise:#1F1F31;--line:#232338;--line-2:#383856;
-  --soft:#BDBDD2;--dim:#8787A6;--btn-hover:#29293F;--s-idle:#8787A6}
+:root{--bg:#09090A;--panel:#111112;--panel-2:#18181A;--raise:#212123;--line:#252528;--line-2:#3A3A3E;
+  --soft:#BEBEC4;--dim:#8A8A92;--btn-hover:#2B2B2E;--s-idle:#8A8A92}
+.btn-nav.want{border:none;padding:9px 12px;align-items:center}
 body{--sec:var(--lime);transition:--sec .45s ease}
 body[data-sec=inbox],body[data-sec=violet]{--sec:var(--violet)}
 body[data-sec=wishlist],body[data-sec=mint]{--sec:var(--mint)}
@@ -1602,6 +1603,50 @@ body.light .due-grid input{color-scheme:light}
   .jot #capBtn{padding:0 18px}
   .jot #capShot{width:48px}
 }
+
+/* v4 — one accent. Surfaces are near-black; lime marks actions; section colours live only in small marks */
+body,body[data-sec]{--sec:var(--lime)}
+#main::before{display:none}
+.topbar{background:var(--bg)}
+.btn-nav.on,.btn-nav.on:hover{background:var(--raise);color:var(--txt)}
+.btn-nav.on svg{color:var(--acc)}
+.btn-nav.on .ncount{color:var(--soft);opacity:1}
+.jot{background:var(--panel);border-color:var(--line)}
+.jot-tab.on,.jot-tab.on:hover{background:var(--raise);color:var(--txt)}
+.jot-tab.on::before{background:var(--jc)}
+.jot .capture input:focus{border-color:var(--line-2)}
+.jot #capBtn{background:var(--lime)}
+.banner{background:var(--panel);border-color:var(--line)}
+.banner .b-list button{border-color:var(--line-2);color:var(--txt)}
+.banner .b-list button:hover{background:var(--raise)}
+.card,.card:hover{background:var(--panel)}
+.card{border-color:var(--line)}
+.card:hover{border-color:var(--line-2)}
+.card .mini i{background:var(--lime)}
+.card .next em{color:var(--dim)}
+.card-status,.card-status[data-s=active]{color:var(--soft)}
+.card-status[data-s=done]{color:var(--mint)}
+.stale,.card .due-badge,.card .rev-tag{color:var(--dim)}
+.sec-n{background:var(--raise);color:var(--soft)}
+.tsrc,.tsrc:hover{color:var(--dim);background:none;padding:0}
+.tsrc:hover{color:var(--txt)}
+.idea{background:var(--panel)}
+.idea:hover{border-color:var(--line-2)}
+.wcard .noimg{background:var(--panel-2)}
+.tditem:hover{border-color:var(--line-2)}
+.wrow-price,.wsum,.wprice{color:var(--txt)}
+.fol.on,.fol[class*="c-"].on{background:var(--lime);color:var(--on)}
+.pick.on[data-s=active],.picker.big .pick.on{color:var(--txt)}
+
+/* idea that is a link: picture, readable name, where it is from */
+.idea.has-link .idea-thumb{width:64px;height:64px;border-radius:12px}
+.idea.has-link.has-img .idea-thumb{width:96px;height:64px}
+a.idea-title{color:var(--txt);text-decoration:none}
+a.idea-title:hover{text-decoration:underline}
+.idea-host{font-size:12.5px;color:var(--dim);gap:6px}
+.idea-host:hover{color:var(--dim)}
+.idea-host img{width:14px;height:14px;border-radius:3px}
+.idea-fav{width:24px;height:24px}
 </style>
 </head>
 <body class="side-open">
@@ -3022,10 +3067,87 @@ function pickFolder(p,cb){
   document.body.appendChild(el);
 }
 
+/* идея-ссылка: адрес либо в url, либо весь текст — это голый адрес */
+const BARE_URL=/^(https?:\/\/\S+|www\.\S+)$/i;
+const isBare=s=>BARE_URL.test(String(s||'').trim());
+function ideaUrl(i){
+  if(i.url) return i.url;
+  const m=String(i.text||'').match(/(https?:\/\/\S+|www\.\S+)/i);
+  return m?(/^https?:/i.test(m[1])?m[1]:'https://'+m[1]):'';
+}
+const noUrl=s=>String(s||'').replace(/(https?:\/\/\S+|www\.\S+)/gi,' ').replace(/\s+/g,' ').trim();
+function linkKind(u){
+  const h=hostOf(u); let p=''; try{ p=decodeURIComponent(new URL(u).pathname) }catch(e){}
+  const at=(p.match(/@([\w.]+)/)||[])[1];
+  if(/(^|\.)youtu(be\.com|\.be)$/.test(h)) return {name:'YouTube',what:/\/shorts\//.test(p)?'short':'video'};
+  if(/instagram\.com$/.test(h)) return {name:'Instagram',what:/\/reels?\//.test(p)?'reel':/\/p\//.test(p)?'post':/\/stories\//.test(p)?'story':'profile'};
+  if(/threads\.(net|com)$/.test(h)) return {name:'Threads',what:at&&!/\/post\//.test(p)?'@'+at:at?'post by @'+at:'post'};
+  if(/tiktok\.com$/.test(h)) return {name:'TikTok',what:at?'video by @'+at:'video'};
+  if(/^(twitter|x)\.com$/.test(h)) return {name:'X',what:'post'};
+  if(/^t\.me$/.test(h)) return {name:'Telegram',what:p.split('/').filter(Boolean)[0]||''};
+  if(/github\.com$/.test(h)) return {name:'GitHub',what:p.split('/').filter(Boolean).slice(0,2).join('/')};
+  const seg=p.split('/').filter(Boolean).pop()||'';
+  return {name:h,what:seg.replace(/\.\w{2,5}$/,'').replace(/[-_+]+/g,' ').slice(0,60)};
+}
 function ideaTitle(i){
-  if(i.text&&i.text.trim()) return i.text.trim();
-  if(i.url) return shortUrl(i.url);
-  return 'Untitled';
+  const u=ideaUrl(i), t=u?noUrl(i.text):String(i.text||'').trim();
+  if(t&&!(u&&t===shortUrl(u))) return t;
+  if(u){ const k=linkKind(u); return (k.name+' '+k.what).trim() }
+  return t||'Untitled';
+}
+function ideaCard(p,i,cur){
+  const url=ideaUrl(i), kind=url?linkKind(url):null;
+  const img=i.preview||(url?autoThumb(url):'');
+  const title=esc(ideaTitle(i));
+  return `<div class="idea ${url?'has-link':''} ${img?'has-img':''}" data-id="${i.id}">
+    <div class="idea-top">
+      ${url?`<a class="idea-thumb ${img?'has':''}" href="${esc(url)}" target="_blank" rel="noopener" ${img?`style="background-image:url('${esc(img)}')"`:''}>
+        ${img?'':`<img class="idea-fav" src="${esc(favOf(url))}" alt="" onerror="this.style.display='none'">`}</a>`
+      :`<span class="idea-thumb">${svg('spark',15,1.8)}</span>`}
+      <span class="idea-main">
+        ${url?`<a class="idea-title" href="${esc(url)}" target="_blank" rel="noopener">${title}</a>`:`<b class="idea-title">${title}</b>`}
+        ${url?`<span class="idea-host"><img src="${esc(favOf(url))}" alt="" onerror="this.style.display='none'">${esc(kind.name)}</span>`:''}
+      </span>
+    </div>
+    <div class="idea-foot">
+      <span class="idea-date">${ago(i.created)}${i.cat&&i.cat!==ARCHIVE&&cur===''?' · '+esc(folderName(p,i.cat)):''}</span>
+      <div class="idea-acts">
+        <button data-ifol="${i.id}" title="Move to a folder">${svg('arch',11,1.7)}</button>
+        <button data-mk="${i.id}" title="Turn this into its own project">${svg('plus',11,2.4)}</button>
+        <button data-mv="${i.id}" title="Move into an existing project">${svg('arrow',11,2)}</button>
+        <button data-ied="${i.id}" title="Edit">${svg('pen',11,1.8)}</button>
+        <button data-idel="${i.id}" title="Delete">${svg('x',11,2.4)}</button>
+      </div>
+    </div>
+  </div>`;
+}
+/* старым ссылкам без названия тихо подтягиваем название и картинку — понемногу за заход */
+let enriching=false;
+async function enrichIdeas(p){
+  if(enriching) return; enriching=true;
+  try{
+    let seen={}; try{ seen=JSON.parse(LS.get('pm:meta')||'{}')||{} }catch(e){}
+    const need=i=>{const u=ideaUrl(i), t=String(i.text||'').trim();
+      return u&&!(seen[i.id]>=3)&&(!i.preview&&!autoThumb(u)||!t||isBare(t)||t===shortUrl(u))};
+    const list=ideasOf(p).filter(need).reverse().slice(0,10);
+    for(const i of list){
+      const u=ideaUrl(i);
+      const meta=await fetchMeta(u);
+      if(meta.fail) continue;                            // лимит или сбой сервиса — попробуем в другой раз
+      seen[i.id]=meta.miss?(seen[i.id]||0)+1:3;          // не нашлось — ещё пару попыток в следующие заходы
+      LS.set('pm:meta',JSON.stringify(seen));
+      const t=String(i.text||'').trim();
+      let ch=false;
+      if(!i.url){ i.url=u; ch=true }
+      if(meta.image&&!i.preview){ i.preview=meta.image; ch=true }
+      if(meta.title&&(!t||isBare(t)||t===shortUrl(u))){ i.text=meta.title; ch=true }
+      if(!ch) continue;
+      saveProject(p,true);
+      const el=document.querySelector('.idea[data-id="'+i.id+'"]');
+      if(el&&st.openId===p.id&&!el.querySelector('textarea,input')) el.outerHTML=ideaCard(p,i,st.ideaFolder||'');
+    }
+  }catch(e){ console.error(e) }
+  enriching=false;
 }
 
 function ideasPane(p){
@@ -3055,30 +3177,7 @@ function ideasPane(p){
       <button id="taskAdd">${svg('plus',15,2.4)}</button>
     </div>
 
-    ${shown.length?`<div class="ideas" id="ideas">${shown.map(i=>{
-      const host=hostOf(i.url);
-      const img=i.preview||'';
-      return `<div class="idea ${i.url?'has-link':''}" data-id="${i.id}">
-        <div class="idea-top">
-          <span class="idea-thumb ${img?'has':''}" ${img?`style="background-image:url('${esc(img)}')"`:''}>
-            ${img?'':(host?`<img class="idea-fav" src="${esc(favOf(i.url))}" alt="" onerror="this.style.display='none'">`:svg('spark',15,1.8))}
-          </span>
-          <span class="idea-main">
-            <b class="idea-title">${esc(ideaTitle(i))}</b>
-            ${host?`<a class="idea-host" href="${esc(i.url)}" target="_blank" rel="noopener">${esc(host)} ${svg('link',9,2)}</a>`:''}
-          </span>
-        </div>
-        <div class="idea-foot">
-          <span class="idea-date">${ago(i.created)}${i.cat&&i.cat!==ARCHIVE&&cur===''?' · '+esc(folderName(p,i.cat)):''}</span>
-          <div class="idea-acts">
-            <button data-ifol="${i.id}" title="Move to a folder">${svg('arch',11,1.7)}</button>
-            <button data-mk="${i.id}" title="Turn this into its own project">${svg('plus',11,2.4)}</button>
-            <button data-mv="${i.id}" title="Move into an existing project">${svg('arrow',11,2)}</button>
-            <button data-ied="${i.id}" title="Edit">${svg('pen',11,1.8)}</button>
-            <button data-idel="${i.id}" title="Delete">${svg('x',11,2.4)}</button>
-          </div>
-        </div>
-      </div>`}).join('')}</div>`
+    ${shown.length?`<div class="ideas" id="ideas">${shown.map(i=>ideaCard(p,i,cur)).join('')}</div>`
     :`<p class="hint" style="margin-top:18px;max-width:60ch">${cur===ARCHIVE?'Archive is empty.'
       :cur?'Nothing in this folder yet.'
       :'Empty. Paste a link while scrolling at night — it lands here with a preview, and you sort it into folders later.'}</p>`}
@@ -3446,14 +3545,25 @@ async function fetchMeta(u){
   const out={image:autoThumb(u)||'',title:''};
   const tt=await tiktokMeta(u);
   if(tt){ if(tt.image) out.image=tt.image; if(tt.title) out.title=tt.title; return out }
+  if(out.image){                      // YouTube: название отдаёт сам YouTube, без посредников и лимитов
+    try{
+      const r=await fetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent(u));
+      if(r.ok){ const j=await r.json(); if(j&&j.title){ out.title=String(j.title).trim().slice(0,110); return out } }
+    }catch(e){}
+  }
   try{
     const r=await fetch('https://api.microlink.io/?url='+encodeURIComponent(u));
     const j=await r.json();
-    const d=(j&&j.data)||{};
+    if(!j||j.status!=='success'){ out.fail=r.status===429||r.status>=500; out.miss=true; return out }
+    const d=j.data||{};
     if(!out.image&&d.image&&d.image.url) out.image=d.image.url;
-    if(d.title) out.title=String(d.title).trim().slice(0,90);
-    else if(d.description) out.title=String(d.description).trim().slice(0,90);
-  }catch(e){}
+    const clean=x=>String(x||'').replace(/\s+/g,' ').trim();
+    const generic=x=>!x||/^(instagram|threads|tiktok|youtube|log ?in|sign ?in|just a moment)\b.{0,12}$/i.test(x);
+    const social=/instagram\.com|threads\.(net|com)|tiktok\.com|(^|\.)x\.com|twitter\.com/.test(hostOf(u));
+    const ti=clean(d.title), de=clean(d.description);
+    const pick=social&&de&&!/followers|log in|sign up/i.test(de)?de:(!generic(ti)?ti:de);
+    out.title=clean(pick).slice(0,110);
+  }catch(e){ out.fail=true }
   return out;
 }
 
@@ -4531,6 +4641,7 @@ function bindProject(p){
   if(ti) ti.addEventListener('keydown',e=>{if(e.key==='Enter')add()});
   bindQuickBar(p);
   bindIdeas(p);
+  if(p.id===INBOX) enrichIdeas(p);
   bindWish(p);
   bindTodo(p);
   bindLinks(p);
