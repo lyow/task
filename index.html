@@ -2167,6 +2167,35 @@ body:has(.paid-pop) .fab-wrap{display:none}
 .wnext svg{color:var(--amber)}
 .wnext small{color:var(--dim);font-size:12.5px}
 .wnext:hover{background:var(--raise)}
+/* command palette */
+.cmdk-wrap{align-items:flex-start;padding-top:12vh}
+.cmdk{width:100%;max-width:560px;border-radius:18px;background:var(--panel);border:1px solid var(--line-2);box-shadow:0 40px 90px -30px #000;overflow:hidden;animation:sheetIn .16s cubic-bezier(.2,.8,.2,1)}
+.cmdk-in{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);color:var(--dim)}
+.cmdk-in input{flex:1;min-width:0;border:none;background:none;color:var(--txt);font-size:17px}
+.cmdk-in input:focus{outline:none;box-shadow:none}
+.cmdk-list{max-height:min(56vh,440px);overflow-y:auto;padding:6px}
+.cmdk-it{width:100%;display:flex;align-items:center;gap:12px;min-height:42px;padding:8px 10px;border-radius:10px;text-align:left;font-size:14.5px;color:var(--txt)}
+.cmdk-it.on,.cmdk-it:hover{background:var(--raise)}
+.cmdk-ic{display:flex;color:var(--soft)}
+.cmdk-l{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmdk-it small{font-size:12px;color:var(--dim);white-space:nowrap}
+.cmdk-none{padding:16px;color:var(--dim);font-size:14px;margin:0}
+.cmdk-foot{padding:8px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+/* home money line */
+.home-money{font-size:13.5px;color:var(--soft);padding:3px 10px;border-radius:999px;border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.home-money:hover{background:var(--raise);color:var(--txt)}
+/* settings sheet */
+.set-sheet{max-width:440px}
+.set-sec{margin-bottom:14px}
+.set-sec h3{margin:0 0 6px;font-size:13px;font-weight:600;color:var(--dim)}
+.set-list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.set-list .tool{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 14px;border-radius:0;font-size:14.5px;color:var(--txt);background:none}
+.set-list .tool+.tool{border-top:1px solid var(--line)}
+.set-list .tool:hover{background:var(--panel-2)}
+.set-list .tool svg{color:var(--soft)}
+.set-list .tool.on svg{color:var(--lime)}
+.set-ver{margin:6px 0 0;font-size:12px;color:var(--dim);text-align:center}
+@media (max-width:760px){.cmdk-wrap{padding-top:10px}.cmdk{max-width:none}}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -2272,9 +2301,9 @@ body:has(.paid-pop) .fab-wrap{display:none}
     </button>
     <span class="crumb" id="crumb">All projects</span>
     <span class="net-dot" id="netDot" style="display:none"></span>
-    <button class="quick-btn" id="quickBtn" title="Quick add — Ctrl+K">
+    <button class="quick-btn" id="quickBtn" title="Quick add">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      quick add <kbd>Ctrl K</kbd>
+      quick add
     </button>
   </div>
   <div id="view"></div>
@@ -3311,7 +3340,9 @@ function renderAll(){
     ${(()=>{const s=doneStats(), d=new Date();
       return `<div class="day"><b>${WEEK[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}</b>
         ${s.today?`<span class="day-done">${svg('boxOk',14,2)} ${s.today} done today</span>`:''}
-        ${s.streak>1?`<span class="day-streak">${s.streak} days in a row</span>`:''}</div>`})()}
+        ${s.streak>1?`<span class="day-streak">${s.streak} days in a row</span>`:''}
+        ${(()=>{ const m=monthSum(spendEntries().filter(e=>monthKey(e.at)===nowKey())); if(!m.v&&!m.inc) return '';
+          return `<button class="home-money" id="homeMoney">${MONL[new Date().getMonth()]}: spent ${m.approx?'≈ ':''}${money2(m.v)}${m.inc?` · <span class="${m.inc-m.v>=0?'g-win':'g-loss'}">${m.inc-m.v>=0?'left':'over'} ${m.approx||m.iapprox?'≈ ':''}${money2(Math.abs(m.inc-m.v))}</span>`:''}</button>` })()}</div>`})()}
     <div class="jot" data-to="${jot.id}">
       <div class="jot-tabs" id="capTo">${jots.map(j=>`<button class="jot-tab ${jot.id===j.id?'on':''}" data-to="${j.id}">${j.label}</button>`).join('')}</div>
       <div class="capture">
@@ -3383,6 +3414,7 @@ function renderAll(){
       </a>`}).join('')}</div>`)
     :`<div class="empty-main empty-line"><p>Nothing to show here.</p><button class="btn-inline" id="emptyNew">${svg('plus',14,2.2)} New project</button></div>`}`;
   paintCovers();
+  const hm=$('#homeMoney'); if(hm) hm.addEventListener('click',()=>{ resetViews(); st.spend=true; route() });
   const mg=$('#migGo'), mk=$('#migSkip');
   if(mg) mg.addEventListener('click',migrateLocal);
   if(mk) mk.addEventListener('click',()=>{migrateOffer=false;LS.set('pm:migrated','1');renderAll()});
@@ -6606,11 +6638,64 @@ function exportData(){
   const n=st.projects.reduce((k,p)=>k+(p.tasks||[]).length,0);
   toast('Backup saved',{sub:st.projects.length+' lists, '+n+' items, no photos'});
 }
+/* Ctrl/Cmd+K: перейти куда угодно, сделать что угодно, добавить что угодно */
+function openPalette(){
+  if(document.querySelector('.cmdk')) return;
+  const go=fn=>()=>{ if(window.innerWidth<900) document.body.classList.remove('side-open'); fn() };
+  const NAV=[['Today','star',go(()=>{ resetViews(); st.focus=true; route() })],['Ideas','spark',go(()=>openProject(INBOX))],['Wishlist','cart',go(()=>openProject(WANT))],
+    ['Spending','arch',go(()=>{ resetViews(); st.spend=true; route() })],['To do','boxOk',go(()=>openProject(TODO))],['All projects','box',go(()=>{ resetViews(); route() })],
+    ['History','clock',go(openHistory)],['Review','done',go(()=>{ resetViews(); st.review=true; route() })]].map(([l,ic,run])=>({l,ic,run,k:'Go to'}));
+  const ACT=[['New project','plus',newProject],['Add expense or income','arch',go(()=>{ resetViews(); st.spend=true; route(); setTimeout(()=>{ const i=$('#spIn'); if(i) i.focus() },80) })],
+    ['Quick add…','plus',openQuick],['Settings','gear',openSettingsSheet],['Export backup','arch',exportData],['Restore from backup','arrow',()=>$('#jsonPick').click()],
+    ['Keyboard shortcuts','box',openKeys]].map(([l,ic,run])=>({l,ic,run,k:'Action'}));
+  const PRJ=st.projects.filter(p=>!SPECIAL(p.id)&&!p.archived).map(p=>({l:p.name||'Untitled',ic:'idle',run:go(()=>openProject(p.id)),k:'Project'}));
+  let recent=[]; try{ recent=JSON.parse(LS.get('pm:recentQ')||'[]') }catch(e){}
+  const el=document.createElement('div'); el.className='sheet-wrap cmdk-wrap';
+  el.innerHTML=`<div class="cmdk" role="dialog" aria-label="Command palette"><div class="cmdk-in">${svg('search',16,2)}<input id="cmdkIn" placeholder="Go to, run or add…" autocomplete="off" aria-label="Command"></div>
+    <div class="cmdk-list" id="cmdkList" role="listbox"></div><div class="cmdk-foot">↑ ↓ move · Enter run · Esc close</div></div>`;
+  document.body.appendChild(el);
+  const inp=el.querySelector('#cmdkIn'), box=el.querySelector('#cmdkList');
+  let items=[], sel=0;
+  const close=()=>el.remove();
+  const build=()=>{
+    const raw=inp.value.trim(), q=normName(raw);
+    const m=x=>!q||normName(x.l).indexOf(q)>=0;
+    let out=[];
+    if(!raw){ out=recent.map(r=>({l:r,ic:'search',k:'Recent search',run:()=>{ const qq=$('#q'); st.query=r; if(qq) qq.value=r; resetViews(); route() }})).concat(NAV,ACT) }
+    else{
+      const qp=parseQuick(raw), sp=parseSpend(raw);
+      const add=[
+        {l:'Add “'+raw+'” to Ideas',ic:'spark',k:'Add',w:qp.url?3:0,run:()=>saveCapture(INBOX,qp.full,qp.url,null,{})},
+        {l:'Add “'+(qp.task||raw)+'” to To do'+(qp.due?' · '+dueLabel(qp.due):''),ic:'boxOk',k:'Add',w:qp.due?3:1,run:()=>saveCapture(TODO,qp.task,qp.url,null,{cat:'other',due:qp.due,rep:qp.rep})},
+        {l:'Add “'+(qp.text||raw)+'” to Wishlist'+(qp.price?' · '+money(qp.price):''),ic:'cart',k:'Add',w:0,run:()=>saveCapture(WANT,qp.text||raw,qp.url,null,{price:qp.price})},
+        {l:(sp.inc?'Income: “':'Money: “')+raw+'”',ic:'arch',k:'Add',w:(sp.price>0||sp.gin!=null)&&(recognise(sp.text).cat||sp.inc||sp.gin!=null)?4:-1,run:()=>{ const it=addExpense(raw); if(it){ spentToast(it); refreshView() } }}
+      ].filter(x=>x.w>=0).sort((a,b)=>b.w-a.w);
+      const hits=NAV.concat(ACT,PRJ).filter(m);
+      out=(add[0].w>=3?[add[0]]:[]).concat(hits,add.slice(add[0].w>=3?1:0),[{l:'Search everything for “'+raw+'”',ic:'search',k:'Search',run:()=>{ const qq=$('#q'); st.query=raw; if(qq) qq.value=raw; resetViews(); route() }}]);
+    }
+    items=out; sel=0; paint();
+  };
+  const paint=()=>{
+    box.innerHTML=items.map((x,i)=>`<button class="cmdk-it ${i===sel?'on':''}" data-i="${i}" role="option"><span class="cmdk-ic">${svg(x.ic,15,1.8)}</span><span class="cmdk-l">${esc(x.l)}</span><small>${esc(x.k)}</small></button>`).join('')||'<p class="cmdk-none">Nothing found</p>';
+    const on=box.querySelector('.on'); if(on) on.scrollIntoView({block:'nearest'});
+  };
+  const run=i=>{ const x=items[i]; if(!x) return; close(); x.run() };
+  inp.addEventListener('input',build);
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'){ e.preventDefault(); sel=Math.min(items.length-1,sel+1); paint() }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); sel=Math.max(0,sel-1); paint() }
+    else if(e.key==='Enter'){ e.preventDefault(); run(sel) }
+    else if(e.key==='Escape'){ e.preventDefault(); close() }
+  });
+  box.addEventListener('click',e=>{ const b=e.target.closest('[data-i]'); if(b) run(+b.dataset.i) });
+  el.addEventListener('click',e=>{ if(e.target===el) close() });
+  build(); setTimeout(()=>inp.focus(),20);
+}
 function openKeys(){
   if(document.querySelector('.keys-sheet')) return;
   const mod=/Mac|iPhone|iPad/.test(navigator.platform||'')?'⌘':'Ctrl';
   const K=a=>a.map(k=>`<kbd>${k}</kbd>`).join('');
-  const rows=[['Quick add',[mod,'K']],['Search','/'],['Write it down: just start typing',null],
+  const rows=[['Go anywhere, run anything, add anything',[mod,'K']],['Search','/'],['Write it down: just start typing',null],
     ['Undo / redo',[mod,'Z'],[mod,'Shift','Z']],['Close a window or menu',['Esc']],['Paste a screenshot onto the board',[mod,'V']],
     ['Move through tasks',['↑'],['↓']],['Done / not done','Space'],['Date for the task','D'],['Move to tomorrow','T'],
     ['Save a full backup with photos',[mod,'Shift','E']],['This list',['?']]];
@@ -7772,7 +7857,8 @@ document.addEventListener('click',e=>{
   if(o){
     if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return;   // новая вкладка — пусть браузер сам
     e.preventDefault();
-    if(o.closest('.sgroup')){ st.query=''; const qq=$('#q'); if(qq) qq.value=''; }
+    if(o.closest('.sgroup')){ const rq=st.query.trim(); if(rq){ let r=[]; try{ r=JSON.parse(LS.get('pm:recentQ')||'[]') }catch(_){} r=[rq].concat(r.filter(x=>x!==rq)).slice(0,5); LS.set('pm:recentQ',JSON.stringify(r)) }
+      st.query=''; const qq=$('#q'); if(qq) qq.value=''; }
     const hid=o.dataset.hit;
     if(hid&&o.dataset.sphit){ const it=(wantP().tasks||[]).find(x=>x.id===hid);
       if(it){ resetViews(); st.spend=true; st.spMonth=Math.max(0,nowKey()-monthKey(it.doneAt)); route(); setTimeout(()=>flashItem(hid),150); return } }
@@ -8014,7 +8100,7 @@ document.addEventListener('keydown',e=>{
     return;
   }
   if((e.ctrlKey||e.metaKey)&&(e.key==='y'||e.key==='Y')){e.preventDefault();redo();return}
-  if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){e.preventDefault();openQuick();return}
+  if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){e.preventDefault();openPalette();return}
   if(e.key==='Escape'){
     const l=document.querySelector('.lb, .sheet-wrap');
     if(l) l.remove();
@@ -8058,10 +8144,29 @@ function openHistory(){
   if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
   route();
 }
-$('#sideFilter').addEventListener('click',()=>{
-  const t=$('#sideTools'); const on=t.style.display==='none';
-  t.style.display=on?'':'none'; $('#sideFilter').classList.toggle('on',on);
-});
+$('#sideFilter').addEventListener('click',openSettingsSheet);
+function openSettingsSheet(){
+  if(document.querySelector('.set-sheet')) return;
+  renderSide();
+  const SECT=[['Display',['tHideDone','tHints','tTheme','tSound']],['Reminders',['tRemind','tRemindRow']],['AI',['tAi']],
+    ['Your data',['tExport','tRestore','tFull']],['Projects',['tArchive','tResort']],['Help',['tKeys']]];
+  const el=document.createElement('div'); el.className='sheet-wrap';
+  el.innerHTML=`<div class="sheet set-sheet"><div class="sheet-head"><span>Settings</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    ${SECT.map(([h])=>`<section class="set-sec"><h3>${h}</h3><div class="set-list" data-sec="${h}"></div></section>`).join('')}
+    <p class="set-ver">${esc($('#appVer')?$('#appVer').textContent:'')}</p></div>`;
+  let full=$('#tFull');
+  if(!full){ full=document.createElement('button'); full.className='tool'; full.id='tFull'; full.innerHTML=svg('img',14,1.7)+' Full backup with photos'; full.addEventListener('click',exportAll); $('#sideTools').appendChild(full) }
+  SECT.forEach(([h,ids])=>{ const box=el.querySelector(`[data-sec="${h}"]`); ids.forEach(id=>{ const n=$('#'+id); if(n) box.appendChild(n) }) });
+  el.querySelectorAll('.set-sec').forEach(sec=>{ if(!sec.querySelector('.tool')) sec.remove() });
+  const close=()=>{ const home=$('#sideTools'); el.querySelectorAll('.tool').forEach(n=>home.appendChild(n)); el.remove() };
+  el.addEventListener('click',e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    if(e.target.closest('#tArchive,#tKeys,#tRestore,#tAi')) setTimeout(close,0);
+  });
+  el.addEventListener('keydown',e=>{ if(e.key==='Escape') close() });
+  document.body.appendChild(el);
+  new MutationObserver((m,o)=>{ if(!document.body.contains(el)){ const home=$('#sideTools'); el.querySelectorAll('.tool').forEach(n=>home.appendChild(n)); o.disconnect() } }).observe(document.body,{childList:true});
+}
 $('#tHideDone').addEventListener('click',()=>{
   st.hideDone=!st.hideDone; LS.set('pm:hideDone',st.hideDone?'1':'0');
   renderSide(); if(!st.openId&&!st.focus) renderAll();
@@ -8142,7 +8247,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:47';
+const APP_VER='19 Nov 02:49';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
