@@ -2152,6 +2152,11 @@ b,strong{font-weight:600}
 
 .trash-acts button{display:inline-flex;align-items:center;gap:5px;width:auto!important;padding:0 9px!important;font-size:12px;font-weight:600}
 .trash-age{font-variant-numeric:tabular-nums}
+
+.app-ver{display:block;width:100%;padding:2px 10px 10px;font-size:11.5px;color:var(--dim);text-align:center;font-variant-numeric:tabular-nums}
+.app-ver:hover{color:var(--soft)}
+.app-ver.new{color:var(--lime);font-weight:600}
+h1.p-title{margin:0;font-family:var(--display)}
 </style>
 </head>
 <body class="side-open">
@@ -2223,10 +2228,10 @@ b,strong{font-weight:600}
       <button class="arch-link" id="archLink">Archive</button>
       <button class="arch-link" id="histLink">History</button>
       <button class="sign-out" id="signOut">Sign out</button>
-      <button class="app-ver" id="appVer" title="Version of the app. Click to check for a newer one"></button>
     </div>
     <input type="file" id="wishPick" accept="image/*" hidden>
   </div>
+  <button class="app-ver" id="appVer" title="Version of the app. Tap to check for a newer one"></button>
 </aside>
 
 <main id="main">
@@ -3644,7 +3649,7 @@ function renderFocus(){
             <button class="check" data-ftoggle="${g.p.id}|${t.id}" aria-label="Toggle">${svg(t.done?'boxOk':'box',17,1.8)}</button>
             <span>${linkify(t.text)}</span>
             ${dueOf(t)?dueChip(g.p.id,t):''}
-            <button class="task-del" data-funstar="${g.p.id}|${t.id}" title="Remove from today">${svg('x',13,2)}</button>
+            ${t.done?'':`<button class="tsnooze" data-funstar="${g.p.id}|${t.id}" title="Not today — move to tomorrow">${svg('arrow',14,2)}</button>`}
           </li>`).join('')}</ul>
       </div>`).join('')}
       ${doneN?`<div style="max-width:760px;margin:0 auto"><button class="btn-inline" id="clearDone">Clear ${doneN} finished</button></div>`:''}
@@ -3669,7 +3674,7 @@ function renderFocus(){
     const [pid,tid]=(tg?tg.dataset.ftoggle:un.dataset.funstar).split('|');
     const pr=st.projects.find(x=>x.id===pid); if(!pr) return;
     const task=(pr.tasks||[]).find(x=>x.id===tid); if(!task) return;
-    if(tg){ task.done=!task.done; task.doneAt=task.done?Date.now():null; rollRepeat(task) } else { task.star=false; if(dueOf(task)&&dueOf(task)<=ld()) setDue(task,'') }
+    if(tg){ task.done=!task.done; task.doneAt=task.done?Date.now():null; rollRepeat(task) } else { const was={star:task.star,due:dueOf(task)}; task.star=false; setDue(task,ldPlus(1)); toast('Moved to tomorrow',{action:'Undo',onAction:()=>{ task.star=was.star; setDue(task,was.due); saveProject(pr,true); renderFocus(); renderSide() }}) }
     saveProject(pr,true); renderFocus(); renderSide();
   }); }
   const cd=$('#clearDone');
@@ -4053,7 +4058,7 @@ function todoPane(p){
           <button class="star ${i.star?'on':''}" data-tdstar="${i.id}" title="${i.star?'Remove from today':'Do it today'}">${svg('star',15,1.8)}</button>
           <button class="row-more" data-amenu title="Actions" aria-label="Actions"><i></i><i></i><i></i></button>
           <div class="idea-acts">
-            <button data-tdexp2="${i.id}" title="${exp?'Close':'Link and notes'}">${svg(exp?'x':'pen',13,1.9)}</button>
+            <button data-tdexp2="${i.id}" title="${exp?'Close':'Link and note'}">${svg(exp?'x':'pen',13,1.9)}</button>
             ${i.done?'':`<button data-due="${p.id}|${i.id}" title="${dueOf(i)?'Change the date':'Set a date'}">${svg('clock',13,1.9)}</button>`}
             <button data-tdmk="${i.id}" title="Turn into a project">${svg('plus',13,2.4)}</button>
             <button data-tddel="${i.id}" title="Delete">${svg('trash',13,1.8)}</button>
@@ -5517,7 +5522,7 @@ async function renderProject(){
   $('#view').innerHTML=`
     <header class="head p-head">
       <div class="p-title-row">
-        <input class="p-title" id="pTitle" value="${esc(p.name)}" placeholder="Project name">
+        ${SPECIAL(p.id)?`<h1 class="p-title">${esc(p.name)}</h1>`:`<input class="p-title" id="pTitle" value="${esc(p.name)}" placeholder="Project name" aria-label="Project name">`}
         ${SPECIAL(p.id)?'':`<button class="row-more big" data-pmenu="${p.id}" title="Project menu" aria-label="Project menu"><i></i><i></i><i></i></button>`}
       </div>
       <div class="p-meta">
@@ -5541,14 +5546,14 @@ async function renderProject(){
         </div>
         <ul class="tasks" id="taskList">${renderTasks(t)}</ul>
       </section>`}
-      ${p.id===WANT||p.id===TODO?'':`<section class="pane">
+      ${p.id===WANT||p.id===TODO||(p.id===INBOX&&!(p.notes||'').trim())?'':`<section class="pane">
         <h2 class="pane-h">Notes</h2>
         <textarea class="notes" id="notes" placeholder="Ideas, links, half-formed thoughts — all of it goes here. Saves itself.">${esc(p.notes||'')}</textarea>
       </section>`}
-      ${p.id===WANT||p.id===TODO?'':linksPane(p)}
+      ${p.id===WANT||p.id===TODO||(p.id===INBOX&&!linksOf(p).length)?'':linksPane(p)}
       ${p.id===WANT||p.id===TODO?'':`<section class="pane wide board-pane ${boardOpen(p.id)?'':'collapsed'}">
         <h2 class="pane-h">
-          <button class="board-toggle" id="boardToggle">Board <span class="count" id="phCount"></span>
+          <button class="board-toggle" id="boardToggle">Photos <span class="count" id="phCount"></span>
             <span class="qchev">${svg('chev',11,2.2)}</span></button><span class="sp"></span>
           <button class="ghost-btn" id="addPhoto">${svg('img',14,1.8)} Add photo</button>
           <button class="row-more" data-amenu title="More" aria-label="More"><i></i><i></i><i></i></button>
@@ -5672,8 +5677,7 @@ function updateBarAndNext(p){
   if(bar&&t.length){bar.querySelector('i').style.width=(d/t.length)*100+'%';bar.querySelector('b').textContent=d+'/'+t.length}
 }
 function bindProject(p){
-  if(SPECIAL(p.id)) $('#pTitle').readOnly=true;
-  $('#pTitle').addEventListener('input',e=>{
+  if($('#pTitle')) $('#pTitle').addEventListener('input',e=>{
     p.name=e.target.value;
     $('#crumb').textContent=p.name||'Untitled';
     document.title=p.name||'Untitled';
@@ -7881,7 +7885,7 @@ if(/Mac|iPhone|iPad/.test(navigator.platform||'')) document.querySelectorAll('#q
 $('#btnAcct').addEventListener('click',e=>{ e.stopPropagation(); acctMenu($('#btnAcct')) });
 function acctMenu(btn){
   closeProjectMenu();
-  const an=archivedCount(), ver=($('#appVer')||{}).textContent||'';
+  const an=archivedCount();
   const el=document.createElement('div'); el.className='pmenu acct-menu';
   el.innerHTML=`<button data-a="histLink">${svg('clock',15,1.8)} History</button>
     <button data-a="archLink">${svg('arch',15,1.8)} Archive${an?`<span class="pm-n">${an}</span>`:''}</button>
@@ -7890,7 +7894,7 @@ function acctMenu(btn){
     <button data-a="keys">${svg('box',15,1.8)} Keyboard shortcuts</button>
     <div class="pm-sep"></div>
     <button data-a="signOut">${svg('arrow',15,1.8)} Sign out</button>
-    ${ver?`<button data-a="appVer" class="pm-ver">${esc(ver)}</button>`:''}`;
+    `;
   document.body.appendChild(el);
   const r=btn.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight;
   el.style.left=Math.max(8,Math.min(r.right-w,innerWidth-w-8))+'px';
@@ -8078,7 +8082,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:38';
+const APP_VER='19 Nov 03:41';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
