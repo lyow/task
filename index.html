@@ -2090,6 +2090,12 @@ body:has(.paid-pop) .fab-wrap{display:none}
 .btn-nav.on .ncount{color:var(--soft)}
 /* one shape per control, whatever the section */
 .btn-nav{height:40px;min-height:0}
+.btn-nav.want,.btn-nav.want:hover{border:0;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;opacity:1}
+#btnFocus svg,#btnFocus.on svg{color:var(--amber)}
+#btnIdeas svg,#btnIdeas.on svg{color:var(--violet)}
+#btnWant svg,#btnWant.on svg{color:var(--mint)}
+#btnSpend svg,#btnSpend.on svg{color:var(--lime)}
+#btnTodo svg,#btnTodo.on svg{color:var(--magenta)}
 .row{border-radius:10px}
 .row-name{padding:9.5px 8px;line-height:21px}
 /* a chosen filter or tab is quiet; lime stays for actions */
@@ -2146,6 +2152,15 @@ body:has(.paid-pop) .fab-wrap{display:none}
 [data-row][data-swipe=later].armed{box-shadow:6px 0 0 var(--amber)}
 [data-row]:not(.swiping){transition:transform .2s cubic-bezier(.2,.8,.2,1)}
 [data-row].kfocus{outline:2px solid var(--lime);outline-offset:-2px;border-radius:10px}
+.idea-q{margin:12px 0 0;max-width:420px}
+.resurf{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 0;padding:12px 14px;border-radius:14px;border:1px dashed var(--line-2)}
+.resurf-k{font-size:12.5px;color:var(--dim);white-space:nowrap}
+.resurf-t{flex:1;min-width:160px;font-size:14.5px}
+.resurf-t a{color:var(--txt);text-decoration:none}
+.resurf-t a:hover{text-decoration:underline}
+.resurf-a{display:flex;gap:6px}
+.resurf-a button{min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);font-size:13px;font-weight:600;color:var(--soft)}
+.resurf-a button:hover{background:var(--raise);color:var(--txt)}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -3860,6 +3875,20 @@ function ideaTitle(i){
   if(u){ const k=linkKind(u); return (k.name+' '+k.what).trim() }
   return t||'Untitled';
 }
+/* та же ссылка уже есть — не дублируем, показываем её */
+const normUrl=u=>String(u||'').toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/[?#].*$/,'').replace(/\/+$/,'');
+function dupIdea(u){ const p=st.projects.find(x=>x.id===INBOX); const n=normUrl(u); return n&&p?ideasOf(p).find(i=>ideaUrl(i)&&normUrl(ideaUrl(i))===n):null }
+function showDup(d){
+  toast('Already saved',{sub:ideaTitle(d),action:'Show it',onAction:()=>{ st.ideaQ=''; st.ideaFolder=d.cat||''; openProject(INBOX); setTimeout(()=>flashItem(d.id),200) }});
+}
+/* раз в день одна старая идея наверху: открыть, оставить или убрать в архив */
+function resurfaceIdea(p){
+  if(LS.get('pm:resurfHide')===ld()) return null;
+  const pool=ideasOf(p).filter(i=>!i.cat&&i.created&&Date.now()-i.created>14*864e5);
+  if(pool.length<3) return null;
+  const seed=Number(ld().replace(/-/g,''));
+  return pool[seed%pool.length];
+}
 function ideaCard(p,i,cur){
   const url=ideaUrl(i), kind=url?linkKind(url):null;
   const img=i.preview||(url?autoThumb(url):'');
@@ -3883,6 +3912,8 @@ function ideaCard(p,i,cur){
         <button data-ifol="${i.id}" title="Move to a folder">${svg('arch',11,1.7)}</button>
         <button data-mk="${i.id}" title="Turn this into its own project">${svg('plus',11,2.4)}</button>
         <button data-mv="${i.id}" title="Move into an existing project">${svg('arrow',11,2)}</button>
+        <button data-ito="${i.id}" title="Move to To do">${svg('boxOk',11,2)}</button>
+        <button data-iwish="${i.id}" title="Move to Wishlist">${svg('cart',11,2)}</button>
         <button data-ied="${i.id}" title="Edit">${svg('pen',11,1.8)}</button>
         <button data-idel="${i.id}" title="Delete">${svg('x',11,2.4)}</button>
       </div>
@@ -3931,8 +3962,11 @@ function ideasPane(p){
   const srcs={}; shown.forEach(i=>{const k=srcOf(i); srcs[k]=(srcs[k]||0)+1});
   const srcList=Object.keys(srcs).sort((a,b)=>(a==='Notes')-(b==='Notes')||srcs[b]-srcs[a]);
   if(st.ideaSrc&&!srcs[st.ideaSrc]) st.ideaSrc='';
+  const iq=normName(st.ideaQ||'');
+  if(iq) shown=all.filter(i=>normName(ideaTitle(i)+' '+(ideaUrl(i)||'')+' '+(i.note||'')+' '+(i.text||'')).indexOf(iq)>=0).slice().reverse();
   const total=shown.length;
-  if(st.ideaSrc) shown=shown.filter(i=>srcOf(i)===st.ideaSrc);
+  if(st.ideaSrc&&!iq) shown=shown.filter(i=>srcOf(i)===st.ideaSrc);
+  const old=!iq&&cur===''?resurfaceIdea(p):null;
   const countOf=id=>id===''?inbox.length:id===ARCHIVE?archived.length:all.filter(i=>i.cat===id).length;
 
   return `<section class="pane wide">
@@ -3952,6 +3986,11 @@ function ideasPane(p){
       <input id="taskInput" placeholder="${cur&&cur!==ARCHIVE?'Add to '+esc(folderName(p,cur)):'Paste a link or write it down'}">
       <button id="taskAdd">${svg('plus',15,2.4)}</button>
     </div>
+    ${all.length>6?`<label class="sp-q idea-q ${iq?'on':''}">${svg('search',14,2)}<input id="ideaQ" value="${esc(st.ideaQ||'')}" placeholder="Filter ideas" autocomplete="off" aria-label="Filter ideas"></label>`:''}
+    ${iq?`<p class="sp-found">${total} found in all folders</p>`:''}
+    ${old?`<div class="resurf"><span class="resurf-k">From ${esc(ago(old.created))}</span>
+      <span class="resurf-t">${ideaUrl(old)?`<a href="${esc(ideaUrl(old))}" target="_blank" rel="noopener">${esc(ideaTitle(old))}</a>`:esc(ideaTitle(old))}</span>
+      <span class="resurf-a"><button data-rkeep>Keep</button><button data-rarch="${old.id}">Archive it</button></span></div>`:''}
 
     ${srcList.length>1?`<div class="chips" style="margin:14px 0 0">
       <button class="chip ${st.ideaSrc?'':'on'}" data-isrc="">All <span class="chip-n">${total}</span></button>
@@ -5461,7 +5500,33 @@ function bindIdeas(p){
   });
   $('#view').querySelectorAll('[data-isrc]').forEach(b=>b.addEventListener('click',()=>{st.ideaSrc=b.dataset.isrc;renderProject()}));
   const na=$('#aiNameAll'); if(na) na.addEventListener('click',()=>aiNameAll(p));
+  const iqi=$('#ideaQ');
+  if(iqi){ iqi.addEventListener('input',()=>{ const pos=iqi.selectionStart; st.ideaQ=iqi.value; renderProject(); const n=$('#ideaQ'); if(n){ n.focus(); n.setSelectionRange(pos,pos) } });
+    iqi.addEventListener('keydown',e=>{ if(e.key==='Escape'){ st.ideaQ=''; renderProject() } }) }
+  const rs=$('#view').querySelector('.resurf');
+  if(rs) rs.addEventListener('click',e=>{
+    if(e.target.closest('[data-rkeep]')){ LS.set('pm:resurfHide',ld()); renderProject(); return }
+    const a=e.target.closest('[data-rarch]'); if(!a) return;
+    const it=(p.tasks||[]).find(x=>x.id===a.dataset.rarch); if(!it) return;
+    const was=it.cat; it.cat=ARCHIVE; LS.set('pm:resurfHide',ld()); saveProject(p,true); renderProject(); renderSide();
+    toast('Archived',{action:'Undo',onAction:()=>{ it.cat=was; saveProject(p,true); renderProject(); renderSide() }});
+  });
   const box=$('#ideas'); if(!box) return;
+  box.addEventListener('click',e=>{
+    const b=e.target.closest('[data-ito],[data-iwish]'); if(!b) return;
+    const toTodo=!!b.dataset.ito, key=b.dataset.ito||b.dataset.iwish;
+    const idea=(p.tasks||[]).find(x=>x.id===key); if(!idea) return;
+    const target=st.projects.find(x=>x.id===(toTodo?TODO:WANT)); if(!target) return;
+    const u=ideaUrl(idea), title=ideaTitle(idea);
+    const ni=toTodo?{id:uid(),text:title,cat:'other',url:u||'',note:'',done:false,created:Date.now()}
+      :{id:uid(),text:title,price:null,url:u||'',done:false,created:Date.now()};
+    target.tasks=target.tasks||[]; target.tasks.push(ni);
+    const at=p.tasks.indexOf(idea); p.tasks.splice(at,1);
+    saveProject(target,true); saveProject(p,true); renderProject(); renderSide();
+    toast(toTodo?'Moved to To do':'Moved to Wishlist',{action:'Undo',onAction:()=>{
+      target.tasks=target.tasks.filter(x=>x.id!==ni.id); p.tasks.splice(Math.min(at,p.tasks.length),0,idea);
+      saveProject(target,true); saveProject(p,true); refreshView() }});
+  });
   box.addEventListener('click',async e=>{
     const pvw=e.target.closest('[data-iprev]');
     if(pvw&&!(e.metaKey||e.ctrlKey||e.shiftKey)){
@@ -5751,6 +5816,7 @@ function bindProject(p){
       const m=v.match(URL_RE);
       if(m){
         let u=m[0]; if(!/^https?:/i.test(u)) u='https://'+u;
+        const dup=dupIdea(u); if(dup){ i.value=''; return showDup(dup) }
         item.url=u;
         item.text=v.replace(m[0],'').trim();
         if(!item.text) item.text=shortUrl(u);
@@ -6713,6 +6779,7 @@ async function saveCapture(target,text,url,file,extra){
     p.tasks.push(ni);
     saveProject(p,true); what='Added to To do';
   }else{
+    if(p.id===INBOX&&url){ const dup=dupIdea(url); if(dup) return showDup(dup) }
     const it={id:uid(),kind:p.id===INBOX?undefined:'task',text:text||'',done:false,created:Date.now()};
     if(p.id===INBOX&&url){
       it.url=url;
@@ -8050,7 +8117,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:44';
+const APP_VER='19 Nov 02:46';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
