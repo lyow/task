@@ -1752,6 +1752,9 @@ input:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--lime) 15
 .pmenu>button svg{width:15px;height:15px}
 @media (hover:hover){.idea .row-more,.tditem .row-more{opacity:0}
   .idea:hover .row-more,.tditem:hover .row-more,.idea .row-more:focus-visible,.tditem .row-more:focus-visible{opacity:1}}
+.app-ver{display:block;margin:8px auto 0;padding:4px 8px;border-radius:7px;font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.app-ver:hover{color:var(--soft);background:var(--raise)}
+.app-ver.new{color:var(--on);background:var(--lime);font-weight:600}
 .pmenu{position:fixed;z-index:150;min-width:232px;padding:6px;border-radius:14px;background:var(--panel-2);
   border:1px solid var(--line-2);box-shadow:0 24px 60px -20px #000;animation:pmenuIn .12s ease}
 @keyframes pmenuIn{from{opacity:0;transform:translateY(-4px) scale(.98)}to{opacity:1;transform:none}}
@@ -2118,6 +2121,7 @@ body:has(.digest) .fab-wrap{display:none}
       <button class="arch-link" id="histLink">History</button>
     </div>
     <button class="sign-out" id="signOut">Sign out</button>
+    <button class="app-ver" id="appVer" title="Version of the app. Click to check for a newer one"></button>
     <input type="file" id="wishPick" accept="image/*" hidden>
   </div>
 </aside>
@@ -7382,6 +7386,28 @@ window.addEventListener('paste',e=>{
   addPhotos(items.map(i=>i.getAsFile()).filter(Boolean));
 });
 
+
+/* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
+const APP_VER='19 Nov 02:15';
+(function(){
+  const el=document.getElementById('appVer'); if(!el) return;
+  let fresh=null, busy=false;
+  const paint=()=>{ el.textContent=fresh?'Update to '+fresh:'v '+APP_VER; el.classList.toggle('new',!!fresh) };
+  async function check(loud){
+    if(busy||fresh) return; busy=true;
+    try{
+      const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});
+      const m=r.ok&&(await r.text()).match(/const APP_VER\s?='([^']+)'/);
+      if(m&&m[1]!==APP_VER){ fresh=m[1]; paint(); toast('New version is ready',{action:'Update',onAction:()=>location.reload()}) }
+      else if(loud) toast(m?'You have the latest version':'Could not check right now');
+    }catch(e){ if(loud) toast('Could not check right now') }
+    busy=false;
+  }
+  el.addEventListener('click',()=>{ if(fresh) location.reload(); else check(true) });
+  paint();
+  setInterval(()=>{ if(!document.hidden) check(false) },60000);
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(false) });
+})();
 
 let edgeX=null;
 window.addEventListener('touchstart',e=>{
