@@ -6854,7 +6854,7 @@ async function setCapturePhoto(p,file){
   }catch(e){ console.error(e); toast('Photo failed',{kind:'bad'}) }
 }
 
-async function openCapture(){
+async function openCapture(preText,preFile){
   if(document.querySelector('.cap-wrap')) return;
   let target=st.spend?'spent':(st.openId||INBOX);                       // внутри раздела — пишем в него
   let file=null, clip='';
@@ -6886,6 +6886,8 @@ async function openCapture(){
 
   const close=()=>{ el.classList.remove('in'); setTimeout(()=>el.remove(),220) };
   const ta=el.querySelector('#capText');
+  if(preText) ta.value=preText;
+  if(preFile){ file=preFile; el.querySelector('#cpPhotoLabel').textContent='1 photo'; el.querySelector('#capPhoto').classList.add('has') }
   const hint=el.querySelector('#cpHint');
   const paste=el.querySelector('#capPaste');
 
@@ -7961,6 +7963,23 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){ const ex=cur.querySelector('[data-tdexp],[data-taskexp]'); if(ex){ e.preventDefault(); ex.click() } return }
   if(e.key==='Escape') cur.classList.remove('kfocus');
 },true);
+/* поделились из другого приложения: берём сохранённое воркером и открываем обычный ввод с тем же распознаванием */
+function openShared(){
+  try{ history.replaceState(null,'',location.pathname+location.hash) }catch(e){}
+  const open=indexedDB.open('pm-share',1);
+  open.onupgradeneeded=()=>open.result.createObjectStore('inbox');
+  open.onsuccess=()=>{
+    const tx=open.result.transaction('inbox','readwrite'), store=tx.objectStore('inbox'), g=store.get('last');
+    g.onsuccess=()=>{
+      const d=g.result; store.delete('last');
+      if(!d||Date.now()-(d.at||0)>10*60e3) return;
+      const parts=[d.title,d.text,d.url].map(x=>String(x||'').trim()).filter(Boolean);
+      const uniq=parts.filter((x,i)=>!parts.some((y,j)=>j!==i&&y.length>x.length&&y.includes(x)));
+      setTimeout(()=>openCapture(uniq.join(' '),d.file||null),300);
+    };
+  };
+}
+if('serviceWorker' in navigator&&location.protocol!=='file:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 /* голосом: заполняет поле, ничего не отправляет само; язык — как у системы, долгое нажатие переключает ru/en */
 const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
 const voiceLang=()=>LS.get('pm:voiceLang')||(/^ru/i.test(navigator.language||'')?'ru-RU':'en-US');
@@ -8169,7 +8188,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:31';
+const APP_VER='19 Nov 03:32';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
@@ -8317,7 +8336,8 @@ async function afterLogin(){
     /* «важное» теперь — это закреплённое; флаг в данных остаётся как был */
     st.projects.forEach(p=>{ if(p.important&&!p.pinned&&!SPECIAL(p.id)){ p.pinned=true; saveProject(p,true) } }); sortProjects();
     loadRates().then(c=>{ if(c){ renderSide(); if(st.spend) renderSpend() } });
-    setTimeout(()=>{ showDigest(); checkRemind() },700);
+    if(/[?&]shared=1/.test(location.search)) openShared();
+    else setTimeout(()=>{ showDigest(); checkRemind() },700);
   }catch(e){
     console.error(e);
     document.getElementById('view').innerHTML='<div class="pad"><h1 style="font-family:var(--display);font-size:20px">Could not reach the database</h1><p class="lede">Check your connection and reload. If it keeps failing, the tables or their access rules may not be set up yet.</p></div>';
