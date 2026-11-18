@@ -1923,6 +1923,15 @@ body:has(.paid-pop) .fab-wrap{display:none}
   .sp-month button{width:40px;height:40px}
   .sp-cats .chip{min-height:40px}
 }
+/* batch 3 */
+.wsum{display:inline-flex;align-items:baseline;gap:6px;margin-left:8px;font-family:var(--display);font-size:18px;font-weight:600;color:var(--txt)}
+.wsum small{font-family:var(--ui);font-size:13px;font-weight:500;color:var(--dim)}
+.kb-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.kb-row:last-of-type{border-bottom:none}
+.kb-k{display:inline-flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.keys-sheet kbd,.kb-k kbd{display:inline-block;min-width:24px;padding:3px 7px;border-radius:7px;border:1px solid var(--line-2);border-bottom-width:2px;
+  background:var(--bg);font-family:var(--ui);font-size:12.5px;font-weight:600;color:var(--soft);text-align:center}
+@media (hover:none){#tKeys{display:none}}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -1997,6 +2006,8 @@ body:has(.paid-pop) .fab-wrap{display:none}
     <button class="tool" id="tSound"></button>
     <button class="tool" id="tAi"></button>
     <button class="tool" id="tResort">Sort automatically again</button>
+    <button class="tool" id="tExport"></button>
+    <button class="tool" id="tKeys"></button>
   </div>
   <div id="sideList"></div>
 
@@ -2455,7 +2466,7 @@ function toast(m,opt){
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')==='1',wishList:LS.get('pm:wishlist')==='1',qbar:{},ideaFolder:'',chipsOpen:false,boardOpen:{},refOpen:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'other',capTo:LS.get('pm:capTo')||'inbox',capFocus:true,todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')==='1',wishList:LS.get('pm:wishlist')==='1',qbar:{},ideaFolder:'',chipsOpen:false,boardOpen:{},refOpen:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'other',capTo:LS.get('pm:capTo')||'inbox',capFocus:true,todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:LS.get('pm:wsort')||'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -2682,9 +2693,7 @@ function undo(){
   if(before===null) return;
   redoStack.push({pid:step.pid,snap:before});
   sortProjects();
-  if(st.openId===step.pid) renderProject();
-  else if(!st.openId&&!st.focus&&!st.hist) renderAll();
-  renderSide();
+  refreshView();
   toast('Undone');
 }
 function redo(){
@@ -2694,9 +2703,7 @@ function redo(){
   if(before===null) return;
   undoStack.push({pid:step.pid,snap:before});
   sortProjects();
-  if(st.openId===step.pid) renderProject();
-  else if(!st.openId&&!st.focus&&!st.hist) renderAll();
-  renderSide();
+  refreshView();
   toast('Redone');
 }
 
@@ -2734,7 +2741,20 @@ function sideVisible(){
 const archivedCount=()=>st.projects.filter(p=>p.archived).length;
 
 /* ───────── sidebar ───────── */
+/* сколько задач на сегодня и просрочено — в заголовке вкладки и на значке приложения */
+function dueCount(){
+  const t0=ld(); let n=0;
+  st.projects.forEach(p=>{ if(p.archived) return;
+    (p.tasks||[]).forEach(t=>{ if(!t.done&&t.kind!=='sticky'&&t.kind!=='link'&&t.kind!=='quick'){ const d=dueOf(t); if(d&&d<=t0) n++ } }) });
+  return n;
+}
+function syncBadge(){
+  const n=dueCount();
+  document.title=(n?'('+n+') ':'')+pageTitle();
+  try{ if(navigator.setAppBadge){ if(n) navigator.setAppBadge(n).catch(()=>{}); else navigator.clearAppBadge().catch(()=>{}) } }catch(e){}
+}
 function renderSide(){
+  syncBadge();
   const list=sideVisible();
   $('#sideLabel').textContent='Projects · '+list.length;
   $('#btnAll').classList.toggle('on',st.openId===null&&!st.focus&&!st.hist);
@@ -2763,6 +2783,8 @@ function renderSide(){
   if(ts){ ts.innerHTML=svg(sOn?'boxOk':'box',14,1.9)+' Sounds'; ts.classList.toggle('on',sOn) }
   const ta2=$('#tAi');
   if(ta2){ ta2.innerHTML=svg('spark',14,1.8)+(aiKey()?' AI key · on':' AI key'); ta2.classList.toggle('on',!!aiKey()) }
+  const tx=$('#tExport'); if(tx&&!tx.innerHTML) tx.innerHTML=svg('arch',14,1.7)+' Export backup';
+  const tk=$('#tKeys'); if(tk&&!tk.innerHTML) tk.innerHTML=svg('box',14,1.7)+' Keyboard shortcuts';
   const tt=$('#tTheme');
   if(tt){ tt.innerHTML=svg(st.light?'boxOk':'box',14,1.9)+' Light theme'; tt.classList.toggle('on',st.light) }
   const box=$('#sideList');
@@ -3632,6 +3654,7 @@ function wishPane(p){
   let shown=(f==='done'?got:open).slice().reverse();
   if(st.wishSort==='cheap') shown=shown.slice().sort((a,b)=>(Number(a.price)||1e12)-(Number(b.price)||1e12));
   if(st.wishSort==='dear') shown=shown.slice().sort((a,b)=>(Number(b.price)||-1)-(Number(a.price)||-1));
+  if(st.wishSort==='star') shown=shown.slice().sort((a,b)=>(b.star?1:0)-(a.star?1:0));
   return `<section class="pane wide">
     <div class="wish-add">
       <input class="w-text" id="wText" placeholder="What to buy" autocomplete="off" style="flex:1;min-width:200px">
@@ -3643,9 +3666,9 @@ function wishPane(p){
     <div class="chips" style="margin:14px 0 0;align-items:center">
       <button class="chip ${f==='open'?'on':''}" data-wf="open">To buy${open.length?` <span class="chip-n">${open.length}</span>`:''}</button>
       <button class="chip ${f==='done'?'on':''}" data-wf="done">Bought${got.length?` <span class="chip-n">${got.length}</span>`:''}</button>
-      ${sum?`<b class="wsum">${money(sum)}</b>`:''}
+      ${sum&&f==='open'?`<span class="wsum">${money(sum)} <small>to buy</small></span>`:''}
       <span style="flex:1"></span>
-      <button class="chip tog" data-ws="${st.wishSort==='new'?'cheap':st.wishSort==='cheap'?'dear':'new'}" title="Change the order">${{new:'Newest',cheap:'Cheapest',dear:'Priciest'}[st.wishSort]||'Newest'}</button>
+      <button class="chip tog" data-ws="${{new:'cheap',cheap:'dear',dear:'star'}[st.wishSort]||'new'}" title="Change the order">${{new:'Newest',cheap:'Cheapest',dear:'Priciest',star:'Starred first'}[st.wishSort]||'Newest'}</button>
       <button class="chip tog ${st.wishList?'on':''}" id="wView" title="Photos or a plain list">${svg(st.wishList?'boxOk':'box',12,2)} List</button>
       <div class="cur-pick">${CURS.map(c=>`<button data-cur="${c}" class="${curSym()===c?'on':''}">${c}</button>`).join('')}</div>
     </div>
@@ -4045,7 +4068,7 @@ function bindWish(p){
   });
   $('#view').querySelectorAll('[data-cur]').forEach(b=>b.addEventListener('click',()=>{LS.set('pm:cur',b.dataset.cur);renderProject()}));
   $('#view').querySelectorAll('[data-wf]').forEach(b=>b.addEventListener('click',()=>{st.wantFilter=b.dataset.wf;renderProject()}));
-  $('#view').querySelectorAll('[data-ws]').forEach(b=>b.addEventListener('click',()=>{st.wishSort=b.dataset.ws;renderProject()}));
+  $('#view').querySelectorAll('[data-ws]').forEach(b=>b.addEventListener('click',()=>{st.wishSort=b.dataset.ws;LS.set('pm:wsort',st.wishSort);renderProject()}));
   const wv=$('#wView');
   if(wv) wv.addEventListener('click',()=>{st.wishList=!st.wishList;LS.set('pm:wishlist',st.wishList?'1':'0');renderProject()});
   if(st.wishRefocus){ st.wishRefocus=false; $('#wText').focus() }
@@ -6069,6 +6092,34 @@ function d2b(u){
   for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);
   return new Blob([a],{type:mime});
 }
+/* копия всех проектов и записей одним файлом, без фото — быстро и только на чтение */
+function exportData(){
+  const out={version:2,exported:new Date().toISOString(),projects:st.projects,photos:[]};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:'application/json'}));
+  const a=document.createElement('a'); a.href=url; a.download='organiser-'+ld()+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  LS.set('pm:lastBackup',String(Date.now()));
+  const n=st.projects.reduce((k,p)=>k+(p.tasks||[]).length,0);
+  toast('Backup saved',{sub:st.projects.length+' lists, '+n+' items, no photos'});
+}
+function openKeys(){
+  if(document.querySelector('.keys-sheet')) return;
+  const mod=/Mac|iPhone|iPad/.test(navigator.platform||'')?'⌘':'Ctrl';
+  const K=a=>a.map(k=>`<kbd>${k}</kbd>`).join('');
+  const rows=[['Quick add',[mod,'K']],['Search','/'],['Write it down: just start typing',null],
+    ['Undo / redo',[mod,'Z'],[mod,'Shift','Z']],['Close a window or menu',['Esc']],['Paste a screenshot onto the board',[mod,'V']],
+    ['Save a full backup with photos',[mod,'Shift','E']],['This list',['?']]];
+  const el=document.createElement('div');
+  el.className='sheet-wrap';
+  el.innerHTML=`<div class="sheet keys-sheet">
+    <div class="sheet-head"><span>Keyboard shortcuts</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    ${rows.map(r=>`<div class="kb-row"><span>${r[0]}</span><span class="kb-k">${r[1]?(Array.isArray(r[1])?K(r[1]):K([r[1]])):''}${r[2]?' '+K(r[2]):''}</span></div>`).join('')}
+    <p class="hint">In quick add, start with <kbd>!</kbd> for Ideas, <kbd>$</kbd> for Wishlist, <kbd>?</kbd> for To do, <kbd>&gt;</kbd> for the current project.</p>
+  </div>`;
+  el.addEventListener('click',e=>{ if(e.target===el||e.target.closest('[data-close]')) el.remove() });
+  document.body.appendChild(el);
+}
 async function exportAll(){
   toast('Preparing file…');
   const {data:prows}=await sb.from('photos').select('*');
@@ -6857,6 +6908,8 @@ document.addEventListener('keydown',e=>{
   }
   if(e.key==='/'&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'){
     e.preventDefault();document.body.classList.add('side-open');st.sideForced=true;$('#q').focus();return}
+  if(e.key==='?'&&!typing&&!e.ctrlKey&&!e.metaKey&&!document.querySelector('.qa-wrap,.sheet-wrap,.lb,.cap-wrap,#board.full')){
+    e.preventDefault(); openKeys(); return }
   // просто начни печатать — откроется быстрый ввод с этой буквой
   if(ME&&!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.isComposing&&e.key.length===1&&e.key!==' '
      &&!(e.target&&e.target.isContentEditable)
@@ -6923,6 +6976,8 @@ $('#tTheme').addEventListener('click',()=>{
   if(meta) meta.setAttribute('content',st.light?'#F2F2F6':'#08080A');
   renderSide();
 });
+$('#tExport').addEventListener('click',exportData);
+$('#tKeys').addEventListener('click',openKeys);
 $('#tResort').addEventListener('click',()=>{
   st.manual=false; LS.set('pm:manual','0');
   st.projects.forEach(p=>{p.ord=null});
