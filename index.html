@@ -2368,6 +2368,38 @@ button:active:not(:disabled){transform:scale(.97)}
 .dice{background:var(--s2);border:1px solid var(--line);color:var(--soft);box-shadow:inset 0 1px 0 var(--edge)}
 .dice svg{color:var(--lime)}
 .dice:hover{background:var(--s3);color:var(--txt);border-color:var(--line-2)}
+
+/* ideas: add first, then one tool row, then sources */
+.ideas-pane{display:flex;flex-wrap:wrap;align-items:center;column-gap:12px;row-gap:12px}
+.ideas-pane>*{flex:1 1 100%;margin:0!important}
+.ideas-pane>.task-add{order:1}
+.ideas-pane>.folders{order:2;flex:1 1 300px}
+.ideas-pane>.idea-q{order:3;flex:0 1 260px;max-width:260px}
+.ideas-pane>.sp-found{order:4}
+.ideas-pane>.resurf{order:5}
+.ideas-pane>.chips{order:6;flex:1 1 auto}
+.ideas-pane>#aiNameAll{order:7;flex:0 0 auto}
+.ideas-pane>.ideas,.ideas-pane>.empty-line,.ideas-pane>p{order:8}
+.fol{background:transparent;border:1px solid var(--line);color:var(--soft)}
+.fol:hover{border-color:var(--line-2);color:var(--txt)}
+
+.tool-cur{justify-content:space-between;cursor:default}
+.tool-cur .cur-pick{display:flex;gap:4px}
+.tool-cur .cur-pick button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);color:var(--soft);font-size:13px}
+.tool-cur .cur-pick button.on{background:var(--s3);color:var(--txt);border-color:var(--line-2)}
+
+/* spending hero: numbers, then one row of small stats */
+.sp-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sp-stats>span,.sp-stats>.sp-big{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 12px;border-radius:12px;background:var(--s1);border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--edge);margin:0}
+.sp-stats>span,.sp-stats .sp-big>span{flex-direction:column;align-items:flex-start;justify-content:center;gap:1px}
+.sp-stats small{font-size:11.5px;color:var(--dim);line-height:1.1}
+.sp-stats b{font-size:14px;font-weight:600;color:var(--txt);font-variant-numeric:tabular-nums;line-height:1.2}
+.sp-stats b.up{color:var(--soft)}
+.sp-stats .sp-big{padding-left:6px}
+.sp-stats .sp-big .sp-ic{flex-basis:30px;width:30px;height:30px;border-radius:9px}
+.sp-sum{margin-top:6px;font-size:13.5px;color:var(--soft)}
+.sp-hero{margin-top:22px}
+.sp-stats .sp-big>span{display:flex}
 </style>
 </head>
 <body class="side-open">
@@ -4168,8 +4200,7 @@ function ideasPane(p){
   const old=!iq&&cur===''?resurfaceIdea(p):null;
   const countOf=id=>id===''?inbox.length:id===ARCHIVE?archived.length:all.filter(i=>i.cat===id).length;
 
-  return `<section class="pane wide">
-    <h2 class="pane-h">Ideas <span class="count">${all.length}</span></h2>
+  return `<section class="pane wide ideas-pane">
 
     <div class="folders" id="folders">
       <button class="fol ${cur===''?'on':''}" data-fol="">${svg('spark',12,1.9)} All <span>${inbox.length}</span></button>
@@ -4230,15 +4261,17 @@ function wishPane(p){
       <button class="go" id="wAdd">${svg('plus',16,2.5)}</button>
     </div>
     ${f==='open'&&next?`<button class="wnext" data-wnext="${next.i.id}">${svg('star',13,1.9)} Buy next: <b>${esc(next.i.text)}</b> ${money(next.i.price)}${next.fits?' <small>· fits what’s left this month</small>':''}</button>`:''}
-    <div class="chips" style="margin:14px 0 0;align-items:center">
+    <div class="chips xrow" style="margin:14px 0 0;align-items:center">
       <button class="chip ${f==='open'?'on':''}" data-wf="open">To buy${open.length?` <span class="chip-n">${open.length}</span>`:''}</button>
       <button class="chip ${f==='done'?'on':''}" data-wf="done">Bought${got.length?` <span class="chip-n">${got.length}</span>`:''}</button>
       ${sum&&f==='open'?`<span class="wsum">${money(sum)} <small>to buy${starSum&&starSum<sum?' · '+money(starSum)+' starred':''}</small></span>`:''}
       <span style="flex:1"></span>
-      ${f==='open'&&open.length?`<button class="chip tog" id="wCopy" title="Copy the list as text">${svg('link',12,2)} Copy</button>`:''}
       <button class="chip tog" data-ws="${{new:'cheap',cheap:'dear',dear:'star'}[st.wishSort]||'new'}" title="Change the order">${{new:'Newest',cheap:'Cheapest',dear:'Priciest',star:'Starred first'}[st.wishSort]||'Newest'}</button>
-      <button class="chip tog ${st.wishList?'on':''}" id="wView" title="Photos or a plain list">${svg(st.wishList?'boxOk':'box',12,2)} List</button>
-      <div class="cur-pick">${CURS.map(c=>`<button data-cur="${c}" class="${curSym()===c?'on':''}">${c}</button>`).join('')}</div>
+      <button class="row-more chips-more" data-amenu title="More" aria-label="More"><i></i><i></i><i></i></button>
+      <span class="xacts" hidden>
+        ${f==='open'&&open.length?`<button id="wCopy" title="Copy the list as text">${svg('link',15,1.8)}</button>`:''}
+        <button id="wView" title="${st.wishList?'Show as cards':'Show as a list'}">${svg(st.wishList?'img':'box',15,1.8)}</button>
+      </span>
     </div>
     ${shown.length&&st.wishList?`<div class="wish-list" id="wishGrid">${shown.map(i=>`
       <div class="wrow ${i.done?'got':''}" data-id="${i.id}">
@@ -7816,19 +7849,20 @@ function renderSpend(){
           <button id="spNext" aria-label="Later month" ${off===0?'disabled':''}>${svg('chev',14,2.2)}</button>
           <button class="row-more" id="spMore" title="Export or ask" aria-label="More"><i></i><i></i><i></i></button>
         </div>
-        ${incM?`<div class="sp-three">
+        ${incM?`<div class="sp-three" title="${S.approx&&R.date?'Other currencies at rates of '+esc(R.date):''}">
           <span><small>Income</small><b class="g-win">${S.iapprox?'≈ ':''}${money2(incM)}</b></span>
           <span><small>Spent</small><b>${S.approx?'≈ ':''}${money2(total)}</b></span>
           <span><small>${left>=0?'Left':'Over'}</small><b class="${left>=0?'g-win':'g-loss'}">${S.approx||S.iapprox?'≈ ':''}${left<0?'−':''}${money2(Math.abs(left))}</b></span>
-        </div>`:`<b class="sp-total">${S.approx?'<i class="sp-approx">≈</i>':''}${money2(total)}</b>`}
+        </div>`:`<b class="sp-total" title="${S.approx&&R.date?'Other currencies at rates of '+esc(R.date):''}">${S.approx?'<i class="sp-approx">≈</i>':''}${money2(total)}</b>`}
         ${Object.keys(S.miss).length?`<span class="sp-oth">+ ${Object.keys(S.miss).map(c=>amtStr(S.miss[c],c)).join(' + ')} · no exchange rates yet</span>`:''}
-        <span class="sp-diff">${[prev?(Math.abs(diff)<0.5?'Same as '+MONL[mo(k-1)]:`${money(Math.round(Math.abs(diff)))} ${diff>0?'more':'less'} than ${MONL[mo(k-1)]}`):'',
-          total?money(Math.round(total/days))+' a day':''].filter(Boolean).join(' · ')||'Nothing spent yet'}</span>
-        ${forecast?`<span class="sp-fc">On pace for ${S.approx?'≈ ':''}${money2(forecast)} by the ${ordN(dIn)}</span>`:''}
+        ${total||prev?`<div class="sp-stats">
+          ${prev?`<span title="Compared with ${MONL[mo(k-1)]}"><small>vs ${MON[mo(k-1)]}</small><b class="${diff>0.5?'up':diff<-0.5?'down':''}">${Math.abs(diff)<0.5?'same':(diff>0?'+':'−')+money(Math.round(Math.abs(diff)))}</b></span>`:''}
+          ${total?`<span><small>Per day</small><b>${money(Math.round(total/days))}</b></span>`:''}
+          ${forecast?`<span title="Variable spending at today's pace plus monthly charges still to come"><small>On pace</small><b>${S.approx?'≈ ':''}${money(Math.round(forecast))}</b></span>`:''}
+          ${big?`<button class="sp-big" data-sp="${big.t.id}" title="Biggest expense">${spIcon(big.t)}<span><small>Biggest</small><b>${esc(spName(big.t))} ${entryAmt(big.t)}</b></span></button>`:''}
+        </div>`:'<span class="sp-diff">Nothing spent yet</span>'}
         ${summary?`<span class="sp-sum">${esc(summary)}</span>`:''}
-        ${S.approx&&R.date?`<span class="sp-oth">Other currencies at rates of ${esc(R.date)}</span>`:''}
         ${gam.length?`<span class="sp-gline ${Math.abs(gNetM)<0.5?'g-even':gNetM>0?'g-win':'g-loss'}">🎰 Gambling: ${Math.abs(gNetM)<0.5?'even':(gNetM>0?'+':'−')+money2(Math.abs(gNetM))} this month${gNetM>0?' · not counted as spending':''}</span>`:''}
-        ${big?`<button class="sp-big" data-sp="${big.t.id}">Biggest: ${spIcon(big.t)} ${esc(spName(big.t))} <b>${entryAmt(big.t)}</b></button>`:''}
         ${budget?`<div class="sp-budget ${ratio>1?'over':ratio>=.85?'near':''}"><i style="width:${Math.min(100,ratio*100)}%"></i>${off===0?`<s style="left:${Math.min(100,new Date().getDate()/new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate()*100)}%" title="Where an even pace would be today"></s>`:''}</div>
           <button class="sp-blabel" id="spBudget">${ratio>1?`${money(Math.round(total-budget))} over the ${money(budget)} budget`:`${money(Math.round(budget-total))} left of ${money(budget)}`}</button>`
         :`<button class="sp-blabel" id="spBudget">Set a monthly budget</button>`}
@@ -8347,12 +8381,16 @@ $('#sideFilter').addEventListener('click',openSettingsSheet);
 function openSettingsSheet(){
   if(document.querySelector('.set-sheet')) return;
   renderSide();
-  const SECT=[['Display',['tHideDone','tHints','tTheme','tSound']],['Reminders',['tRemind','tRemindRow']],['AI',['tAi']],
+  const SECT=[['Display',['tHideDone','tHints','tTheme','tSound','tCur']],['Reminders',['tRemind','tRemindRow']],['AI',['tAi']],
     ['Your data',['tExport','tRestore','tFull']],['Projects',['tArchive','tResort']],['Help',['tKeys']]];
   const el=document.createElement('div'); el.className='sheet-wrap';
   el.innerHTML=`<div class="sheet set-sheet"><div class="sheet-head"><span>Settings</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
     ${SECT.map(([h])=>`<section class="set-sec"><h3>${h}</h3><div class="set-list" data-sec="${h}"></div></section>`).join('')}
     <p class="set-ver">${esc($('#appVer')?$('#appVer').textContent:'')}</p></div>`;
+  let tc=$('#tCur');
+  if(!tc){ tc=document.createElement('div'); tc.className='tool tool-cur'; tc.id='tCur'; $('#sideTools').appendChild(tc) }
+  tc.innerHTML='Currency <span class="cur-pick">'+CURS.map(c=>`<button data-setcur="${c}" class="${curSym()===c?'on':''}">${c}</button>`).join('')+'</span>';
+  tc.onclick=e=>{ const b=e.target.closest('[data-setcur]'); if(!b) return; LS.set('pm:cur',b.dataset.setcur); tc.querySelectorAll('[data-setcur]').forEach(x=>x.classList.toggle('on',x===b)); refreshView() };
   let full=$('#tFull');
   if(!full){ full=document.createElement('button'); full.className='tool'; full.id='tFull'; full.innerHTML=svg('img',14,1.7)+' Full backup with photos'; full.addEventListener('click',exportAll); $('#sideTools').appendChild(full) }
   SECT.forEach(([h,ids])=>{ const box=el.querySelector(`[data-sec="${h}"]`); ids.forEach(id=>{ const n=$('#'+id); if(n) box.appendChild(n) }) });
@@ -8446,7 +8484,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:55';
+const APP_VER='19 Nov 02:57';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
