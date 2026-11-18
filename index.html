@@ -2182,7 +2182,7 @@ h1.p-title{margin:0;font-family:var(--display)}
 .cal-cell.sel{background:var(--s2);box-shadow:inset 0 0 0 1px var(--line-2)}
 .cal-cell.drop{box-shadow:inset 0 0 0 2px var(--lime)}
 .cal-n{font-size:12.5px;font-weight:600;color:var(--soft);font-variant-numeric:tabular-nums;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
-.cal-cell.today .cal-n{background:var(--lime);color:var(--on)}
+.cal-cell.is-today .cal-n{background:var(--lime);color:var(--on)}
 .cal-ev{display:flex;align-items:center;gap:5px;min-width:0;padding:2px 6px;border-radius:6px;font-size:12px;line-height:16px;background:var(--s3);color:var(--txt)}
 .cal-ev>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .cal-ev i{font-style:normal;flex:0 0 auto;font-size:11px}
@@ -2251,6 +2251,46 @@ h1.p-title{margin:0;font-family:var(--display)}
 .jr-more{font-size:13px;color:var(--soft);padding:4px 2px}
 .jr-older{display:block;margin:6px auto 0}
 .cap-t.t-note.on{background:var(--amber);color:#111;border-color:transparent}
+
+/* edit sheets: one behaviour, Done always in reach */
+.sheet-wrap{top:var(--vvt,0px);bottom:auto;height:min(var(--vvh,100%),100%)}
+.sheet{max-height:min(92vh,calc(min(var(--vvh,100vh),100vh) - 24px))}
+.keep-foot{position:sticky;bottom:calc(-22px - env(safe-area-inset-bottom));z-index:3;display:flex;align-items:center;gap:8px;margin:14px -22px calc(-22px - env(safe-area-inset-bottom));padding:12px 22px calc(12px + env(safe-area-inset-bottom));background:rgb(22,22,27);border-top:1px solid var(--line);border-radius:0 0 18px 18px}
+.keep-foot .danger{margin-right:auto}
+.keep-done{margin-left:auto;min-width:128px;width:auto}
+.f.fq{margin-bottom:12px}
+.f.fq>span{font-size:12px;color:var(--dim);margin-bottom:5px}
+.ed-sheet .sheet-head,.sp-sheet .sheet-head{margin-bottom:12px}
+.ed-link{display:flex;gap:6px;align-items:center}
+.f>.ed-link{display:flex;flex-wrap:nowrap;margin:0;font-size:inherit;color:inherit}
+.ed-link input{flex:1 1 auto;min-width:0;width:auto!important}
+.ed-link a{width:40px;padding:0}
+.keep-foot .danger{flex:0 0 auto;width:auto;margin-right:auto}
+.ed-link a{flex:0 0 40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--soft);border:1px solid var(--line)}
+.ed-link a:hover{color:var(--txt);background:var(--s2)}
+.cat-pick{position:relative}
+.ed-cat{display:flex;align-items:center;gap:8px;width:100%;min-height:42px;padding:0 12px;border-radius:10px;background:var(--s2);border:1px solid var(--line);color:var(--txt);font-size:14.5px;text-align:left}
+.ed-cat i{font-style:normal}
+.ed-cat span{flex:1}
+.ed-cat svg{color:var(--dim);transform:rotate(90deg)}
+.ed-cat[aria-expanded="true"] svg{transform:rotate(-90deg)}
+.cat-pop{margin-top:6px;max-height:208px;overflow-y:auto;border-radius:10px}
+.ed-photo{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ed-photo img{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.ed-photo .ghost-btn{min-height:40px}
+
+.cal-hint{margin:0 0 14px;padding:14px 16px;border-radius:var(--r-card);background:var(--s1);border:1px solid var(--line);font-size:14px;line-height:1.5;color:var(--soft);max-width:720px}
+.cal-hint b{color:var(--txt);font-weight:600}
+.cal-legend{margin-left:auto;display:flex;gap:14px;font-size:12.5px;color:var(--dim)}
+.cal-legend span{display:inline-flex;align-items:center;gap:6px}
+.cal-legend span::before{content:'';width:10px;height:10px;border-radius:3px;background:var(--s3)}
+.cal-legend .lg-date::before{background:color-mix(in srgb,var(--amber) 40%,var(--s3))}
+.cal-legend .lg-rep::before{background:transparent;box-shadow:inset 0 0 0 1px var(--line-2)}
+.cal-legend .lg-money::before{background:color-mix(in srgb,var(--mint) 30%,var(--s3))}
+.cal-ev.ev-money{background:color-mix(in srgb,var(--mint) 12%,var(--s3))}
+.cal-cell{min-height:92px}
+.cal-cell.is-today{background:color-mix(in srgb,var(--lime) 5%,transparent)}
+@media (max-width:1100px){.cal-legend{display:none}}
 </style>
 </head>
 <body class="side-open">
@@ -4199,56 +4239,117 @@ function todoPane(p){
   </section>`;
 }
 
+/* листы правки — одно поведение для всех: закрыть любым способом (✕, мимо, Esc, «назад») значит сохранить; «Undo» возвращает как было */
+const SHEETS=[]; let sheetPopSkip=0, sheetAfter=null, sheetHand=null;
+window.addEventListener('popstate',()=>{ if(sheetPopSkip){ sheetPopSkip--; const f=sheetAfter; sheetAfter=null; if(f) f(); return } const top=SHEETS[SHEETS.length-1]; if(top) top(true) });
+function snapKeep(obj,keys){ const pick=()=>JSON.stringify(keys?keys.map(k=>obj[k]===undefined?null:obj[k]):obj), was=pick(), raw=JSON.parse(JSON.stringify(obj));
+  return {changed:()=>pick()!==was, restore:()=>{ if(keys) keys.forEach(k=>{ if(k in raw) obj[k]=raw[k]; else delete obj[k] }); else { Object.keys(obj).forEach(k=>{ if(!(k in raw)) delete obj[k] }); Object.assign(obj,raw) } }} }
+/* o: {snap, save() — переносит поля в данные, store() — записывает, after() — перерисовывает}. Возвращает fin(): fin() сохранить и закрыть, fin.drop() закрыть без сохранения, fin.hand() закрыть, чтобы сразу открыть заново */
+function keepSheet(el,o){
+  let done=false, dirty=false, mark;
+  if(sheetHand&&history.state&&history.state.sheet===sheetHand){ mark=sheetHand } else { mark='sh'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); try{ history.pushState({sheet:mark},'',location.href) }catch(e){} }
+  sheetHand=null;
+  const kd=e=>{ if(SHEETS[SHEETS.length-1]!==fin) return;
+    if(e.key==='Escape'){ e.preventDefault(); e.stopImmediatePropagation(); fin() }
+    else if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.target.tagName==='INPUT'&&el.contains(e.target)&&!/^(file|checkbox|radio|button|date)$/.test(e.target.type)){ e.preventDefault(); fin() } };
+  const off=()=>{ done=true; const i=SHEETS.indexOf(fin); if(i>=0) SHEETS.splice(i,1); document.removeEventListener('keydown',kd,true); el.remove() };
+  const popOwn=after=>{ if(history.state&&history.state.sheet===mark){ sheetPopSkip++; sheetAfter=after; history.back();
+      setTimeout(()=>{ if(sheetAfter===after){ sheetAfter=null; sheetPopSkip=Math.max(0,sheetPopSkip-1); after() } },500) } else after() };
+  function fin(byPop){ if(done) return;
+    let ch=false;
+    try{ if(dirty&&o.save) o.save(); ch=!!(o.snap&&o.snap.changed()); if(ch&&o.store) o.store() }catch(err){ console.error(err) }
+    off();
+    const after=()=>{ if(o.after) o.after(); if(ch&&!o.quiet) toast('Saved',{action:'Undo',onAction:()=>{ o.snap.restore(); if(o.store) o.store(); if(o.after) o.after() }}) };
+    if(byPop===true) after(); else popOwn(after);
+  }
+  fin.drop=()=>{ if(done) return; off(); popOwn(()=>{}) };
+  fin.hand=()=>{ if(done) return; try{ if(dirty&&o.save) o.save(); if(o.snap&&o.snap.changed()&&o.store) o.store() }catch(err){ console.error(err) } off(); sheetHand=mark };
+  fin.dirty=()=>{ dirty=true };
+  el.addEventListener('input',()=>{ dirty=true });
+  el.addEventListener('change',()=>{ dirty=true });
+  el.addEventListener('click',e=>{
+    if(e.target===el||e.target.closest('[data-close],[data-done]')){ e.preventDefault(); e.stopImmediatePropagation(); fin(); return }
+    const b=e.target.closest('button'); if(b&&!b.closest('[data-catbtn]')) dirty=true;
+  },true);
+  document.addEventListener('keydown',kd,true);
+  SHEETS.push(fin);
+  return fin;
+}
+/* клавиатура телефона не закрывает лист: держим высоту видимой области */
+(()=>{ const v=window.visualViewport; if(!v) return; const sync=()=>{ const r=document.documentElement.style; r.setProperty('--vvh',v.height+'px'); r.setProperty('--vvt',v.offsetTop+'px') };
+  v.addEventListener('resize',sync); v.addEventListener('scroll',sync); window.addEventListener('resize',sync); sync() })();
+/* категория — один компактный выбор вместо сетки из 13 плиток */
+const catPickHTML=(on,inc)=>{ const c=SCAT[on]||SCAT[inc?'incother':'other']||{e:'•',l:on};
+  return `<div class="cat-pick" data-inc="${inc?1:0}"><button type="button" class="ed-cat" data-catbtn aria-expanded="false"><i>${c.e}</i><span>${esc(c.l)}</span>${svg('chev',12,2.2)}</button><div class="cat-pop" hidden>${catGrid(on,'data-cpk',inc)}</div></div>` };
+function catPickClick(e,onPick){
+  const b=e.target.closest('[data-catbtn]');
+  if(b){ const pop=b.nextElementSibling; pop.hidden=!pop.hidden; b.setAttribute('aria-expanded',String(!pop.hidden)); if(!pop.hidden){ const on=pop.querySelector('.on'); if(on&&on.scrollIntoView) on.scrollIntoView({block:'nearest'}) } return true }
+  const k=e.target.closest('[data-cpk]');
+  if(k){ const w=k.closest('.cat-pick'); onPick(k.dataset.cpk); w.outerHTML=catPickHTML(k.dataset.cpk,w.dataset.inc==='1'); return true }
+  return false;
+}
+const doneBtn=(left)=>`<div class="keep-foot">${left||''}<button type="button" class="gate-go keep-done" data-done>Done</button></div>`;
 function itemEdit(p,item,isWish){
+  const snap=snapKeep(item), cur0=layObj(item).cur||curSym();
+  let pick=catIdOf(item);
+  const ph=isWish&&(st.photos||[]).find(x=>x.item===item.id);
   const el=document.createElement('div');
   el.className='sheet-wrap';
-  el.innerHTML=`<div class="sheet">
-    <div class="sheet-head"><span>Edit</span><button data-close>${svg('x',15,2)}</button></div>
-    <label class="f"><span>What</span><input id="eText" value="${esc(item.text)}"></label>
-    ${isWish?`<label class="f"><span>Price (${curSym()})</span><input id="ePrice" inputmode="decimal" value="${item.price||''}"></label>`
-     :`<div class="f"><span>Kind</span><div class="kind-pick" style="flex-wrap:wrap">
-        ${CATS.map(c=>`<button data-ec="${c.id}" class="${(item.cat||'other')===c.id?'on':''}">${c.label}</button>`).join('')}
+  el.innerHTML=`<div class="sheet ed-sheet" role="dialog" aria-label="${isWish?'Wish':'Edit'}">
+    <div class="sheet-head"><span>${isWish?'Wish':'Edit'}</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    <label class="f fq"><span>Name</span><input id="eText" value="${esc(item.text)}" autocomplete="off" enterkeyhint="done"></label>
+    ${isWish?`<label class="f fq"><span>Price</span><span class="sp-amt"><select id="eCur" aria-label="Currency">${CURS.map(c=>`<option ${cur0===c?'selected':''}>${c}</option>`).join('')}</select><input id="ePrice" inputmode="decimal" value="${item.price==null?'':esc(String(item.price))}" placeholder="—" autocomplete="off" enterkeyhint="done"></span></label>`
+     :`<div class="f fq"><span>Kind</span><div class="kind-pick" style="flex-wrap:wrap">
+        ${CATS.map(c=>`<button type="button" data-ec="${c.id}" class="${(item.cat||'other')===c.id?'on':''}">${c.label}</button>`).join('')}
       </div></div>`}
-    <label class="f"><span>Link</span><input id="eUrl" placeholder="https://" value="${esc(item.url||'')}"></label>
-    ${isWish?`<div class="f"><span>Counts in Spending as</span>${catGrid(catIdOf(item),'data-wcat')}</div>`:''}
-    ${isWish?`<div class="f"><span>Photo</span><button class="wish-shot" id="ePhoto" style="width:100%">${svg('img',15,1.7)} replace photo</button></div>`:''}
-    <div class="sheet-foot"><button class="opt" id="eSave" style="width:100%">Save</button></div>
+    <label class="f fq"><span>Link</span><span class="ed-link"><input id="eUrl" placeholder="https://" value="${esc(item.url||'')}" autocomplete="off" inputmode="url" enterkeyhint="done"><a id="eOpen" href="${esc(item.url||'#')}" target="_blank" rel="noopener" title="Open the link" aria-label="Open the link" ${item.url?'':'hidden'}>${svg('link',15,1.9)}</a></span></label>
+    ${isWish?`<div class="f fq"><span>Counts in Spending as</span>${catPickHTML(pick,false)}</div>
+    <div class="f fq"><span>Photo</span><div class="ed-photo">${ph?`<img src="${esc(photoSrc(ph))}" alt="">`:''}<button type="button" class="ghost-btn" id="ePhoto">${svg('img',14,1.8)} ${ph?'Replace':'Add a photo'}</button>${ph?`<button type="button" class="ghost-btn" id="ePhDel">${svg('trash',14,1.8)} Remove</button>`:''}</div></div>`:''}
+    ${doneBtn(isWish?`<button type="button" class="danger" data-edel>${svg('trash',14,1.8)} Delete</button>`:'')}
   </div>`;
-  const close=()=>el.remove();
-  el.addEventListener('click',e=>{
-    if(e.target===el||e.target.closest('[data-close]')) return close();
-    const c=e.target.closest('[data-ec]');
-    if(c){ item.cat=c.dataset.ec; saveProject(p,true); close(); itemEdit(p,item,isWish); return }
-    const wc=e.target.closest('[data-wcat]');
-    if(wc){ if(wc.dataset.wcat!==catIdOf(item)) learnCat(item.text,wc.dataset.wcat); setLay(item,'ecat',wc.dataset.wcat); saveProject(p,true);
-      el.querySelectorAll('[data-wcat]').forEach(b=>b.classList.toggle('on',b===wc)); return }
-    if(e.target.closest('#ePhoto')){
-      const inp=$('#wishPick');
-      inp.onchange=async ev=>{
-        const f=ev.target.files[0]; ev.target.value='';
-        if(!f) return;
-        await setWishPhoto(item.id,f);
-        close(); renderProject();
-      };
-      inp.click();
-      return;
-    }
-    if(e.target.closest('#eSave')){
-      const t=el.querySelector('#eText').value.trim();
-      if(t) item.text=t;
+  const fin=keepSheet(el,{snap,
+    save:()=>{
+      const t=el.querySelector('#eText').value.trim(); if(t&&t!==item.text) item.text=t;
       if(isWish){
         const pr=parseFloat(String(el.querySelector('#ePrice').value).replace(',','.'));
-        const np=isNaN(pr)?null:pr; if(item.price&&np&&np!==Number(item.price)) setLay(item,'was',item.price);
-        if(np!==Number(item.price)){ setLay(item,'pl',''); setLay(item,'ph','') }
-        item.price=np; setLay(item,'approx','');      // цену вписали руками — она уже не примерная
+        const np=isNaN(pr)?null:pr, op=item.price==null||item.price===''?null:Number(item.price);
+        if(np!==op){ if(op&&np) setLay(item,'was',op); setLay(item,'pl',''); setLay(item,'ph',''); item.price=np; setLay(item,'approx','') }
+        const cu=el.querySelector('#eCur').value; if(cu!==cur0) setLay(item,'cur',cu===curSym()?'':cu);
+        if(pick!==catIdOf(item)){ learnCat(item.text,pick); setLay(item,'ecat',pick) }
       }
       let u=el.querySelector('#eUrl').value.trim();
       if(u&&!/^https?:\/\//i.test(u)) u='https://'+u;
-      item.url=u;
-      saveProject(p,true); close(); renderProject(); renderSide();
+      if(u!==(item.url||'')) item.url=u;
+    },
+    store:()=>saveProject(p,true),
+    after:()=>{ if(st.openId===p.id) renderProject(); else refreshView(); renderSide() }});
+  el.addEventListener('input',e=>{ if(e.target.id==='eUrl'){ const a=el.querySelector('#eOpen'), v=e.target.value.trim(); a.hidden=!v; a.href=v&&!/^https?:\/\//i.test(v)?'https://'+v:v } });
+  el.addEventListener('click',e=>{
+    if(catPickClick(e,id=>{ pick=id })) return;
+    const c=e.target.closest('[data-ec]');
+    if(c){ item.cat=c.dataset.ec; el.querySelectorAll('[data-ec]').forEach(b=>b.classList.toggle('on',b===c)); return }
+    if(e.target.closest('#ePhoto')){
+      const inp=$('#wishPick');
+      inp.onchange=async ev=>{ const f=ev.target.files[0]; ev.target.value=''; if(!f) return;
+        fin.hand(); await setWishPhoto(item.id,f); if(st.openId===p.id) renderProject(); await loadWishPhotos(); itemEdit(p,item,isWish) };
+      inp.click(); return;
+    }
+    if(e.target.closest('#ePhDel')){
+      (async()=>{ const gone=(await photosOf(WANT)).filter(x=>x.item===item.id); for(const o of gone) await delPhotoDB(o.id);
+        fin.hand(); if(st.openId===p.id) renderProject(); await loadWishPhotos(); itemEdit(p,item,isWish);
+        toast('Photo removed',{action:'Undo',onAction:async()=>{ for(const o of gone) await putPhoto(o); if(st.openId===p.id) renderProject() }}) })();
+      return;
+    }
+    if(e.target.closest('[data-edel]')){
+      fin.drop();
+      const at=p.tasks.indexOf(item), key=item.id; let back=false;
+      p.tasks=p.tasks.filter(x=>x.id!==key); saveProject(p,true); refreshView(); renderSide();
+      toast('Deleted',{action:'Undo',onAction:()=>{ back=true; p.tasks.splice(Math.min(at,p.tasks.length),0,item); saveProject(p,true); refreshView() }});
+      setTimeout(async()=>{ if(back) return; try{ for(const o of (await photosOf(WANT)).filter(x=>x.item===key)) await delPhotoDB(o.id) }catch(e){} },6000);
     }
   });
   document.body.appendChild(el);
+  setTimeout(()=>{ const i=el.querySelector('#eText'); if(i&&document.body.contains(i)){ i.focus({preventScroll:true}); i.setSelectionRange(i.value.length,i.value.length) } },60);
 }
 
 async function setWishPhoto(itemId,file){
@@ -5258,11 +5359,14 @@ function linkEdit(p,item){
         <button class="opt" id="lgRe">${svg('clock',13,1.8)} Fetch again</button>
       </div>
     </div>
-    <div class="sheet-foot"><button class="opt" id="lgSave" style="width:100%">Save</button></div>
+    ${doneBtn()}
   </div>`;
-  const close=()=>el.remove();
+  const fin=keepSheet(el,{snap:snapKeep(item),
+    save:()=>{ const nm=el.querySelector('#lgName').value.trim(); if(nm!==(item.text||'')) item.text=nm;
+      let u=el.querySelector('#lgUrl').value.trim(); if(u&&!/^https?:\/\//i.test(u)) u='https://'+u; if(u!==(item.url||'')) item.url=u },
+    store:()=>saveProject(p,true), after:()=>{ if(st.openId===p.id) renderProject() }});
+  const close=()=>fin();
   el.addEventListener('click',async e=>{
-    if(e.target===el||e.target.closest('[data-close]')) return close();
     if(e.target.closest('#lgShot')){
       const inp=$('#wishPick');
       inp.onchange=async ev=>{
@@ -5281,13 +5385,6 @@ function linkEdit(p,item){
       saveProject(p,true); close(); renderProject();
       toast(img?'Preview found':'No preview available — upload your own');
       return;
-    }
-    if(e.target.closest('#lgSave')){
-      item.text=el.querySelector('#lgName').value.trim();
-      let u=el.querySelector('#lgUrl').value.trim();
-      if(u&&!/^https?:\/\//i.test(u)) u='https://'+u;
-      item.url=u;
-      saveProject(p,true); close(); renderProject();
     }
   });
   document.body.appendChild(el);
@@ -6279,20 +6376,16 @@ function stickyEdit(p,note){
     <div class="f"><span>Size</span>
       <div class="kind-pick">${STICKY_SIZES.map(z=>`<button data-z="${z.id}" class="${((L.s||'m')===z.id)?'on':''}">${z.label}</button>`).join('')}</div>
     </div>
-    <div class="sheet-foot"><button class="opt" id="skSave" style="width:100%">Save</button></div>
+    ${doneBtn()}
   </div>`;
-  const close=()=>el.remove();
+  keepSheet(el,{snap:snapKeep(note),
+    save:()=>{ note.text=el.querySelector('#skText').value; note.layout=JSON.stringify(L) },
+    store:()=>saveProject(p,true), after:()=>paintBoard()});
   el.addEventListener('click',e=>{
-    if(e.target===el||e.target.closest('[data-close]')) return close();
     const c=e.target.closest('[data-c]');
     if(c){ L.c=c.dataset.c; el.querySelectorAll('[data-c]').forEach(b=>b.classList.toggle('on',b.dataset.c===L.c)); return }
     const z=e.target.closest('[data-z]');
     if(z){ L.s=z.dataset.z; el.querySelectorAll('[data-z]').forEach(b=>b.classList.toggle('on',b.dataset.z===L.s)); return }
-    if(e.target.closest('#skSave')){
-      note.text=el.querySelector('#skText').value;
-      note.layout=JSON.stringify(L);
-      saveProject(p,true); close(); paintBoard();
-    }
   });
   document.body.appendChild(el);
   setTimeout(()=>{const t=el.querySelector('#skText'); if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}},30);
@@ -6400,8 +6493,9 @@ function lightbox(ph,url){
 }
 
 /* ───────── settings ───────── */
-function openSettings(id){
+function openSettings(id,snap0){
   const p=st.projects.find(x=>x.id===id); if(!p) return;
+  const snap=snap0||snapKeep(p,['name','color','startDate','revisit','status','important','archived']);
   const el=document.createElement('div');
   el.className='sheet-wrap';
   el.innerHTML=`<div class="sheet">
@@ -6441,12 +6535,10 @@ function openSettings(id){
         ${p.revisit?'<button class="clr" data-rev="0">clear</button>':''}
       </div>
     </div>
-    ${p.id===INBOX?'<p class="hint">“Ideas” is a permanent inbox for quick thoughts — it cannot be deleted.</p>'
-      :`<div class="sheet-foot">
-          <button class="danger" data-del>${svg('trash',14,1.8)} Delete project…</button>
-        </div>`}
+    ${doneBtn(SPECIAL(p.id)?'':`<button class="danger" data-del>${svg('trash',14,1.8)} Delete project…</button>`)}
   </div>`;
-  const close=()=>el.remove();
+  const fin=keepSheet(el,{snap,store:()=>saveProject(p,true),after:()=>{ renderSide(); if(st.openId===p.id) renderProject(); else refreshView() }});
+  const close=()=>fin.hand();
   el.addEventListener('input',e=>{
     if(e.target.id==='sName'){p.name=e.target.value;saveProject(p,true);renderSide();
       if(st.openId===p.id){$('#crumb').textContent=p.name;const t=$('#pTitle');if(t&&t.value!==p.name)t.value=p.name}}
@@ -6456,7 +6548,7 @@ function openSettings(id){
   el.addEventListener('click',async e=>{
     if(e.target===el||e.target.closest('[data-close]')) return close();
     const s=e.target.closest('[data-sset]');
-    if(s){setStatus(p,s.dataset.sset);close();openSettings(id);return}
+    if(s){setStatus(p,s.dataset.sset);close();openSettings(id,snap);return}
     if(e.target.closest('#shCopy')){
       const i=el.querySelector('#shLink');
       i.select();
@@ -6464,13 +6556,13 @@ function openSettings(id){
       return;
     }
     if(e.target.closest('#shRefresh')){ await refreshShare(p); return }
-    if(e.target.closest('#shOff')){ await disableShare(p); close(); openSettings(id); return }
+    if(e.target.closest('#shOff')){ await disableShare(p); close(); openSettings(id,snap); return }
     const pc=e.target.closest('[data-pc]');
     if(pc){
       p.color=pc.dataset.pc||null;
       saveProject(p,true); renderSide();
       if(st.openId===p.id) renderProject(); else if(!st.openId&&!st.focus&&!st.hist) renderAll();
-      close(); openSettings(id);
+      close(); openSettings(id,snap);
       return;
     }
     if(e.target.closest('[data-dup]')){
@@ -6490,12 +6582,12 @@ function openSettings(id){
     if(rv){
       const n=Number(rv.dataset.rev);
       p.revisit=n?(n>=30?plusMonths(Math.round(n/30)):plusDays(n)):'';
-      saveProject(p,true); renderSide(); close(); openSettings(id); if(st.openId===p.id) renderProject(); else if(!st.openId&&!st.focus&&!st.hist) renderAll();
+      saveProject(p,true); renderSide(); close(); openSettings(id,snap); if(st.openId===p.id) renderProject(); else if(!st.openId&&!st.focus&&!st.hist) renderAll();
       toast(p.revisit?'Will resurface on '+ru(p.revisit):'Reminder cleared');
       return;
     }
     const im=e.target.closest('[data-imp]');
-    if(im){p.important=im.dataset.imp==='1';saveProject(p,true);renderSide();if(st.openId===p.id)renderProject();close();openSettings(id);return}
+    if(im){p.important=im.dataset.imp==='1';saveProject(p,true);renderSide();if(st.openId===p.id)renderProject();close();openSettings(id,snap);return}
     if(e.target.closest('[data-arch]')){
       p.archived=!p.archived;
       if(p.archived&&st.openId===p.id) st.openId=null;
@@ -7294,22 +7386,19 @@ function spendEdit(it){
       <label class="f"><span>Date</span><input id="eDate" type="date" value="${ld(d)}"></label>
     </div>
     ${exp&&!g?`<div class="sp-kind"><button type="button" class="${wantInc?'':'on'}" data-ekind="0">Expense</button><button type="button" class="${wantInc?'on':''}" data-ekind="1">Income</button></div>`:''}
-    <div class="f"><span>Category</span><div id="eGrid">${catGrid(pick,'data-ec',wantInc)}</div></div>
+    <div class="f fq"><span>Category</span><div id="eGrid">${catPickHTML(pick,wantInc)}</div></div>
     ${exp&&!g?`<label class="f"><span>Note</span><textarea id="eNote" rows="2" placeholder="What it was for, warranty, who paid…">${esc(it.note||'')}</textarea></label>
     <div class="f sp-rcpt"><span>Receipt</span><div id="eRcpt" class="sp-rcpt-box">${L0.rcpt?'<i class="sp-rcpt-wait">Loading…</i>':''}<button type="button" class="ghost-btn" data-ercpt>${svg('img',14,1.8)} ${L0.rcpt?'Replace photo':'Add a photo'}</button>${L0.rcpt?`<button type="button" class="ghost-btn" data-ercptdel>${svg('trash',14,1.8)} Remove</button>`:''}</div></div>`:''}
     ${exp&&!g?`<button type="button" class="sp-rep ${wantRep?'on':''}" data-erep>${svg(wantRep?'boxOk':'box',15,1.9)} Monthly${wantRep?' · next '+esc(MON[nextCharge(it).getMonth()]+' '+nextCharge(it).getDate()):''}</button>`:''}
-    <div class="sheet-foot sp-foot">
-      <button type="button" class="danger" data-edel>${exp?svg('trash',14,1.8)+' Delete':svg('box',14,1.8)+' Not bought'}</button>
-      <button type="submit" class="gate-go sp-save">Save</button>
-    </div>
+    ${doneBtn(`<button type="button" class="danger" data-edel>${exp?svg('trash',14,1.8)+' Delete':svg('box',14,1.8)+' Not bought'}</button>`)}
   </form>`;
-  const close=()=>el.remove();
+  let apply=()=>{};
+  const fin=keepSheet(el,{snap:snapKeep(it),save:()=>apply(),store:()=>saveProject(p,true),after:()=>refreshView()});
+  const close=()=>fin.hand();
   const num=id=>{ const x=el.querySelector(id); return x?parseFloat(String(x.value).replace(',','.')):NaN };
   el.addEventListener('input',()=>{ const n=el.querySelector('#eNet'); if(n){ const i=num('#eIn')||0, o=num('#eOut')||0; n.textContent=gLabel(o-i,el.querySelector('#eCur').value===curSym()?'':el.querySelector('#eCur').value) } });
   el.addEventListener('click',e=>{
-    if(e.target===el||e.target.closest('[data-close]')) return close();
-    const c=e.target.closest('[data-ec]');
-    if(c){ pick=c.dataset.ec; el.querySelectorAll('[data-ec]').forEach(b=>b.classList.toggle('on',b===c)); return }
+    if(catPickClick(e,id=>{ pick=id })) return;
     if(e.target.closest('[data-ercpt]')){
       const inp=$('#wishPick');
       inp.onchange=async ev=>{ const f=ev.target.files[0]; ev.target.value=''; if(!f) return;
@@ -7322,32 +7411,31 @@ function spendEdit(it){
     }
     const kb=e.target.closest('[data-ekind]');
     if(kb){ wantInc=kb.dataset.ekind==='1'; el.querySelectorAll('[data-ekind]').forEach(b=>b.classList.toggle('on',b===kb));
-      pick=wantInc?(incomeCat(it.text)||'incother'):(recognise(it.text).cat||'other'); el.querySelector('#eGrid').innerHTML=catGrid(pick,'data-ec',wantInc); return }
+      pick=wantInc?(incomeCat(it.text)||'incother'):(recognise(it.text).cat||'other'); el.querySelector('#eGrid').innerHTML=catPickHTML(pick,wantInc); return }
     const rb=e.target.closest('[data-erep]');
     if(rb){ wantRep=!wantRep; rb.classList.toggle('on',wantRep); rb.innerHTML=svg(wantRep?'boxOk':'box',15,1.9)+' Monthly'; return }
     if(e.target.closest('[data-edel]')){
-      close();
+      fin.drop();
       if(exp){ const undo=dropExpense(it); refreshView(); toast('Deleted',{action:'Undo',onAction:undo}) }
       else{ const was=it.doneAt; it.done=false; it.doneAt=null; saveProject(p,true); refreshView();
         toast('Back on the wishlist',{action:'Undo',onAction:()=>{ it.done=true; it.doneAt=was; saveProject(p,true); refreshView() }}) }
     }
   });
-  el.querySelector('form').addEventListener('submit',e=>{
-    e.preventDefault();
+  el.querySelector('form').addEventListener('submit',e=>{ e.preventDefault(); fin() });
+  apply=()=>{
     const nm=el.querySelector('#eName').value.trim();
     const dv=el.querySelector('#eDate').value, cu=el.querySelector('#eCur').value;
     if(nm) it.text=nm;
-    const nt=el.querySelector('#eNote'); if(nt) it.note=nt.value.trim()||null;
+    const nt=el.querySelector('#eNote'); if(nt&&(nt.value.trim()||null)!==(it.note||null)) it.note=nt.value.trim()||null;
     if(g){ const i=Math.max(0,num('#eIn')||0), o=Math.max(0,num('#eOut')||0); setLayRaw(it,{gin:i,gout:o}); it.price=Math.max(0,i-o) }
-    else{ const v=num('#eAmt'); if(v>0) it.price=v }
+    else{ const v=num('#eAmt'); if(v>0&&v!==Number(it.price)) it.price=v }
     if(/^\d{4}-\d\d-\d\d$/.test(dv)&&dv!==ld(d)){ const [y,m,dd]=dv.split('-').map(Number); it.doneAt=new Date(y,m-1,dd,12).getTime() }
     if(exp&&!g&&wantInc!==isInc(it)){ const n=normName(it.text); if(n){ const m=lsMap('pm:incLearn'); m[n]=wantInc?1:0; LS.set('pm:incLearn',JSON.stringify(m)) } setLayRaw(it,{inc:wantInc?1:undefined}) }
     if(pick!==catIdOf(it)) learnCat(it.text,pick);
-    setLayRaw(it,{ecat:pick,approx:undefined});
-    if(cu!==cur0||!layObj(it).cur){ setLayRaw(it,{cur:cu}); fxStamp(it) }
-    if(exp&&!g) setLayRaw(it,{rep:wantRep?'month':undefined,rday:wantRep?new Date(it.doneAt).getDate():undefined});
-    saveProject(p,true); close(); refreshView();
-  });
+    if(pick!==catIdOf(it)||layObj(it).approx) setLayRaw(it,{ecat:pick,approx:undefined});
+    if(cu!==cur0){ setLayRaw(it,{cur:cu}); fxStamp(it) }
+    if(exp&&!g&&wantRep!==!!layObj(it).rep) setLayRaw(it,{rep:wantRep?'month':undefined,rday:wantRep?new Date(it.doneAt).getDate():undefined});
+  };
   document.body.appendChild(el);
   if(L0.rcpt) photosOf(WANT).then(list=>{ const ph=list.find(x=>x.item===it.id); const box=el.querySelector('#eRcpt'); if(!box) return; const w=box.querySelector('.sp-rcpt-wait'); if(w) w.remove();
     if(ph&&ph.url){ const a=document.createElement('a'); a.href=ph.url; a.target='_blank'; a.rel='noopener'; a.className='sp-rcpt-img'; a.innerHTML=`<img src="${esc(ph.url)}" alt="Receipt">`; box.prepend(a) } }).catch(()=>{});
@@ -7743,21 +7831,21 @@ function dateEdit(it){
       <label class="f"><span>Remind days ahead</span><input id="dAhead" inputmode="numeric" value="${esc(String(L.ahead||7))}"></label></div>
     <div class="sp-kind">${Object.keys(DK).map(k=>`<button type="button" class="${(L.dk||'date')===k?'on':''}" data-dk="${k}">${DK[k].e} ${DK[k].l}</button>`).join('')}</div>
     <button type="button" class="sp-rep ${L.yearly?'on':''}" data-dy>${svg(L.yearly?'boxOk':'box',15,1.9)} Every year</button>
-    <div class="sheet-foot sp-foot"><button type="button" class="danger" data-ddel>${svg('trash',14,1.8)} Delete</button><button type="submit" class="gate-go sp-save">Save</button></div></form>`;
+    ${doneBtn(`<button type="button" class="danger" data-ddel>${svg('trash',14,1.8)} Delete</button>`)}</form>`;
   let dk=L.dk||'date', yearly=!!L.yearly;
-  const close=()=>el.remove();
+  const fin=keepSheet(el,{snap:snapKeep(it),
+    save:()=>{ const nm=el.querySelector('#dName').value.trim(), dv=el.querySelector('#dDate').value, ah=parseInt(el.querySelector('#dAhead').value,10);
+      if(nm&&nm!==it.text) it.text=nm; if(/^\d{4}-\d\d-\d\d$/.test(dv)&&dv!==L.date) setLay(it,'date',dv);
+      if(dk!==(L.dk||'date')) setLay(it,'dk',dk); if(yearly!==!!L.yearly) setLay(it,'yearly',yearly?1:'');
+      const na=ah>=0&&ah!==7?ah:''; if(String(na)!==String(L.ahead||'')) setLay(it,'ahead',na) },
+    store:()=>saveProject(p,true), after:()=>{ refreshView(); renderSide() }});
   el.addEventListener('click',e=>{
-    if(e.target===el||e.target.closest('[data-close]')) return close();
     const k=e.target.closest('[data-dk]'); if(k){ dk=k.dataset.dk; el.querySelectorAll('[data-dk]').forEach(b=>b.classList.toggle('on',b===k)); return }
     const y=e.target.closest('[data-dy]'); if(y){ yearly=!yearly; y.classList.toggle('on',yearly); y.innerHTML=svg(yearly?'boxOk':'box',15,1.9)+' Every year'; return }
-    if(e.target.closest('[data-ddel]')){ const at=p.tasks.indexOf(it); p.tasks.splice(at,1); saveProject(p,true); close(); refreshView();
+    if(e.target.closest('[data-ddel]')){ const at=p.tasks.indexOf(it); p.tasks.splice(at,1); saveProject(p,true); fin.drop(); refreshView();
       toast('Deleted',{action:'Undo',onAction:()=>{ p.tasks.splice(at,0,it); saveProject(p,true); refreshView() }}) }
   });
-  el.querySelector('form').addEventListener('submit',e=>{ e.preventDefault();
-    const nm=el.querySelector('#dName').value.trim(), dv=el.querySelector('#dDate').value, ah=parseInt(el.querySelector('#dAhead').value,10);
-    if(nm) it.text=nm; if(/^\d{4}-\d\d-\d\d$/.test(dv)) setLay(it,'date',dv);
-    setLay(it,'dk',dk); setLay(it,'yearly',yearly?1:''); setLay(it,'ahead',ah>=0&&ah!==7?ah:'');
-    saveProject(p,true); close(); refreshView() });
+  el.querySelector('form').addEventListener('submit',e=>{ e.preventDefault(); fin() });
   document.body.appendChild(el);
 }
 function renderCalendar(){
@@ -7781,12 +7869,13 @@ function renderCalendar(){
   const cells=[]; for(let d=new Date(gridFrom+'T12:00'); ld(d)<=gridTo; d.setDate(d.getDate()+1)) cells.push(ld(d));
   const alerts=dateAlerts();
   $('#view').innerHTML=`<div class="cal">
-    <div class="sp-add cal-add"><input id="calIn" placeholder="${phone?'Mom’s birthday 14 March':'Mom’s birthday 14 March · insurance until 20.01 · a task on '+esc(dueLabel(sel))}" autocomplete="off" enterkeyhint="done" aria-label="Add a date">${micBtn('#calIn')}<button class="sp-go" id="calGo">Add</button></div>
+    <div class="sp-add cal-add"><input id="calIn" placeholder="${phone?'Birthday, expiry or a task with a date':'Add to '+esc(dueLabel(sel))+', or write a date: “Mom’s birthday 14 March”'}" autocomplete="off" enterkeyhint="done" aria-label="Add a date">${micBtn('#calIn')}<button class="sp-go" id="calGo">Add</button></div>
     ${alerts.length?`<div class="cal-soon">${alerts.map(a=>`<button data-ev="date||${a.t.id}">${(DK[layObj(a.t).dk]||DK.date).e} ${esc(a.t.text)} <b>${whenLabel(a.d)}</b></button>`).join('')}</div>`:''}
-    ${phone?`<div class="cal-agenda">${Object.keys(byDay).length?Object.keys(byDay).sort().map(d=>dayList(d,byDay[d])).join(''):'<p class="empty-line">Nothing dated in the next two months.</p>'}</div>`
-    :`<div class="cal-head"><button id="calPrev" aria-label="Earlier month">${svg('chev',14,2.2)}</button><b>${MONL[m]} ${y}</b><button id="calNext" aria-label="Later month">${svg('chev',14,2.2)}</button>${st.calOff?'<button class="ghost-btn" id="calToday">Today</button>':''}</div>
+    ${phone?`<div class="cal-agenda">${Object.keys(byDay).length?Object.keys(byDay).sort().map(d=>dayList(d,byDay[d])).join(''):'<div class="cal-hint"><b>Nothing dated in the next two months.</b> Tasks with a due date, repeats and monthly payments show up here. Add a birthday or an expiry date above — you’ll be reminded a week before.</div>'}</div>`
+    :`${evs.length?'':`<div class="cal-hint"><b>Everything with a date, in one place.</b> Tasks with a due date, repeats and monthly payments appear here by themselves. Add your own dates above — “Mom’s birthday 14 March” repeats every year, “insurance until 20.01” reminds you a week before. Click a day to add a task to it.</div>`}
+    <div class="cal-head"><button id="calPrev" aria-label="Earlier month">${svg('chev',14,2.2)}</button><b>${MONL[m]} ${y}</b><button id="calNext" aria-label="Later month">${svg('chev',14,2.2)}</button>${st.calOff?'<button class="ghost-btn" id="calToday">Today</button>':''}<span class="cal-legend"><span class="lg-date">Dates</span><span class="lg-task">Tasks</span><span class="lg-rep">Repeats</span><span class="lg-money">Payments</span></span></div>
     <div class="cal-grid">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(w=>`<span class="cal-wd">${w}</span>`).join('')}
-      ${cells.map(d=>{ const l=byDay[d]||[]; return `<div class="cal-cell ${d<first||d>last?'out':''} ${d===ld()?'today':''} ${d===sel?'sel':''}" data-day="${d}">
+      ${cells.map(d=>{ const l=byDay[d]||[]; return `<div class="cal-cell ${d<first||d>last?'out':''} ${d===ld()?'is-today':''} ${d===sel?'sel':''}" data-day="${d}">
         <span class="cal-n">${+d.slice(8)}</span>${l.slice(0,3).map(chip).join('')}${l.length>3?`<span class="cal-more">+${l.length-3}</span>`:''}</div>` }).join('')}</div>
     ${dayList(sel,byDay[sel]||[]).replace('</div></div>','</div>'+((byDay[sel]||[]).length?'':'<p class="cal-none">Nothing on this day yet — type above to add.</p>')+'</div>')}`}
   </div>`;
@@ -8502,7 +8591,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:51';
+const APP_VER='19 Nov 03:58';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
