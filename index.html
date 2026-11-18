@@ -2107,6 +2107,18 @@ body:has(.paid-pop) .fab-wrap{display:none}
 /* counters */
 .chip-n,.sec-n,.qcount,.pane-h .count,.ncount{font-variant-numeric:tabular-nums}
 .sec-n,.pane-h .count,.qcount{font-size:12.5px;font-weight:600;color:var(--soft);background:var(--raise);border-radius:999px;padding:1px 8px}
+.sp-three{display:grid;grid-template-columns:repeat(3,auto);gap:6px 28px;margin:4px 0 2px}
+.sp-three span{display:flex;flex-direction:column;gap:2px}
+.sp-three small{font-size:13px;color:var(--dim)}
+.sp-three b{font-family:var(--display);font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.sp-col u{position:absolute;left:-6px;right:-6px;height:0;border-top:2px solid var(--mint);opacity:.85}
+.sp-col u.cap{border-top-style:dotted}
+.sp-day-h em{font-style:normal;margin-right:10px;font-variant-numeric:tabular-nums}
+.sp-kind{display:inline-flex;gap:2px;padding:3px;margin:-4px 0 16px;border-radius:999px;border:1px solid var(--line)}
+.sp-kind button{height:34px;padding:0 16px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--soft)}
+.sp-kind button.on{background:var(--raise);color:var(--txt);box-shadow:inset 0 0 0 1px var(--line-2)}
+.sp-ok-flip{color:var(--soft)}
+@media (max-width:760px){.sp-three{gap:4px 16px}.sp-three b{font-size:24px}}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -2658,7 +2670,7 @@ const catLabel=c=>(CATS.find(x=>x.id===(c||'other'))||{label:c}).label;
 const JOT=[{id:INBOX,label:'Idea',ph:'A thought or a link you don’t want to lose'},
            {id:TODO,label:'Task',ph:'What needs doing?'},
            {id:WANT,label:'To buy',ph:'What do you want? Put the price at the end'},
-           {id:'spent',label:'Spent',ph:'What did you pay for? Like “coffee 300”'}];
+           {id:'spent',label:'Money',ph:'coffee 4 · +500 salary'}];
 const CURS=['$','€','֏','₽','£'];
 const curSym=()=>LS.get('pm:cur')||'$';
 const money=n=>curSym()+Number(n).toLocaleString('en-US',{maximumFractionDigits:2});
@@ -3383,7 +3395,7 @@ function historyEvents(days){
       ev.push({at:p.doneAt,kind:'proj',text:p.name,src:'project finished',pid:p.id});
     (p.tasks||[]).forEach(t=>{
       if(!t.doneAt||t.doneAt<from) return;
-      if(p.id===WANT) ev.push({at:t.doneAt,kind:'wish',text:t.text,src:(isExp(t)?'spent':'bought')+(t.price?' · '+money(t.price):''),pid:p.id});
+      if(p.id===WANT) ev.push({at:t.doneAt,kind:'wish',text:t.text,src:(isExp(t)?(layObj(t).inc?'income':'spent'):'bought')+(t.price?' · '+money(t.price):''),pid:p.id});
       else if(p.id===TODO) ev.push({at:t.doneAt,kind:'todo',text:t.text,src:(t.cat||'other')+' · done',pid:p.id});
       else if(p.id===INBOX) return;
       else ev.push({at:t.doneAt,kind:'task',text:t.text,src:p.name,pid:p.id});
@@ -3499,7 +3511,7 @@ function snippet(text,q,pad){
   const a=Math.max(0,i-pad), b=Math.min(t.length,i+q.length+pad*2);
   return (a>0?'…':'')+t.slice(a,b)+(b<t.length?'…':'');
 }
-const KIND_LABEL={spent:'spent',bought:'bought',task:'task',idea:'idea',wish:'wish',todo:'to do',link:'link',sticky:'note',quick:'link'};
+const KIND_LABEL={income:'income',spent:'spent',bought:'bought',task:'task',idea:'idea',wish:'wish',todo:'to do',link:'link',sticky:'note',quick:'link'};
 
 function searchHits(){
   const q=st.query.trim().toLowerCase();
@@ -3510,7 +3522,7 @@ function searchHits(){
     if((p.name||'').toLowerCase().includes(q)) hits.push({k:'name',t:p.name});
     (p.tasks||[]).forEach(t=>{
       const kind=t.kind||(SPECIAL(p.id)?KIND_OF(p.id):'task');
-      const wk=p.id===WANT&&t.done?(isExp(t)?'spent':'bought'):kind;
+      const wk=p.id===WANT&&t.done?(isExp(t)?(layObj(t).inc?'income':'spent'):'bought'):kind;
       if((t.text||'').toLowerCase().includes(q)) hits.push({k:wk,t:t.text+(p.id===WANT&&t.done&&t.price?' · '+money2(Number(t.price)):''),done:t.done&&wk!=='spent'&&wk!=='bought',id:t.id,sp:p.id===WANT&&t.done&&Number(t.price)>0});
       if((t.note||'').toLowerCase().includes(q)) hits.push({k:'note',t:snippet(t.note,q,45),id:t.id});
       if((t.url||'').toLowerCase().includes(q)) hits.push({k:'link',t:t.url,id:t.id});
@@ -6668,7 +6680,7 @@ async function openCapture(){
   let target=st.spend?'spent':(st.openId||INBOX);                       // внутри раздела — пишем в него
   let file=null, clip='';
   const targets=recentTargets();
-  targets.splice(3,0,{id:'spent',label:'Spent',cls:'t-spent'});
+  targets.splice(3,0,{id:'spent',label:'Money',cls:'t-spent'});
 
   const el=document.createElement('div');
   el.className='cap-wrap';
@@ -6853,7 +6865,24 @@ const SCATS=[
   {id:'groceries',e:'🛒',l:'Groceries'},{id:'transport',e:'🚕',l:'Transport'},{id:'gifts',e:'🎁',l:'Gifts'},
   {id:'fun',e:'🎉',l:'Fun'},{id:'gambling',e:'🎰',l:'Gambling'},{id:'shopping',e:'🛍️',l:'Shopping'},
   {id:'home',e:'🏠',l:'Home'},{id:'health',e:'💊',l:'Health'},{id:'travel',e:'✈️',l:'Travel'},{id:'other',e:'📦',l:'Other'}];
-const SCAT={}; SCATS.forEach(c=>{ SCAT[c.id]=c });
+/* доходы: свои категории, в сетке трат их нет */
+const ICATS=[{id:'salary',e:'💼',l:'Salary'},{id:'freelance',e:'🧑‍💻',l:'Freelance'},{id:'sales',e:'🏷️',l:'Sales'},
+  {id:'giftin',e:'🎀',l:'Gifts received'},{id:'refund',e:'↩️',l:'Refunds & cashback'},{id:'incother',e:'💰',l:'Other income'}];
+const SCAT={}; SCATS.concat(ICATS).forEach(c=>{ SCAT[c.id]=c });
+const ISTEMS=[['salary','зарплат зп salary payroll paycheck аванс премия премию bonus бонус'],['freelance','фриланс freelance гонорар fee заказчик client invoice'],
+  ['sales','продал продала продали sold продаж sale'],['giftin','подарили gifted'],['refund','вернули возврат refund кэшбэк кешбэк cashback compensation компенсац'],
+  ['incother','доход income дивиденд dividend проценты interest']].map(([cat,w])=>({cat,w:w.split(' ')}));
+/* доход ли это: «+» в начале, слово-доход или запомненная поправка; казино — никогда */
+const ICAT_ID={}; ICATS.forEach(c=>{ ICAT_ID[c.id]=1 });
+function incomeCat(text){
+  const n=normName(text); if(!n) return '';
+  const lc=lsMap('pm:ecatLearn')[n]; if(lc&&ICAT_ID[lc]) return lc;
+  const words=n.split(' ');
+  for(const g of ISTEMS) for(const w of g.w){ if(w.length<=3?words.indexOf(w)>=0:words.some(x=>x.indexOf(w)===0)) return g.cat }
+  return '';
+}
+function isIncomeName(text){ const n=normName(text); const L=lsMap('pm:incLearn'); if(n in L) return !!L[n]; return !!incomeCat(text) }
+const isInc=t=>!!layObj(t).inc;
 const OLDCAT={Food:'food',Home:'home',Transport:'transport',Fun:'fun',Health:'health',Wishlist:'shopping',Other:'other',Rent:'home'};
 /* известные сервисы: значок по домену и категория */
 const SVCS=[
@@ -6896,7 +6925,7 @@ const svcOf=text=>{ const n=normName(text); return n?SVCS.find(s=>s.re.test(' '+
 function recognise(text){
   const n=normName(text); if(!n) return {cat:'',svc:null,how:''};
   const svc=svcOf(text);
-  const learned=lsMap('pm:ecatLearn')[n]; if(learned&&SCAT[learned]) return {cat:learned,svc,how:'learned'};
+  const learned=lsMap('pm:ecatLearn')[n]; if(learned&&SCAT[learned]&&!ICAT_ID[learned]) return {cat:learned,svc,how:'learned'};
   if(svc) return {cat:svc.cat,svc,how:'service'};
   const words=n.split(' ');
   for(const g of STEMS) for(const w of g.w){
@@ -6909,7 +6938,8 @@ function learnCat(text,cat){ const n=normName(text); if(!n||!SCAT[cat]) return; 
 /* категория записи: своя новая → по названию → старая подпись → по умолчанию */
 function catIdOf(t){
   const L=layObj(t);
-  if(L.ecat&&SCAT[L.ecat]) return L.ecat;
+  if(L.inc) return L.ecat&&ICAT_ID[L.ecat]?L.ecat:(incomeCat(t.text)||'incother');
+  if(L.ecat&&SCAT[L.ecat]&&!ICAT_ID[L.ecat]) return L.ecat;
   const r=recognise(t.text); if(r.cat) return r.cat;
   if(L.ecat&&OLDCAT[L.ecat]) return OLDCAT[L.ecat];
   return isExp(t)?'other':'shopping';
@@ -6955,20 +6985,22 @@ function spendEntries(){
   const p=wantP(); if(!p) return [];
   return (p.tasks||[]).filter(t=>t.done&&t.doneAt&&(Number(t.price)>0||isGamble(t))).map(t=>{
     const g=isGamble(t), net=g?gNet(t):0, amt=g?Math.abs(net):Number(t.price), cur=curOf(t), m=inMain(t,amt);
-    return {t,at:Number(t.doneAt),amt,cur,cat:catIdOf(t),g,net,main:m.v,fx:m.fx,
-      spend:g?(net<0?m.v:0):m.v, win:g&&net>0?(m.v||0):0};
+    const inc=!g&&isInc(t);
+    return {t,at:Number(t.doneAt),amt,cur,cat:catIdOf(t),g,net,inc,main:m.v,fx:m.fx,
+      spend:inc?0:g?(net<0?m.v:0):m.v, win:g&&net>0?(m.v||0):0};
   });
 }
 /* итог: траты в основной валюте («≈», если что-то пересчитано); выигрыш не вычитается, он отдельно */
 function monthSum(list){
-  let v=0, approx=false, gs=0; const miss={};
+  let v=0, approx=false, gs=0, inc=0, iapprox=false; const miss={}, imiss={};
   list.forEach(e=>{
+    if(e.inc){ if(e.main==null) imiss[e.cur]=(imiss[e.cur]||0)+e.amt; else { inc+=e.main; if(e.fx) iapprox=true } return }   /* доход — отдельно */
     if(e.main==null){ if(!e.g||e.net<0) miss[e.cur]=(miss[e.cur]||0)+e.amt; return }
     if(e.g){ gs+=e.net>0?e.main:-e.main; if(e.fx&&e.main) approx=true; return }   /* казино — только итог за период */
     v+=e.main; if(e.fx) approx=true;
   });
   v+=Math.max(0,-gs);
-  return {v,approx,miss,win:Math.max(0,gs),gnet:gs};
+  return {v,approx,miss,win:Math.max(0,gs),gnet:gs,inc,iapprox,imiss};
 }
 const sumLabel=s=>(s.approx?'≈ ':'')+money2(s.v)+Object.keys(s.miss).map(c=>' + '+amtStr(s.miss[c],c)).join('');
 function spendMonth(off){ const k=nowKey()-off; return monthSum(spendEntries().filter(e=>monthKey(e.at)===k)).v }
@@ -6988,6 +7020,7 @@ function curTok(x){ x=String(x||'').toLowerCase();
 function parseSpend(raw){
   let s=String(raw||'').trim(), rep=false;
   const rr=s.match(REP_SPEND); if(rr){ rep=true; s=s.slice(0,rr.index).trim() }
+  const plus=/^\+\s*\S/.test(s);
   /* казино: «-200 +350», «200 350», «+150», «-200»; одно число без знака — проигрыш */
   const parts=s.split(/\s+/).filter(Boolean);
   const NUM=/^([+\-−])?([$€֏₽£])?(\d+(?:[.,]\d+)?)([$€֏₽£]|р|руб)?$/i;
@@ -7002,6 +7035,7 @@ function parseSpend(raw){
     if(gc===curSym()) gc='';
     return {text:gw.replace(/^(на|за|for|on)\s+/i,'').trim(),price:Math.max(0,gin-gout),cur:gc,rep:false,gin,gout};
   }
+  if(plus) s=s.replace(/^\+\s*/,'');
   let tk=s.split(/\s+/).filter(Boolean), cur='', price=null;
   const AMT=/^([$€֏₽£])?(\d+(?:[.,]\d+)?)(k|к|[$€֏₽£]|р|руб)?$/i;
   const take=m=>{ let v=parseFloat(m[2].replace(',','.')); if(/^[kк]$/i.test(m[3]||'')) v*=1000;
@@ -7011,7 +7045,8 @@ function parseSpend(raw){
   else if(tk.length&&AMT.test(tk[0])){ take(tk.shift().match(AMT)); if(tk.length&&curTok(tk[0])) cur=cur||curTok(tk.shift()) }
   else if(tk.length>1&&curTok(tk[0])&&AMT.test(tk[1])){ cur=curTok(tk.shift()); take(tk.shift().match(AMT)) }
   if(cur===curSym()) cur='';
-  return {text:tk.join(' ').replace(/^(на|за|for|on)\s+/i,'').trim(),price,cur,rep};
+  const text=tk.join(' ').replace(/^(на|за|for|on)\s+/i,'').trim();
+  return {text,price,cur,rep,inc:plus||isIncomeName(text)};
 }
 /* повторяющиеся траты: запись с layout.rep='month' сама появляется в каждом новом месяце, когда наступает её число */
 function spendRoll(){
@@ -7050,16 +7085,36 @@ function addExpense(raw,_cat,at){
     const n=normName(r.text), prev=(p.tasks||[]).slice().reverse().find(t=>isExp(t)&&normName(t.text)===n&&layObj(t).cur);
     if(prev) cur=layObj(prev).cur;
   }
-  const it={id:uid(),text:r.text||(rc.cat?SCAT[rc.cat].l:'Expense'),price:gamble?Math.max(0,(r.gin||0)-(r.gout||0)):r.price,url:'',done:true,doneAt:at||r.at||Date.now(),created:Date.now()};
-  setLayRaw(it,{exp:1,ecat:r.cat||rc.cat||(gamble?'gambling':'other'),cur:cur||curSym()});
+  const inc=!gamble&&!!r.inc;
+  const icat=inc?(r.cat&&ICAT_ID[r.cat]?r.cat:incomeCat(r.text)||'incother'):'';
+  /* «X monthly», когда X уже повторяется: обновляем ту запись, второй не заводим */
+  if(r.rep&&!gamble&&r.text){
+    const n=normName(r.text), head=(p.tasks||[]).find(t=>isExp(t)&&layObj(t).rep==='month'&&normName(t.text)===n);
+    if(head){
+      head.price=r.price; setLayRaw(head,{cur:cur||layObj(head).cur||curSym()}); fxStamp(head);
+      if(inc) setLayRaw(head,{inc:1,ecat:icat});
+      saveProject(p,true); st.spLast=head.id; st.spUpdated=head.id;
+      return head;
+    }
+  }
+  const it={id:uid(),text:r.text||(inc?SCAT[icat].l:rc.cat?SCAT[rc.cat].l:'Expense'),price:gamble?Math.max(0,(r.gin||0)-(r.gout||0)):r.price,url:'',done:true,doneAt:at||r.at||Date.now(),created:Date.now()};
+  setLayRaw(it,{exp:1,ecat:inc?icat:(r.cat||rc.cat||(gamble?'gambling':'other')),cur:cur||curSym()});
+  if(inc) setLayRaw(it,{inc:1});
   if(gamble) setLayRaw(it,{gin:Number(r.gin)||0,gout:Number(r.gout)||0});
   fxStamp(it);
   if(r.rep&&!gamble) setLayRaw(it,{rep:'month',rday:new Date(it.doneAt).getDate()});
   p.tasks=p.tasks||[]; p.tasks.push(it);
   saveProject(p,true); blip('add');
   st.spLast=it.id;
-  if(!rc.cat&&!r.cat&&r.text&&!gamble) aiCatFor(it);
+  if(!inc&&!rc.cat&&!r.cat&&r.text&&!gamble) aiCatFor(it);
   return it;
+}
+/* доход ↔ трата одним нажатием; поправка запоминается для этого названия */
+function flipIncome(it){
+  const to=!isInc(it), n=normName(it.text);
+  setLayRaw(it,{inc:to?1:undefined,ecat:to?(incomeCat(it.text)||'incother'):(recognise(it.text).cat||'other')});
+  if(n){ const m=lsMap('pm:incLearn'); m[n]=to?1:0; LS.set('pm:incLearn',JSON.stringify(m)) }
+  saveProject(wantP(),true);
 }
 /* не узнали название — один короткий вопрос AI без инструментов, ответ запоминаем по названию */
 async function aiCatFor(it){
@@ -7081,6 +7136,7 @@ function dropExpense(it){
 }
 function spentToast(it){
   const c=SCAT[catIdOf(it)];
+  if(st.spUpdated===it.id){ st.spUpdated=null; toast('Updated monthly '+spName(it),{sub:entryAmt(it)}); return }
   toast(spName(it)+' · '+entryAmt(it),{sub:c.e+' '+c.l+(layObj(it).rep?' · every month':''),action:'Undo',onAction:()=>{ dropExpense(it); refreshView() }});
 }
 /* отметили покупку без цены — спрашиваем, сколько заплатили */
@@ -7107,17 +7163,17 @@ function askPaid(p,item){
   setTimeout(()=>{ const i=el.querySelector('#paidIn'); if(i) i.focus() },30);
 }
 const ordN=n=>n+((n%10===1&&n!==11)?'st':(n%10===2&&n!==12)?'nd':(n%10===3&&n!==13)?'rd':'th');
-const catGrid=(on,attr)=>`<div class="sp-grid13">${SCATS.map(c=>`<button type="button" class="${on===c.id?'on':''}" ${attr}="${c.id}"><i>${c.e}</i>${c.l}</button>`).join('')}</div>`;
+const catGrid=(on,attr,inc)=>`<div class="sp-grid13">${(inc?ICATS:SCATS).map(c=>`<button type="button" class="${on===c.id?'on':''}" ${attr}="${c.id}"><i>${c.e}</i>${c.l}</button>`).join('')}</div>`;
 function spendEdit(it){
   const p=wantP(); if(!p) return;
   const exp=isExp(it), g=isGamble(it), L0=layObj(it);
   const d=new Date(it.doneAt||Date.now());
-  let pick=catIdOf(it), wantRep=!!L0.rep;
+  let pick=catIdOf(it), wantRep=!!L0.rep, wantInc=!!L0.inc;
   const cur0=L0.cur||curSym();
   const el=document.createElement('div');
   el.className='sheet-wrap';
   el.innerHTML=`<form class="sheet sp-sheet">
-    <div class="sheet-head"><span class="sp-sh">${spIcon(it,true)} ${g?'Session':exp?'Expense':'Bought'}</span><button type="button" data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    <div class="sheet-head"><span class="sp-sh">${spIcon(it,true)} ${g?'Session':wantInc?'Income':exp?'Expense':'Bought'}</span><button type="button" data-close aria-label="Close">${svg('x',15,2)}</button></div>
     <label class="f"><span>Name</span><input id="eName" value="${esc(it.text||'')}" autocomplete="off"></label>
     ${g?`<div class="sp-two">
       <label class="f"><span>Put in</span><input id="eIn" inputmode="decimal" value="${esc(String(L0.gin||0))}" autocomplete="off"></label>
@@ -7128,7 +7184,8 @@ function spendEdit(it){
       <label class="f"><span>${g?'Currency':'Amount'}</span><span class="sp-amt"><select id="eCur" aria-label="Currency">${CURS.map(c=>`<option ${cur0===c?'selected':''}>${c}</option>`).join('')}</select>${g?'':`<input id="eAmt" inputmode="decimal" value="${esc(String(it.price||''))}" autocomplete="off">`}</span></label>
       <label class="f"><span>Date</span><input id="eDate" type="date" value="${ld(d)}"></label>
     </div>
-    <div class="f"><span>Category</span>${catGrid(pick,'data-ec')}</div>
+    ${exp&&!g?`<div class="sp-kind"><button type="button" class="${wantInc?'':'on'}" data-ekind="0">Expense</button><button type="button" class="${wantInc?'on':''}" data-ekind="1">Income</button></div>`:''}
+    <div class="f"><span>Category</span><div id="eGrid">${catGrid(pick,'data-ec',wantInc)}</div></div>
     ${exp&&!g?`<button type="button" class="sp-rep ${wantRep?'on':''}" data-erep>${svg(wantRep?'boxOk':'box',15,1.9)} Monthly${wantRep?' · next '+esc(MON[nextCharge(it).getMonth()]+' '+nextCharge(it).getDate()):''}</button>`:''}
     <div class="sheet-foot sp-foot">
       <button type="button" class="danger" data-edel>${exp?svg('trash',14,1.8)+' Delete':svg('box',14,1.8)+' Not bought'}</button>
@@ -7142,6 +7199,9 @@ function spendEdit(it){
     if(e.target===el||e.target.closest('[data-close]')) return close();
     const c=e.target.closest('[data-ec]');
     if(c){ pick=c.dataset.ec; el.querySelectorAll('[data-ec]').forEach(b=>b.classList.toggle('on',b===c)); return }
+    const kb=e.target.closest('[data-ekind]');
+    if(kb){ wantInc=kb.dataset.ekind==='1'; el.querySelectorAll('[data-ekind]').forEach(b=>b.classList.toggle('on',b===kb));
+      pick=wantInc?(incomeCat(it.text)||'incother'):(recognise(it.text).cat||'other'); el.querySelector('#eGrid').innerHTML=catGrid(pick,'data-ec',wantInc); return }
     const rb=e.target.closest('[data-erep]');
     if(rb){ wantRep=!wantRep; rb.classList.toggle('on',wantRep); rb.innerHTML=svg(wantRep?'boxOk':'box',15,1.9)+' Monthly'; return }
     if(e.target.closest('[data-edel]')){
@@ -7159,6 +7219,7 @@ function spendEdit(it){
     if(g){ const i=Math.max(0,num('#eIn')||0), o=Math.max(0,num('#eOut')||0); setLayRaw(it,{gin:i,gout:o}); it.price=Math.max(0,i-o) }
     else{ const v=num('#eAmt'); if(v>0) it.price=v }
     if(/^\d{4}-\d\d-\d\d$/.test(dv)&&dv!==ld(d)){ const [y,m,dd]=dv.split('-').map(Number); it.doneAt=new Date(y,m-1,dd,12).getTime() }
+    if(exp&&!g&&wantInc!==isInc(it)){ const n=normName(it.text); if(n){ const m=lsMap('pm:incLearn'); m[n]=wantInc?1:0; LS.set('pm:incLearn',JSON.stringify(m)) } setLayRaw(it,{inc:wantInc?1:undefined}) }
     if(pick!==catIdOf(it)) learnCat(it.text,pick);
     setLayRaw(it,{ecat:pick,approx:undefined});
     if(cu!==cur0||!layObj(it).cur){ setLayRaw(it,{cur:cu}); fxStamp(it) }
@@ -7170,17 +7231,17 @@ function spendEdit(it){
 /* часто повторяющиеся траты — одной кнопкой ещё раз на сегодня (без казино и без ежемесячных) */
 function spendFrequent(){
   const since=Date.now()-120*864e5, g={};
-  spendEntries().filter(e=>isExp(e.t)&&!e.g&&e.at>=since).sort((a,b)=>a.at-b.at).forEach(e=>{
+  spendEntries().filter(e=>isExp(e.t)&&!e.g&&!e.inc&&e.at>=since).sort((a,b)=>a.at-b.at).forEach(e=>{
     const k=normName(e.t.text)+'|'+e.cur; if(!k.split('|')[0]) return;
     g[k]=g[k]||{n:0,e:null}; g[k].n++; g[k].e=e });
   const monthly={}; (wantP().tasks||[]).forEach(t=>{ if(isExp(t)&&layObj(t).rep) monthly[normName(t.text)]=1 });
   return Object.values(g).filter(x=>x.n>=2&&!monthly[normName(x.e.t.text)]).sort((a,b)=>b.n-a.n||b.e.at-a.e.at).slice(0,6).map(x=>x.e);
 }
-const entryAmt=t=>isGamble(t)?gLabel(gNet(t),curOf(t)):amtStr(Number(t.price),curOf(t));
-const entryCls=t=>isGamble(t)?(Math.abs(gNet(t))<0.005?'g-even':gNet(t)>0?'g-win':'g-loss'):'';
+const entryAmt=t=>isGamble(t)?gLabel(gNet(t),curOf(t)):(isInc(t)?'+':'')+amtStr(Number(t.price),curOf(t));
+const entryCls=t=>isGamble(t)?(Math.abs(gNet(t))<0.005?'g-even':gNet(t)>0?'g-win':'g-loss'):isInc(t)?'g-win':'';
 function approxMain(t){ if(!curOf(t)) return ''; const m=inMain(t,isGamble(t)?Math.abs(gNet(t)):Number(t.price)); return m.v==null?'':'≈ '+money2(m.v) }
 function spConfirm(it){
-  const c=SCAT[catIdOf(it)], rep=!!layObj(it).rep, d=ld(new Date(it.doneAt)), g=isGamble(it), suggest=c.id==='subs'&&!rep;
+  const c=SCAT[catIdOf(it)], rep=!!layObj(it).rep, d=ld(new Date(it.doneAt)), g=isGamble(it), inc=isInc(it), suggest=(c.id==='subs'||c.id==='salary')&&!rep;
   const am=approxMain(it);
   return `<div class="sp-ok" data-ok="${it.id}">
     <div class="sp-ok-top">${spIcon(it,true)}<span class="sp-ok-name"><b>${esc(spName(it))}</b>
@@ -7191,11 +7252,12 @@ function spConfirm(it){
       <button class="${d===ldPlus(-1)?'on':''}" data-okday="1">Yesterday</button>
       <label class="sp-ok-date ${d!==ld()&&d!==ldPlus(-1)?'on':''}">${svg('cal',13,1.9)}<input type="date" data-okdate value="${d}" aria-label="Another date"></label>
       ${g?`<button data-okedit>Cash out…</button>`:`<button class="sp-ok-rep ${rep?'on':''} ${suggest?'suggest':''}" data-okrep>↻ ${suggest?'Monthly?':'Monthly'}</button>`}
+      ${g?'':`<button class="sp-ok-flip" data-okflip>${inc?'It’s an expense':'It’s income'}</button>`}
       <span class="sp-ok-sp"></span>
       <button data-okundo>Undo</button>
       <button class="sp-ok-x" data-okx aria-label="Done">${svg('x',13,2.2)}</button>
     </div>
-    ${st.spGrid?catGrid(c.id,'data-okcat'):''}
+    ${st.spGrid?catGrid(c.id,'data-okcat',inc):''}
   </div>`;
 }
 function renderSpend(){
@@ -7213,9 +7275,11 @@ function renderSpend(){
   const big=month.filter(e=>e.spend).sort((a,b)=>b.spend-a.spend)[0];
   const budget=Number(LS.get('pm:budget'))||0, ratio=budget?total/budget:0;
   const win=[]; for(let i=5;i>=0;i--) win.push(Math.min(nk,k+5)-i);
-  const bars=win.map(kk=>({kk,v:monthSum(inK(kk)).v})), max=Math.max(1,...bars.map(b=>b.v),budget);
+  const bars=win.map(kk=>{ const m=monthSum(inK(kk)); return {kk,v:m.v,inc:m.inc} }), max=Math.max(1,...bars.map(b=>b.v),budget);
+  const incM=S.inc, left=incM-total;
   const gam=month.filter(e=>e.g), gNetM=gam.reduce((n,e)=>n+(e.main==null?0:(e.net>0?e.main:-e.main)),0);
-  const subs=(wantP().tasks||[]).filter(t=>isExp(t)&&layObj(t).rep==='month').map(t=>({t,m:inMain(t,Number(t.price))})).sort((a,b)=>(b.m.v||0)-(a.m.v||0));
+  const reps=(wantP().tasks||[]).filter(t=>isExp(t)&&layObj(t).rep==='month').map(t=>({t,m:inMain(t,Number(t.price))})).sort((a,b)=>(b.m.v||0)-(a.m.v||0));
+  const subs=reps.filter(x=>!isInc(x.t)), incoming=reps.filter(x=>isInc(x.t));
   const subsMo=subs.reduce((n,s)=>n+(s.m.v||0),0), subsFx=subs.some(s=>s.m.fx);
   const last=st.spLast&&(wantP().tasks||[]).find(t=>t.id===st.spLast);
   if(!last) st.spLast=null;
@@ -7227,10 +7291,21 @@ function renderSpend(){
       <span class="sp-amtc"><b class="${entryCls(e.t)}">${entryAmt(e.t)}</b>${e.cur&&e.main!=null?`<small>≈ ${money2(e.g?Math.abs(e.main):e.main)}</small>`:''}</span></button>`;
   /* по группам: строка группы → категории → записи */
   const groupHtml=()=>{
-    const gs=GROUPS.map(G=>{ const es=month.filter(e=>G.cats.indexOf(e.cat)>=0); return {G,es,s:monthSum(es)} }).filter(x=>x.es.length).sort((a,b)=>b.s.v-a.s.v);
-    if(!gs.length) return '';
+    const gs=GROUPS.map(G=>{ const es=month.filter(e=>!e.inc&&G.cats.indexOf(e.cat)>=0); return {G,es,s:monthSum(es)} }).filter(x=>x.es.length).sort((a,b)=>b.s.v-a.s.v);
+    const ies=month.filter(e=>e.inc);
+    if(!gs.length&&!ies.length) return '';
     const top=Math.max(1,...gs.map(x=>x.s.v));
-    return `<div class="sp-groups">${gs.map(({G,es,s})=>{
+    const incHtml=ies.length?(()=>{ const isOpen=!!open.income; const cats=ICATS.map(c=>({c:c.id,es:ies.filter(e=>e.cat===c.id)})).filter(x=>x.es.length).map(x=>Object.assign(x,{s:monthSum(x.es)})).sort((a,b)=>b.s.inc-a.s.inc);
+      return `<section class="sp-grp sp-grp-inc ${isOpen?'open':''}">
+        <button class="sp-grp-h" data-grp="income" aria-expanded="${isOpen}">
+          <span class="sp-stack">${[...new Set(cats.map(x=>SCAT[x.c].e))].slice(0,3).map(x=>`<i>${x}</i>`).join('')}</span>
+          <span class="sp-grp-n"><b>Income</b><small>${ies.length} ${ies.length===1?'entry':'entries'}</small></span>
+          <span class="sp-grp-v"><b class="g-win">${S.iapprox?'≈ ':''}+${money2(incM)}</b></span>
+          <span class="sp-chev">${svg('chev',13,2.2)}</span>
+        </button>
+        ${isOpen?cats.map(x=>`<div class="sp-cat-h"><span>${SCAT[x.c].e} ${SCAT[x.c].l}</span><b class="g-win">${x.s.iapprox?'≈ ':''}+${money2(x.s.inc)}</b></div>${x.es.map(row).join('')}`).join(''):''}
+      </section>` })():'';
+    return `<div class="sp-groups">${incHtml}${gs.map(({G,es,s})=>{
       const cats=G.cats.map(c=>({c,es:es.filter(e=>e.cat===c)})).filter(x=>x.es.length).map(x=>Object.assign(x,{s:monthSum(x.es)})).sort((a,b)=>b.s.v-a.s.v);
       const isOpen=!!open[G.id];
       const lead=[...new Set(cats.map(x=>SCAT[x.c].e))].slice(0,3);
@@ -7252,7 +7327,7 @@ function renderSpend(){
   const dayHtml=()=>{
     const groups=[]; month.forEach(e=>{ const dk=dayKey(e.at); let g=groups.find(x=>x.k===dk); if(!g){ g={k:dk,at:e.at,items:[]}; groups.push(g) } g.items.push(e) });
     return groups.map(g=>{ const s=monthSum(g.items); return `<div class="sp-day">
-      <div class="sp-day-h"><b>${dayLabel(g.at)}</b><span>${s.v||Object.keys(s.miss).length?sumLabel(s):''}</span></div>
+      <div class="sp-day-h"><b>${dayLabel(g.at)}</b><span>${s.inc?`<em class="g-win">${s.iapprox?'≈ ':''}+${money2(s.inc)}</em>`:''}${s.v||Object.keys(s.miss).length?sumLabel(s):''}</span></div>
       ${g.items.map(row).join('')}</div>` }).join('');
   };
   $('#view').innerHTML=`
@@ -7262,7 +7337,7 @@ function renderSpend(){
         ${st.spNeed?`<div class="sp-need"><span>How much was <b>${esc(st.spNeed.text)}</b>?</span><input id="spAmt" inputmode="decimal" autocomplete="off" placeholder="${curSym()}" aria-label="Amount"><button class="sp-go" id="spAmtGo">Add</button></div>`:''}
         ${freq.length&&!st.spNeed?`<div class="sp-freq">${freq.map(e=>`<button data-again="${e.t.id}">${spIcon(e.t)}${esc(spName(e.t))} <b>${amtStr(e.amt,e.cur)}</b></button>`).join('')}</div>`:''}
         <div class="sp-add">
-          <input id="spIn" placeholder="taxi 1000 · claude 200$ · кофе 4" autocomplete="off" enterkeyhint="done" aria-label="What did you pay for, and how much">
+          <input id="spIn" placeholder="taxi 1000 · claude 200$ · +500 salary" autocomplete="off" enterkeyhint="done" aria-label="What you paid or got, and how much">
           <button class="sp-go" id="spGo">Add</button>
         </div>
       </div>
@@ -7272,7 +7347,11 @@ function renderSpend(){
           <span>${name(k)}</span>
           <button id="spNext" aria-label="Later month" ${off===0?'disabled':''}>${svg('chev',14,2.2)}</button>
         </div>
-        <b class="sp-total">${S.approx?'<i class="sp-approx">≈</i>':''}${money2(total)}</b>
+        ${incM?`<div class="sp-three">
+          <span><small>Income</small><b class="g-win">${S.iapprox?'≈ ':''}${money2(incM)}</b></span>
+          <span><small>Spent</small><b>${S.approx?'≈ ':''}${money2(total)}</b></span>
+          <span><small>${left>=0?'Left':'Over'}</small><b class="${left>=0?'g-win':'g-loss'}">${S.approx||S.iapprox?'≈ ':''}${left<0?'−':''}${money2(Math.abs(left))}</b></span>
+        </div>`:`<b class="sp-total">${S.approx?'<i class="sp-approx">≈</i>':''}${money2(total)}</b>`}
         ${Object.keys(S.miss).length?`<span class="sp-oth">+ ${Object.keys(S.miss).map(c=>amtStr(S.miss[c],c)).join(' + ')} · no exchange rates yet</span>`:''}
         <span class="sp-diff">${[prev?(Math.abs(diff)<0.5?'Same as '+MONL[mo(k-1)]:`${money(Math.round(Math.abs(diff)))} ${diff>0?'more':'less'} than ${MONL[mo(k-1)]}`):'',
           total?money(Math.round(total/days))+' a day':''].filter(Boolean).join(' · ')||'Nothing spent yet'}</span>
@@ -7284,7 +7363,7 @@ function renderSpend(){
         :`<button class="sp-blabel" id="spBudget">Set a monthly budget</button>`}
       </div>
       <div class="sp-bars">${bars.map(b=>`<button class="sp-bar ${b.kk===k?'on':''}" data-mk="${b.kk}" ${b.kk>nk?'disabled':''} title="${name(b.kk)}: ${money(Math.round(b.v))}">
-        <span class="sp-col">${budget?`<em style="bottom:${(budget/max)*100}%"></em>`:''}<i style="height:${b.v?Math.max(3,(b.v/max)*100):0}%"></i></span>
+        <span class="sp-col">${budget?`<em style="bottom:${(budget/max)*100}%"></em>`:''}${b.inc?`<u class="${b.inc>max?'cap':''}" style="bottom:${Math.min(100,b.inc/max*100)}%" title="Income ${money(Math.round(b.inc))}"></u>`:''}<i style="height:${b.v?Math.max(3,(b.v/max)*100):0}%"></i></span>
         <small>${MON[mo(b.kk)]}</small><span class="sp-v">${b.v?moneyShort(b.v):'–'}</span></button>`).join('')}</div>
       <div class="sp-cols">
         <div class="sp-side">
@@ -7292,6 +7371,10 @@ function renderSpend(){
             ${subs.map(({t,m})=>{ const nx=nextCharge(t); return `<button class="sp-row" data-sp="${t.id}">${spIcon(t)}
               <span class="sp-main"><span class="sp-name">${esc(spName(t))}</span><small>next ${MON[nx.getMonth()]} ${nx.getDate()}</small></span>
               <span class="sp-amtc"><b>${amtStr(Number(t.price),curOf(t))}</b>${curOf(t)&&m.v!=null?`<small>≈ ${money2(m.v)}</small>`:''}</span></button>` }).join('')}</section>`:''}
+          ${incoming.length?`<section class="sp-box sp-subs"><h2 class="pane-h">Coming in <span class="sp-subs-t">${incoming.some(x=>x.m.fx)?'≈ ':''}+${money2(incoming.reduce((n,x)=>n+(x.m.v||0),0))} a month</span></h2>
+            ${incoming.map(({t,m})=>{ const nx=nextCharge(t); return `<button class="sp-row" data-sp="${t.id}">${spIcon(t)}
+              <span class="sp-main"><span class="sp-name">${esc(spName(t))}</span><small>next ${MON[nx.getMonth()]} ${nx.getDate()}</small></span>
+              <span class="sp-amtc"><b class="g-win">+${amtStr(Number(t.price),curOf(t))}</b>${curOf(t)&&m.v!=null?`<small>≈ ${money2(m.v)}</small>`:''}</span></button>` }).join('')}</section>`:''}
         </div>
         <div class="sp-list">
           ${month.length?`<div class="sp-switch" role="tablist"><button class="${view==='group'?'on':''}" data-view="group">By group</button><button class="${view==='day'?'on':''}" data-view="day">By day</button></div>`:''}
@@ -7302,7 +7385,9 @@ function renderSpend(){
     </div>`;
   markNew(wantP());
   const inp=$('#spIn');
-  const after=it=>{ st.spMonth=0; st.spGrid=false; st.spNeed=null; renderSpend(); renderSide(); const i2=$('#spIn'); if(i2&&!isTouch()) i2.focus() };
+  const after=it=>{ st.spMonth=0; st.spGrid=false; st.spNeed=null; renderSpend(); renderSide();
+    if(st.spUpdated===it.id){ st.spUpdated=null; toast('Updated monthly '+spName(it),{sub:entryAmt(it)}) }
+    const i2=$('#spIn'); if(i2&&!isTouch()) i2.focus() };
   const add=()=>{
     const v=inp.value.trim(); if(!v) return;
     const r=parseSpend(v);
@@ -7334,6 +7419,7 @@ function renderSpend(){
       const d=e.target.closest('[data-okday]');
       if(d){ const x=new Date(); x.setDate(x.getDate()-Number(d.dataset.okday)); x.setHours(12,0,0,0); it.doneAt=x.getTime(); if(layObj(it).rep) setLayRaw(it,{rday:x.getDate()}); return save() }
       if(e.target.closest('[data-okedit]')) return spendEdit(it);
+      if(e.target.closest('[data-okflip]')){ flipIncome(it); st.spGrid=false; renderSpend(); renderSide(); return }
       if(e.target.closest('[data-okrep]')){ const on=!layObj(it).rep; setLayRaw(it,{rep:on?'month':undefined,rday:on?new Date(it.doneAt).getDate():undefined}); if(on) toast('Monthly',{sub:'Added again on the '+ordN(new Date(it.doneAt).getDate())+' of each month'}); return save() }
       if(e.target.closest('[data-okundo]')){ dropExpense(it); st.spLast=null; st.spGrid=false; renderSpend(); renderSide(); toast('Removed'); return }
       if(e.target.closest('[data-okx]')){ st.spLast=null; st.spGrid=false; renderSpend() }
@@ -7770,7 +7856,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:36';
+const APP_VER='19 Nov 02:39';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
