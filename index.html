@@ -2432,6 +2432,9 @@ button:active:not(:disabled){transform:scale(.97)}
 }
 @media (max-width:760px){.sp-hero{margin-top:0}}
 @media (hover:none){.acct-menu [data-a=keys]{display:none}}
+
+.wbusy{position:absolute;left:10px;right:10px;top:50%;transform:translateY(-50%);z-index:3;padding:8px 10px;border-radius:10px;text-align:center;
+  font-size:12.5px;font-weight:600;color:var(--txt);background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:var(--sh-float)}
 </style>
 </head>
 <body class="side-open">
@@ -4309,7 +4312,7 @@ function wishPane(p){
       <div class="wrow ${i.done?'got':''}" data-id="${i.id}">
         <button class="check" data-wtog="${i.id}" aria-label="Toggle">${svg(i.done?'boxOk':'box',18,1.8)}</button>
         <span class="wrow-name">${esc(i.text)}</span>
-        ${i.price?`<span class="wrow-price">${wasLabel(i)}${layObj(i).approx?'≈ ':''}${money(i.price)}</span>`:`<button data-wai="${i.id}" title="Find the price">${svg('spark',14,1.8)}</button>`}
+        ${i.price?`<span class="wrow-price">${wasLabel(i)}${wishPriceLabel(i)}</span>`:`<button data-wai="${i.id}" title="Find the price">${svg('spark',14,1.8)}</button>`}
         ${i.url?`<button data-wopen="${i.id}" title="Open the link">${svg('link',14,1.9)}</button>`:'<span class="wgap"></span>'}
         <button data-wed="${i.id}" title="Edit">${svg('pen',14,1.8)}</button>
         <button data-wdel="${i.id}" title="Delete">${svg('trash',14,1.8)}</button>
@@ -4320,7 +4323,8 @@ function wishPane(p){
         <img data-img="${i.id}" alt="" ${i.preview?`src="${esc(i.preview)}" class="has" onerror="this.classList.remove('has')"`:''}>
         <div class="shade"></div>
         ${i.done?'<span class="got-tag">bought</span>':''}
-        ${i.price?`<span class="wprice">${wasLabel(i)}${layObj(i).approx?'≈ ':''}${money(i.price)}</span>`:''}
+        ${st.wishBusy&&st.wishBusy[i.id]?'<span class="wbusy">Finding price and photo…</span>':''}
+        ${i.price?`<span class="wprice">${wasLabel(i)}${wishPriceLabel(i)}</span>`:''}
         <div class="wname">
           <b>${esc(i.text)}</b>
           <span>${ago(i.created)}${i.url?' · has link':''}</span>
@@ -4329,7 +4333,7 @@ function wishPane(p){
         <button class="row-more wmore" data-amenu title="Actions" aria-label="Actions"><i></i><i></i><i></i></button>
         <div class="wacts">
           <button data-wtog="${i.id}">${svg(i.done?'box':'boxOk',18,1.8)}${i.done?'undo':'bought'}</button>
-          ${i.price==null||!i.url?`<button data-wai="${i.id}">${svg('spark',18,1.7)}find</button>`:''}
+          <button data-wai="${i.id}" title="${i.price==null&&!i.url?'Find price and photo':'Find again'}">${svg('spark',18,1.7)}${i.price==null&&!i.url?'find':'find again'}</button>
           <button data-wed="${i.id}">${svg('pen',18,1.7)}edit</button>
           ${i.url?`<button data-wopen="${i.id}">${svg('link',18,1.8)}open</button>`:''}
           <button data-wdel="${i.id}">${svg('trash',18,1.7)}delete</button>
@@ -4436,6 +4440,7 @@ function itemEdit(p,item,isWish){
       if(isWish){
         const pr=parseFloat(String(el.querySelector('#ePrice').value).replace(',','.'));
         const np=isNaN(pr)?null:pr; if(item.price&&np&&np!==Number(item.price)) setLay(item,'was',item.price);
+        if(np!==Number(item.price)){ setLay(item,'pl',''); setLay(item,'ph','') }
         item.price=np; setLay(item,'approx','');      // цену вписали руками — она уже не примерная
       }
       let u=el.querySelector('#eUrl').value.trim();
@@ -4524,16 +4529,47 @@ function aiFail(e){
     {kind:'bad',sub:e.status==='cap'?'raise it in settings → AI key':e.status===401?'check it in settings → AI key':aiWhy(e)});
 }
 const aiReady=()=>{ if(aiKey()) return true; openAiKey(); return false };
+/* поиск товара: диапазон цены нового (базовая — популярная комплектация), страница и картинка. Не больше двух вызовов */
 async function aiProduct(name){
-  const j=lastJson(await aiAsk('Item on my wishlist: "'+name+'". Work out which product this most likely is, its typical current retail price new in '
-    +(CUR_NAME[curSym()]||'US dollars')+', and one page for it (the maker\'s own product page if there is one, otherwise a major retailer). '
+  const cur=CUR_NAME[curSym()]||'US dollars';
+  const num=x=>typeof x==='number'&&isFinite(x)&&x>0?Math.round(x*100)/100:null;
+  const j=lastJson(await aiAsk('Item on my wishlist: "'+name+'". Work out which product this most likely is. Give the typical price range for buying it new in '+cur
+    +': "low" = the base configuration, "high" = a common upper configuration (the same number if there is one price). If the product is identifiable, always give your best estimate — never null. '
+    +'Also give one page for it (the maker\'s own product page if there is one, otherwise a major retailer) and, if you know one, a direct URL of a product photo. '
     +'If the name is too vague to identify a product, use nulls. Finish with one line of JSON and nothing after it: '
-    +'{"name": "<proper product name>", "price": <number or null>, "url": "<https link or null>"}','search'));
+    +'{"name": "<proper product name>", "low": <number or null>, "high": <number or null>, "url": "<https link or null>", "image": "<https image link or null>"}','search'));
   if(!j) return null;
-  const price=typeof j.price==='number'&&isFinite(j.price)&&j.price>0?Math.round(j.price*100)/100:null;
-  const url=typeof j.url==='string'&&/^https:\/\//i.test(j.url)?j.url:'';
-  return {name:typeof j.name==='string'?j.name.trim().slice(0,120):'',price,url};
+  const out={name:typeof j.name==='string'?j.name.trim().slice(0,120):'',low:num(j.low)||num(j.price),high:num(j.high),
+    url:typeof j.url==='string'&&/^https:\/\//i.test(j.url)?j.url:'',image:typeof j.image==='string'&&/^https:\/\//i.test(j.image)?j.image:''};
+  if(!out.low&&out.name){                                /* цены нет — второй, короткий вопрос без поиска */
+    const k=lastJson(await aiAsk('From general knowledge, what is the typical price of "'+out.name+'" bought new, in '+cur+'? Give your best estimate even if unsure. '
+      +'Finish with one line of JSON and nothing after it: {"low": <number>, "high": <number>}'));
+    if(k){ out.low=num(k.low)||num(k.price); out.high=num(k.high) }
+  }
+  if(out.low&&(!out.high||out.high<out.low)) out.high=out.low;
+  return out;
 }
+/* картинка товара без AI: превью страницы → Jina → картинка от модели, только если она правда загружается */
+function imgOk(u){ return new Promise(res=>{ if(!u) return res(false); const im=new Image(); const t=setTimeout(()=>res(false),7000);
+  im.onload=()=>{ clearTimeout(t); res(im.naturalWidth>=120&&im.naturalHeight>=120) }; im.onerror=()=>{ clearTimeout(t); res(false) };
+  im.referrerPolicy='no-referrer'; im.src=u }) }
+async function productImage(url,aiImg){
+  if(url){
+    const a=await fetchPreview(url); if(a&&await imgOk(a)) return a;
+    try{
+      const r=await fetch('https://r.jina.ai/'+url,{headers:{accept:'application/json'}});
+      if(r.ok){ const d=((await r.json())||{}).data||{};
+        const md=(String(d.content||'').match(/!\[[^\]]*\]\((https?:[^)\s]+)\)/g)||[]).map(x=>x.replace(/^.*\((https?:[^)\s]+)\).*$/,'$1'));
+        for(const c of [d.image].concat(md).filter(Boolean).slice(0,6)){ if(await imgOk(c)) return c } }
+    }catch(e){}
+  }
+  if(aiImg&&await imgOk(aiImg)) return aiImg;
+  return '';
+}
+/* цена в карточке: диапазон, если он есть */
+const wishPriceLabel=i=>{ const L=layObj(i), lo=Number(L.pl), hi=Number(L.ph);
+  if(L.approx&&lo&&hi&&hi>lo) return '≈ '+money(lo)+'–'+money(hi).replace(curSym(),'');
+  return (L.approx?'≈ ':'')+money(i.price) };
 /* что это за ссылка — открываем страницу и называем в нескольких словах */
 const ideaNamed=i=>{ const u=ideaUrl(i); return !u||(!!noUrl(i.text)&&noUrl(i.text)!==shortUrl(u)) };
 async function aiNameIdea(p,i){
@@ -4632,24 +4668,42 @@ async function aiSort(raw){
 }
 
 /* дополняем покупку: цену (помечаем как примерную), ссылку и по ней — картинку. Своё не перезаписываем */
-async function aiFillWish(p,item,loud){
+async function aiFillWish(p,item,loud,again){
   if(!aiKey()){ if(loud) openAiKey(); return }
   if(item._ai) return; item._ai=true;
-  if(loud) toast('Looking it up…');
+  st.wishBusy=st.wishBusy||{}; st.wishBusy[item.id]=1; wishRerender(p);
+  const before={text:item.text,price:item.price,url:item.url,preview:item.preview,layout:item.layout};
+  const done=()=>{ delete item._ai; if(st.wishBusy) delete st.wishBusy[item.id]; wishRerender(p) };
   try{
     const f=await aiProduct(item.text);
-    if(!f||(!f.price&&!f.url)){ if(loud) toast('Nothing found for that name',{kind:'warn'}); return }
-    let ch=false;
-    if(f.price&&(item.price==null||item.price==='')){ item.price=f.price; setLay(item,'approx',1); ch=true }
-    if(f.url&&!item.url){ item.url=f.url; ch=true; if(!item.preview) wishFill(p,item,false) }
-    if(ch){
-      saveProject(p,true);
-      wishRerender(p);
-      renderSide();
-      toast(f.price?'About '+money(f.price):'Found the page',{sub:f.name||item.text});
-    }else if(loud) toast('Already filled in');
-  }catch(e){ if(loud||e.status!=='cap') aiFail(e) }
-  finally{ delete item._ai }
+    const L=layObj(item);
+    const handPrice=item.price!=null&&item.price!==''&&!L.approx;
+    let hasPhoto=false; try{ hasPhoto=(await photosOf(WANT)).some(x=>x.item===item.id) }catch(e){}
+    const got=[];
+    if(f&&f.low&&(!handPrice||again)){
+      item.price=f.low; setLay(item,'approx',1); setLay(item,'pl',f.low); setLay(item,'ph',f.high);
+      got.push(wishPriceLabel(item));
+    }
+    if(f&&f.url&&(!item.url||again)){ item.url=f.url; got.push('link') }
+    if(!hasPhoto&&(!item.preview||again)){
+      const img=await productImage(item.url||(f&&f.url),f&&f.image);
+      if(img){ item.preview=img; got.push('photo') }
+    }
+    /* название меняем, только если человек написал сокращение («mac pro 16» → полное имя) */
+    let renamed=false;
+    if(f&&f.name){
+      const a=normName(item.text).split(' ').filter(Boolean), b=normName(f.name).split(' ');
+      if(a.length&&normName(f.name)!==normName(item.text)&&f.name.length>item.text.length&&a.every(w=>b.some(x=>x.indexOf(w)===0))){ item.text=f.name; renamed=true }
+    }
+    if(got.length||renamed){
+      saveProject(p,true); renderSide();
+      const miss=[!item.price?'price':'',!item.url?'link':'',!(item.preview||hasPhoto)?'photo':''].filter(Boolean);
+      toast(got.length?got.join(' · '):'Renamed',{sub:(renamed?'Now “'+item.text+'”':(f&&f.name)||item.text)+(miss.length?' · no '+miss.join(', ')+' found':''),action:'Undo',onAction:()=>{
+        Object.assign(item,{text:before.text,price:before.price,url:before.url,preview:before.preview}); if(before.layout) item.layout=before.layout; else delete item.layout;
+        saveProject(p,true); wishRerender(p); renderSide() }});
+    }else if(loud||!f) toast(f&&f.name?'Nothing new for “'+f.name+'”':'Could not identify “'+item.text+'”',{kind:'warn',sub:f&&f.name?'Price, link and photo were already filled — use Find again to replace them':'Try a more specific name, like the model'});
+  }catch(e){ aiFail(e) }
+  finally{ done() }
 }
 function openAiKey(){
   const el=document.createElement('div');
@@ -4765,7 +4819,7 @@ function bindWish(p){
   grid.addEventListener('click',async e=>{
     if(e.target.closest('a')) return;
     const ai=e.target.closest('[data-wai]');
-    if(ai){ const it=(p.tasks||[]).find(x=>x.id===ai.dataset.wai); if(it) aiFillWish(p,it,true); return }
+    if(ai){ const it=(p.tasks||[]).find(x=>x.id===ai.dataset.wai); if(it) aiFillWish(p,it,true,it.price!=null||!!it.url); return }
     const tg=e.target.closest('[data-wtog]'), ed=e.target.closest('[data-wed]'),
           op=e.target.closest('[data-wopen]'), dl=e.target.closest('[data-wdel]');
     if(!tg&&!ed&&!op&&!dl){                               // клик по самой карточке — открыть её
@@ -8516,7 +8570,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:00';
+const APP_VER='19 Nov 03:02';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
