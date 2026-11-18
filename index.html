@@ -1647,6 +1647,52 @@ a.idea-title:hover{text-decoration:underline}
 .idea-host:hover{color:var(--dim)}
 .idea-host img{width:14px;height:14px;border-radius:3px}
 .idea-fav{width:24px;height:24px}
+.idea.unnamed .idea-title{color:var(--dim);font-weight:400}
+.idea-name{color:var(--lime);font-size:12.5px;font-weight:600;padding:0}
+.idea-name:hover{text-decoration:underline}
+[data-iprev]{cursor:pointer}
+.idea-thumb[data-iprev]{position:relative}
+.idea-thumb[data-iprev]::after{content:'';position:absolute;right:5px;bottom:5px;width:0;height:0;
+  border-left:9px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent;filter:drop-shadow(0 1px 3px #000)}
+.iprev-name{flex:1;min-width:220px;max-width:460px;padding:10px 13px;border-radius:10px;border:1px solid var(--line-2);
+  background:var(--panel);color:var(--txt);font-size:15px}
+
+/* v5 — feel: soft focus, gentle lift, things answer when touched */
+::selection{background:color-mix(in srgb,var(--lime) 35%,transparent)}
+#view{scroll-behavior:smooth}
+@keyframes viewFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.view-in{animation:viewFade .18s ease}
+input,textarea{transition:border-color .15s,box-shadow .15s}
+input:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--lime) 15%,transparent)}
+.p-title:focus,.qa-in input:focus,.qadd input:focus,#capText:focus{box-shadow:none}
+.jot .capture input:focus{border-color:color-mix(in srgb,var(--lime) 55%,transparent)}
+.jot #capBtn,.quick-btn,.task-add button,.want-add .go,.wish-add .go,.link-add .go,.fab:not(.small),.gate-go,.cap-send{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.38),0 6px 16px -10px color-mix(in srgb,var(--lime) 70%,transparent)}
+.card,.wcard,.lcard,.idea{transition:transform .18s cubic-bezier(.2,.8,.2,1),border-color .15s,box-shadow .18s}
+@media (hover:hover){
+  .card:hover,.wcard:hover,.lcard:hover,.idea:hover{transform:translateY(-2px);box-shadow:0 16px 30px -20px #000}
+  .tsnooze{opacity:0}
+  .tlist li:hover .tsnooze,.tsnooze:focus-visible{opacity:1}
+}
+.card:active,.wcard:active,.lcard:active,.idea:active{transform:scale(.99)}
+.tasks li,.tditem,.wrow,.row,.btn-nav{transition:background-color .12s,border-color .12s}
+.tasks:not(.tlist) li:hover{background:color-mix(in srgb,var(--txt) 3%,transparent)}
+@keyframes pop{0%{transform:scale(.4)}100%{transform:scale(1)}}
+.check.pop svg{animation:pop .34s cubic-bezier(.2,1.7,.4,1)}
+.day{max-width:1500px;margin:0 auto 14px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.day b{font-family:var(--display);font-size:22px;font-weight:600;letter-spacing:-.01em}
+.day-done{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:var(--lime)}
+.day-streak{font-size:13.5px;color:var(--soft)}
+.tsnooze{flex:0 0 auto;padding:5px;border-radius:8px;color:var(--dim)}
+.tsnooze:hover{color:var(--txt);background:var(--raise)}
+.rep-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.rep-row button{padding:9px 4px;border-radius:10px;border:1px solid var(--line);font-size:13px;color:var(--soft)}
+.rep-row button.on{background:var(--raise);color:var(--txt);border-color:var(--line-2)}
+.confetti{position:fixed;inset:0;z-index:9998;pointer-events:none;overflow:hidden}
+.confetti i{position:absolute;top:-14px;width:8px;height:12px;border-radius:2px;animation:fall 1.5s cubic-bezier(.3,.6,.5,1) forwards}
+@keyframes fall{to{transform:translate(var(--dx),108vh) rotate(var(--r))}}
+@media (prefers-reduced-motion:reduce){.view-in,.check.pop svg{animation:none}#view{scroll-behavior:auto}}
+@media (max-width:760px){.day b{font-size:19px}}
 </style>
 </head>
 <body class="side-open">
@@ -1697,6 +1743,7 @@ a.idea-title:hover{text-decoration:underline}
     <button class="tool" id="tArchive"></button>
     <button class="tool" id="tHints"></button>
     <button class="tool" id="tTheme"></button>
+    <button class="tool" id="tSound"></button>
     <button class="tool" id="tResort">Sort automatically again</button>
   </div>
   <div id="sideList"></div>
@@ -2186,10 +2233,65 @@ const ld=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).p
 const ldPlus=n=>{const d=new Date();d.setDate(d.getDate()+n);return ld(d)};
 const layObj=t=>{ try{ return t.layout?(typeof t.layout==='string'?JSON.parse(t.layout):t.layout)||{}:{} }catch(e){ return {} } };
 const dueOf=t=>(t&&t.kind!=='sticky'&&layObj(t).due)||'';
-function setDue(t,d){
+function setLay(t,k,v){
   const L=layObj(t);
-  if(d) L.due=d; else delete L.due;
+  if(v) L[k]=v; else delete L[k];
   if(Object.keys(L).length) t.layout=JSON.stringify(L); else delete t.layout;
+}
+const setDue=(t,d)=>setLay(t,'due',d);
+const repOf=t=>(t&&t.kind!=='sticky'&&layObj(t).rep)||'';
+function nextDue(d,rep){
+  const x=new Date((d&&d>=ld()?d:ld())+'T12:00:00');
+  if(rep==='day') x.setDate(x.getDate()+1);
+  else if(rep==='week') x.setDate(x.getDate()+7);
+  else if(rep==='month') x.setMonth(x.getMonth()+1);
+  return ld(x);
+}
+/* сразу после отметки «сделано»: повторяющаяся задача не закрывается, а переезжает на следующий срок */
+function rollRepeat(t){
+  const rep=repOf(t); if(!t.done||!rep) return false;
+  t.done=false; t.doneAt=null; t.star=false;
+  setLay(t,'due',nextDue(dueOf(t),rep)); setLay(t,'last',Date.now());
+  if(t.subs&&t.subs.length) t.subs.forEach(s=>{s.done=false});
+  toast('Done',{sub:'next: '+dueLabel(dueOf(t))});
+  return true;
+}
+const WEEK=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function doneStats(){
+  const days={}, tk=ld(); let today=0;
+  st.projects.forEach(p=>(p.tasks||[]).forEach(t=>{
+    [t.doneAt,t.layout&&t.kind!=='sticky'?layObj(t).last:0].forEach(ts=>{
+      if(!ts) return; const k=ld(new Date(Number(ts))); days[k]=1; if(k===tk) today++;
+    });
+  }));
+  const d=new Date(); if(!days[ld(d)]) d.setDate(d.getDate()-1);
+  let streak=0; while(days[ld(d)]){ streak++; d.setDate(d.getDate()-1) }
+  return {today,streak};
+}
+/* тихие звуки и конфетти */
+let actx=null;
+function blip(kind){
+  if(LS.get('pm:sound')==='0') return;
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const t=actx.currentTime, o=actx.createOscillator(), g=actx.createGain();
+    const f=kind==='done'?[620,940]:kind==='add'?[480,600]:[880,1320];
+    o.type='sine'; o.frequency.setValueAtTime(f[0],t); o.frequency.exponentialRampToValueAtTime(f[1],t+.09);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.05,t+.012); g.gain.exponentialRampToValueAtTime(.0001,t+.17);
+    o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+.19);
+  }catch(e){}
+}
+function confetti(){
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const box=document.createElement('div'); box.className='confetti';
+  const cols=['var(--lime)','var(--txt)','var(--mint)','var(--amber)'];
+  for(let i=0;i<44;i++){
+    const d=document.createElement('i');
+    d.style.cssText='left:'+(Math.random()*100)+'%;background:'+cols[i%4]+';animation-delay:'+(Math.random()*.25)+'s;--dx:'+((Math.random()-.5)*160)+'px;--r:'+(Math.random()*720-360)+'deg';
+    box.appendChild(d);
+  }
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(),1900);
 }
 const dueState=d=>!d?'':d<ld()?'late':d===ld()?'now':'later';
 function dueLabel(d){
@@ -2200,7 +2302,7 @@ function dueLabel(d){
   const a=d.split('-'); return MON[+a[1]-1]+' '+(+a[2]);
 }
 const dueChip=(pid,t)=>{const d=dueOf(t);
-  return `<button class="due ${dueState(d)}" data-due="${pid}|${t.id}" title="${d?'Change the date':'Set a date'}">${svg('clock',12,2)}${d?' '+dueLabel(d):''}</button>`};
+  return `<button class="due ${dueState(d)}" data-due="${pid}|${t.id}" title="${d?'Change the date':'Set a date'}">${svg('clock',12,2)}${d?' '+dueLabel(d):''}${repOf(t)?' ↻':''}</button>`};
 const DUE_WORDS={'сегодня':0,'today':0,'завтра':1,'tomorrow':1,'послезавтра':2};
 const isHot=t=>!!t.star||(!t.done&&!!dueOf(t)&&dueOf(t)<=ld());
 const starred=()=>st.projects.map(p=>({p,items:(p.tasks||[]).filter(isHot)})).filter(g=>g.items.length);
@@ -2402,6 +2504,8 @@ function renderSide(){
   if(ta) ta.innerHTML=svg('arch',14,1.7)+' Archive · '+an;
   const th=$('#tHints');
   if(th){ th.innerHTML=svg(st.hints?'boxOk':'box',14,1.9)+' Show hints'; th.classList.toggle('on',st.hints) }
+  const ts=$('#tSound'), sOn=LS.get('pm:sound')!=='0';
+  if(ts){ ts.innerHTML=svg(sOn?'boxOk':'box',14,1.9)+' Sounds'; ts.classList.toggle('on',sOn) }
   const tt=$('#tTheme');
   if(tt){ tt.innerHTML=svg(st.light?'boxOk':'box',14,1.9)+' Light theme'; tt.classList.toggle('on',st.light) }
   const box=$('#sideList');
@@ -2558,6 +2662,10 @@ function renderAll(){
   const chips=[{id:'all',label:'All'},...STATUSES.map(s=>({id:s.id,label:s.short,n:n(s.id)})),{id:'archived',label:'Archive',n:archivedCount()}];
   const jot=JOT.find(j=>j.id===st.capTo)||JOT[0];
   $('#view').innerHTML=`
+    ${(()=>{const s=doneStats(), d=new Date();
+      return `<div class="day"><b>${WEEK[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}</b>
+        ${s.today?`<span class="day-done">${svg('boxOk',14,2)} ${s.today} done today</span>`:''}
+        ${s.streak>1?`<span class="day-streak">${s.streak} days in a row</span>`:''}</div>`})()}
     <div class="jot" data-to="${jot.id}">
       <div class="jot-tabs" id="capTo">${JOT.map(j=>`<button class="jot-tab ${jot.id===j.id?'on':''}" data-to="${j.id}">${j.label}</button>`).join('')}</div>
       <div class="capture">
@@ -2585,6 +2693,7 @@ function renderAll(){
             <button class="check" data-ttog="${p.id}|${t.id}" aria-label="Done">${svg('box',18,1.8)}</button>
             <span>${linkify(t.text)}</span>
             ${dueOf(t)?dueChip(p.id,t):''}
+            <button class="tsnooze" data-tsnooze="${p.id}|${t.id}" title="Not today — move to tomorrow">${svg('arrow',14,2)}</button>
             <button class="tsrc" data-open="${p.id}" style="--pc:var(--${p.id===INBOX?'violet':p.id===TODO?'magenta':p.id===WANT?'mint':tintOf(p)})">${esc(p.name)}</button>
           </li>`).join('')}</ul>
       </section>`})()}
@@ -2663,15 +2772,26 @@ function renderAll(){
   if(hn) hn.addEventListener('click',newProject);
   const td=$('#today');
   if(td) td.addEventListener('click',e=>{
-    const tg=e.target.closest('[data-ttog]'); if(!tg) return;
-    const [pid,tid]=tg.dataset.ttog.split('|');
+    const tg=e.target.closest('[data-ttog]'), sn=e.target.closest('[data-tsnooze]');
+    if(!tg&&!sn) return;
+    const [pid,tid]=(tg?tg.dataset.ttog:sn.dataset.tsnooze).split('|');
     const pr=st.projects.find(x=>x.id===pid); if(!pr) return;
     const task=(pr.tasks||[]).find(x=>x.id===tid); if(!task) return;
+    const later=()=>setTimeout(()=>{ if(!st.openId&&!st.focus&&!st.hist&&!st.review) renderAll(); renderSide() },420);
+    if(sn){
+      const was={star:task.star,due:dueOf(task)};
+      task.star=false; setDue(task,ldPlus(1)); saveProject(pr,true);
+      sn.closest('li').classList.add('leaving'); later();
+      toast('Moved to tomorrow',{action:'Undo',onAction:()=>{ task.star=was.star; setDue(task,was.due); saveProject(pr,true); if(!st.openId) renderAll(); renderSide() }});
+      return;
+    }
     task.done=true; task.doneAt=Date.now();
+    const rolled=rollRepeat(task);
     saveProject(pr,true);
     const li=tg.closest('li'); li.classList.add('done','leaving'); tg.innerHTML=svg('boxOk',18,1.8);
-    setTimeout(()=>{ if(!st.openId&&!st.focus&&!st.hist&&!st.review) renderAll(); renderSide() },420);
-    toast('Done',{action:'Undo',onAction:()=>{ task.done=false; task.doneAt=null; saveProject(pr,true); if(!st.openId) renderAll(); renderSide() }});
+    later();
+    if(!hotList().length){ confetti(); blip('clear'); toast('All clear for today') }
+    else if(!rolled) toast('Done',{action:'Undo',onAction:()=>{ task.done=false; task.doneAt=null; saveProject(pr,true); if(!st.openId) renderAll(); renderSide() }});
   });
 }
 
@@ -2945,7 +3065,7 @@ function renderFocus(){
     const [pid,tid]=(tg?tg.dataset.ftoggle:un.dataset.funstar).split('|');
     const pr=st.projects.find(x=>x.id===pid); if(!pr) return;
     const task=(pr.tasks||[]).find(x=>x.id===tid); if(!task) return;
-    if(tg){ task.done=!task.done; task.doneAt=task.done?Date.now():null } else { task.star=false; if(dueOf(task)&&dueOf(task)<=ld()) setDue(task,'') }
+    if(tg){ task.done=!task.done; task.doneAt=task.done?Date.now():null; rollRepeat(task) } else { task.star=false; if(dueOf(task)&&dueOf(task)<=ld()) setDue(task,'') }
     saveProject(pr,true); renderFocus(); renderSide();
   });
   const cd=$('#clearDone');
@@ -3099,14 +3219,16 @@ function ideaCard(p,i,cur){
   const url=ideaUrl(i), kind=url?linkKind(url):null;
   const img=i.preview||(url?autoThumb(url):'');
   const title=esc(ideaTitle(i));
-  return `<div class="idea ${url?'has-link':''} ${img?'has-img':''}" data-id="${i.id}">
+  const named=!url||!!noUrl(i.text)&&noUrl(i.text)!==shortUrl(url);
+  const pv=url&&embedOf(url)?` data-iprev="${i.id}"`:'';
+  return `<div class="idea ${url?'has-link':''} ${img?'has-img':''} ${named?'':'unnamed'}" data-id="${i.id}">
     <div class="idea-top">
-      ${url?`<a class="idea-thumb ${img?'has':''}" href="${esc(url)}" target="_blank" rel="noopener" ${img?`style="background-image:url('${esc(img)}')"`:''}>
+      ${url?`<a class="idea-thumb ${img?'has':''}"${pv} href="${esc(url)}" target="_blank" rel="noopener" ${img?`style="background-image:url('${esc(img)}')"`:''}>
         ${img?'':`<img class="idea-fav" src="${esc(favOf(url))}" alt="" onerror="this.style.display='none'">`}</a>`
       :`<span class="idea-thumb">${svg('spark',15,1.8)}</span>`}
       <span class="idea-main">
-        ${url?`<a class="idea-title" href="${esc(url)}" target="_blank" rel="noopener">${title}</a>`:`<b class="idea-title">${title}</b>`}
-        ${url?`<span class="idea-host"><img src="${esc(favOf(url))}" alt="" onerror="this.style.display='none'">${esc(kind.name)}</span>`:''}
+        ${url?`<a class="idea-title"${pv} href="${esc(url)}" target="_blank" rel="noopener">${title}</a>`:`<b class="idea-title">${title}</b>`}
+        ${url?`<span class="idea-host"><img src="${esc(favOf(url))}" alt="" onerror="this.style.display='none'">${esc(kind.name)}${named?'':` · <button class="idea-name" data-ied="${i.id}">name it</button>`}</span>`:''}
       </span>
     </div>
     <div class="idea-foot">
@@ -3129,7 +3251,9 @@ async function enrichIdeas(p){
     let seen={}; try{ seen=JSON.parse(LS.get('pm:meta')||'{}')||{} }catch(e){}
     const need=i=>{const u=ideaUrl(i), t=String(i.text||'').trim();
       return u&&!(seen[i.id]>=3)&&(!i.preview&&!autoThumb(u)||!t||isBare(t)||t===shortUrl(u))};
-    const list=ideasOf(p).filter(need).reverse().slice(0,10);
+    const closed=u=>/instagram\.com$/.test(hostOf(u));
+    ideasOf(p).forEach(i=>{ const u=ideaUrl(i); if(u&&closed(u)&&!i.url){ i.url=u } });
+    const list=ideasOf(p).filter(i=>need(i)&&!closed(ideaUrl(i))).reverse().slice(0,25);
     for(const i of list){
       const u=ideaUrl(i);
       const meta=await fetchMeta(u);
@@ -3156,7 +3280,13 @@ function ideasPane(p){
   const cur=st.ideaFolder||'';
   const inbox=all.filter(i=>!i.cat);
   const archived=all.filter(i=>i.cat===ARCHIVE);
-  const shown=(cur===''?inbox:cur===ARCHIVE?archived:all.filter(i=>i.cat===cur)).slice().reverse();
+  let shown=(cur===''?inbox:cur===ARCHIVE?archived:all.filter(i=>i.cat===cur)).slice().reverse();
+  const srcOf=i=>{const u=ideaUrl(i); return u?linkKind(u).name:'Notes'};
+  const srcs={}; shown.forEach(i=>{const k=srcOf(i); srcs[k]=(srcs[k]||0)+1});
+  const srcList=Object.keys(srcs).sort((a,b)=>(a==='Notes')-(b==='Notes')||srcs[b]-srcs[a]);
+  if(st.ideaSrc&&!srcs[st.ideaSrc]) st.ideaSrc='';
+  const total=shown.length;
+  if(st.ideaSrc) shown=shown.filter(i=>srcOf(i)===st.ideaSrc);
   const countOf=id=>id===''?inbox.length:id===ARCHIVE?archived.length:all.filter(i=>i.cat===id).length;
 
   return `<section class="pane wide">
@@ -3177,6 +3307,10 @@ function ideasPane(p){
       <button id="taskAdd">${svg('plus',15,2.4)}</button>
     </div>
 
+    ${srcList.length>1?`<div class="chips" style="margin:14px 0 0">
+      <button class="chip ${st.ideaSrc?'':'on'}" data-isrc="">All <span class="chip-n">${total}</span></button>
+      ${srcList.map(k=>`<button class="chip ${st.ideaSrc===k?'on':''}" data-isrc="${esc(k)}">${esc(k)} <span class="chip-n">${srcs[k]}</span></button>`).join('')}
+    </div>`:''}
     ${shown.length?`<div class="ideas" id="ideas">${shown.map(i=>ideaCard(p,i,cur)).join('')}</div>`
     :`<p class="hint" style="margin-top:18px;max-width:60ch">${cur===ARCHIVE?'Archive is empty.'
       :cur?'Nothing in this folder yet.'
@@ -3221,7 +3355,7 @@ function wishPane(p){
     :shown.length?`<div class="wish-grid" id="wishGrid">${shown.map(i=>`
       <div class="wcard ${i.done?'got':''}" data-id="${i.id}">
         <div class="noimg">${svg('img',30,1.2)}</div>
-        <img data-img="${i.id}" alt="">
+        <img data-img="${i.id}" alt="" ${i.preview?`src="${esc(i.preview)}" class="has" onerror="this.classList.remove('has')"`:''}>
         <div class="shade"></div>
         ${i.done?'<span class="got-tag">bought</span>':''}
         ${i.price?`<span class="wprice">${money(i.price)}</span>`:''}
@@ -3359,16 +3493,28 @@ async function loadWishPhotos(){
   });
 }
 
+/* покупка со ссылкой: картинку (и название, если его не дали) берём со страницы товара */
+function wishFill(p,item,needTitle){
+  fetchMeta(item.url).then(meta=>{
+    let ch=false;
+    if(meta.image&&!item.preview){ item.preview=meta.image; ch=true }
+    if(needTitle&&meta.title){ item.text=meta.title; ch=true }
+    if(ch){ saveProject(p,true); if(st.openId===p.id&&!document.activeElement.closest('.wish-add')) renderProject() }
+  }).catch(()=>{});
+}
 function bindWish(p){
   const wa=$('#wAdd'); if(!wa) return;
   const add=async()=>{
     const ti=$('#wText'), pi=$('#wPrice'), li=$('#wLink');
-    const v=ti.value.trim(); if(!v) return;
+    let v=ti.value.trim(); if(!v&&!(li&&li.value.trim())) return;
     const pr=parseFloat(String(pi.value).replace(',','.'));
     let u=(li?li.value:'').trim();
+    if(!u&&ideaUrl({text:v})){ u=ideaUrl({text:v}); v=noUrl(v) }      // ссылку вставили прямо в название
     if(u&&!/^https?:\/\//i.test(u)) u='https://'+u;
-    const item={id:uid(),text:v,price:isNaN(pr)?null:pr,url:u,done:false,created:Date.now()};
+    const item={id:uid(),text:v||(u?(linkKind(u).name+' '+linkKind(u).what).trim():'Untitled'),price:isNaN(pr)?null:pr,url:u,done:false,created:Date.now()};
     p.tasks=p.tasks||[]; p.tasks.push(item);
+    if(u) wishFill(p,item,!v);
+    blip('add');
     if(st.wishFile){ await setWishPhoto(item.id,st.wishFile); st.wishFile=null }
     ti.value=''; pi.value=''; if(li) li.value='';
     st.wishRefocus=true;
@@ -3496,8 +3642,8 @@ function bindTodo(p){
       window.open(item.url,'_blank','noopener'); return;
     }
     if(ex){ st.todoOpen=st.todoOpen===key?null:key; renderProject(); return }
-    if(tg){ item.done=!item.done; item.doneAt=item.done?Date.now():null; saveProject(p,true); renderProject(); renderSide(); return }
-    if(dl){ p.tasks=p.tasks.filter(x=>x.id!==key); saveProject(p,true); renderProject(); renderSide(); return }
+    if(tg){ item.done=!item.done; item.doneAt=item.done?Date.now():null; rollRepeat(item); saveProject(p,true); renderProject(); renderSide(); return }
+    if(dl){ p.tasks=p.tasks.filter(x=>x.id!==key); saveProject(p,true); renderProject(); renderSide(); toast('Deleted',{action:'Undo',onAction:undo}); return }
     if(mk){
       const name=item.text.length>64?item.text.slice(0,64).trim()+'…':item.text;
       const np={id:uid(),name,status:'idle',important:false,startDate:'',created:Date.now(),
@@ -4234,6 +4380,36 @@ function refPreview(p,item){
   document.body.appendChild(el);
 }
 
+/* идея-видео: смотрим прямо здесь и сразу даём ей название */
+function ideaPreview(p,i){
+  const url=ideaUrl(i), emb=embedOf(url);
+  if(!emb){ window.open(url,'_blank','noopener'); return }
+  const el=document.createElement('div');
+  el.className='lb refprev';
+  el.innerHTML=`
+    <div class="embed-box ${emb.wide?'wide':'tall'}">
+      <iframe src="${esc(emb.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+        allowfullscreen loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    </div>
+    <div class="lb-bar">
+      <input class="iprev-name" id="iprevName" placeholder="Name it so you can find it later" value="${esc(noUrl(i.text)===shortUrl(url)?'':noUrl(i.text))}" autocomplete="off">
+      <button data-go>${svg('link',14,1.9)} Open</button>
+      <button data-close>${svg('x',14,2)} Close</button>
+    </div>`;
+  const inp=el.querySelector('#iprevName');
+  const close=()=>{
+    const v=inp.value.trim();
+    if(v!==noUrl(i.text)&&(v||noUrl(i.text))){ i.url=url; i.text=v; saveProject(p,true); if(st.openId===p.id) renderProject() }
+    el.remove();
+  };
+  el.addEventListener('click',e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    if(e.target.closest('[data-go]')){ window.open(url,'_blank','noopener'); return }
+  });
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); close() } e.stopPropagation() });
+  document.body.appendChild(el);
+}
+
 async function retryMissingPreviews(p){
   const items=linksOf(p).filter(i=>i.url&&!i.preview&&!i._triedMeta);
   if(!items.length) return;
@@ -4362,8 +4538,15 @@ function bindIdeas(p){
     const b=e.target.closest('[data-fol]');
     if(b){ st.ideaFolder=b.dataset.fol; renderProject() }
   });
+  $('#view').querySelectorAll('[data-isrc]').forEach(b=>b.addEventListener('click',()=>{st.ideaSrc=b.dataset.isrc;renderProject()}));
   const box=$('#ideas'); if(!box) return;
   box.addEventListener('click',async e=>{
+    const pvw=e.target.closest('[data-iprev]');
+    if(pvw&&!(e.metaKey||e.ctrlKey||e.shiftKey)){
+      e.preventDefault();
+      const it=(p.tasks||[]).find(x=>x.id===pvw.dataset.iprev); if(it) ideaPreview(p,it);
+      return;
+    }
     if(e.target.closest('a')) return;
     const mk=e.target.closest('[data-mk]'), mv=e.target.closest('[data-mv]'),
           ed=e.target.closest('[data-ied]'), dl=e.target.closest('[data-idel]'),
@@ -4712,8 +4895,9 @@ function bindProject(p){
       const x=p.tasks.find(y=>y.id===tg.dataset.toggle);
       x.done=!x.done; x.doneAt=x.done?Date.now():null;
       if(x.subs&&x.subs.length) x.subs.forEach(sb=>{sb.done=x.done});
+      rollRepeat(x);
     }
-    else if(dl){p.tasks=p.tasks.filter(y=>y.id!==dl.dataset.deltask)}
+    else if(dl){p.tasks=p.tasks.filter(y=>y.id!==dl.dataset.deltask); toast('Deleted',{action:'Undo',onAction:undo})}
     else if(sr){const x=p.tasks.find(y=>y.id===sr.dataset.star);x.star=!x.star}
     else return;
     redrawTasks();
@@ -5470,6 +5654,7 @@ async function saveCapture(target,text,url,file,extra){
   const p=st.projects.find(x=>x.id===target);
   if(!p) return;
   const ex=extra||{};
+  blip('add');
   p.tasks=p.tasks||[];
   let what='Saved';
   if(url&&!SPECIAL(p.id)){
@@ -5480,7 +5665,9 @@ async function saveCapture(target,text,url,file,extra){
     what='Reference added';
     fetchPreview(url).then(img=>{ if(img){ item.preview=img; saveProject(p,true); if(st.openId===p.id) renderProject() } });
   }else if(p.id===WANT){
-    p.tasks.push({id:uid(),text:text||shortUrl(url)||'Untitled',url:url||'',price:ex.price==null?null:ex.price,done:false,created:Date.now()});
+    const wi={id:uid(),text:text||shortUrl(url)||'Untitled',url:url||'',price:ex.price==null?null:ex.price,done:false,created:Date.now()};
+    p.tasks.push(wi);
+    if(url) wishFill(p,wi,!text);
     saveProject(p,true); what='Added to Wishlist';
   }else if(p.id===TODO){
     const ni={id:uid(),text:text||shortUrl(url)||'Untitled',cat:ex.cat||st.todoCat||'other',url:url||'',note:'',done:false,created:Date.now()};
@@ -5783,12 +5970,23 @@ function pickDue(pr,task){
       <button data-d="${ldPlus(7)}">In a week</button>
       <input type="date" id="dueDate" value="${esc(cur)}" aria-label="Pick a date">
     </div>
+    <div class="rep-row">${[['','Once'],['day','Daily'],['week','Weekly'],['month','Monthly']]
+      .map(([k,l])=>`<button data-rep="${k}" class="${repOf(task)===k?'on':''}">${l}</button>`).join('')}</div>
     ${cur?`<button class="danger" data-d="">No date</button>`:''}
   </div>`;
-  const close=()=>el.remove();
-  const apply=d=>{ setDue(task,d); saveProject(pr,true); close(); refreshView() };
+  let dirty=false;
+  const close=()=>{ el.remove(); if(dirty) refreshView() };
+  const apply=d=>{ setDue(task,d); if(!d) setLay(task,'rep',''); saveProject(pr,true); dirty=true; close() };
   el.addEventListener('click',e=>{
     if(e.target===el||e.target.closest('[data-close]')) return close();
+    const r=e.target.closest('[data-rep]');
+    if(r){
+      setLay(task,'rep',r.dataset.rep);
+      if(r.dataset.rep&&!dueOf(task)) setDue(task,ld());
+      saveProject(pr,true); dirty=true;
+      el.querySelectorAll('[data-rep]').forEach(x=>x.classList.toggle('on',x===r));
+      return;
+    }
     const b=e.target.closest('[data-d]'); if(b) apply(b.dataset.d);
   });
   el.querySelector('#dueDate').addEventListener('change',e=>{ if(e.target.value) apply(e.target.value) });
@@ -5814,6 +6012,9 @@ document.addEventListener('click',e=>{
   for(let i=0;i<8;i++){ const d=document.createElement('i'); d.style.setProperty('--a',(i*45+12)+'deg'); box.appendChild(d) }
   document.body.appendChild(box);
   setTimeout(()=>box.remove(),600);
+  blip('done');
+  const x=r.left+r.width/2, y=r.top+r.height/2;             // строка перерисуется — подпрыгнет уже новая галочка
+  setTimeout(()=>{ const n=document.elementFromPoint(x,y); const k=n&&n.closest('.check'); if(k) k.classList.add('pop') },30);
 },true);
 $('#quickBtn').addEventListener('click',openQuick);
 $('#fabAdd').addEventListener('click',()=>{ isPhone()?openCapture():openQuick() });
@@ -5887,6 +6088,10 @@ $('#tHints').addEventListener('click',()=>{
   LS.set('pm:hints',st.hints?'1':'0');
   document.body.classList.toggle('no-hints',!st.hints);
   renderSide(); route();
+});
+$('#tSound').addEventListener('click',()=>{
+  LS.set('pm:sound',LS.get('pm:sound')==='0'?'1':'0');
+  renderSide(); blip('add');
 });
 $('#tTheme').addEventListener('click',()=>{
   st.light=!st.light;
@@ -6009,6 +6214,7 @@ async function reload(){
     st.projects=await allProjects();
     setNet(true);
     st.projects.forEach(p=>localPut('projects',JSON.parse(JSON.stringify(p))));
+    st.projects.forEach(p=>{ baseline[p.id]=snapOf(p) });      // чтобы отменялось и самое первое действие
   }catch(e){
     const mirror=await localProjects().catch(()=>[]);
     if(!mirror.length) throw e;
