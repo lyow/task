@@ -915,30 +915,6 @@ body.no-hints .lede{display:none}
 .sel-bar button:hover{color:var(--txt);box-shadow:inset 0 0 0 1px var(--line-2);background:var(--panel-2)}
 .sel-bar button[data-sel="del"]:hover{color:var(--magenta);box-shadow:inset 0 0 0 1px var(--magenta)}
 
-/* светлая тема */
-body.light{
-  --bg:#F2F2F6;--panel:#FFFFFF;--panel-2:#F6F6FA;--raise:#EDEDF3;
-  --txt:#14141C;--soft:#5B5B6B;--dim:#8B8B9B;
-  --line:rgba(0,0,0,.09);--line-2:rgba(0,0,0,.16);
-  --violet:#6B46F0;--cyan:#0E93C4;--magenta:#C6249E;--mint:#0F9A66;--amber:#A9720F;--lime:#5E9209;
-  --dots:radial-gradient(circle at center,rgba(0,0,0,.10) 1px,transparent 1.2px);
-  --btn-hover:#E4E4EC;--chip-bg:rgba(0,0,0,.06);
-}
-body.light{--iris:#14141C;--on:#FFFFFF}
-body.light::before{opacity:.5}
-body.light .btn-nav .ncount,body.light .fcount,body.light .scount{background:var(--chip-bg)}
-body.light .mini,body.light .bar{background:rgba(0,0,0,.07)}
-body.light .sticky-acts button{background:rgba(255,255,255,.7);color:#14141C}
-body.light .lacts button{background:rgba(255,255,255,.8)}
-body.light .lb,body.light .refprev{background:rgba(20,20,28,.88)}
-body.light .lb-bar{color:#fff}
-body.light .card.has-cover .veil{background:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.7) 42%,rgba(255,255,255,.94) 100%)}
-body.light .wcard .shade,body.light .lshade{
-  background:linear-gradient(180deg,rgba(0,0,0,.32) 0%,transparent 38%,transparent 46%,rgba(0,0,0,.78) 100%)}
-body.light .card,body.light .prow,body.light .lrow,body.light .rrow,body.light .sgroup{
-  box-shadow:0 1px 2px rgba(20,20,40,.05)}
-body.light .topbar{background:rgba(255,255,255,.82)}
-body.light ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.14)}
 .share-box{display:flex;gap:6px}
 .share-box input{flex:1;min-width:0;padding:9px 11px;border:1px solid var(--line);border-radius:9px;
   background:var(--panel-2);font-family:var(--ui);font-size:12.5px;color:var(--soft)}
@@ -1041,7 +1017,6 @@ body.shared-view .fab-wrap{display:none!important}.refs-pane.collapsed .link-add
 .links.row{cursor:grab;scrollbar-width:thin}
 .links.row.dragging{cursor:grabbing;scroll-snap-type:none}
 .links.row.dragging .lcard{pointer-events:none}
-body.light .row-nav{background:rgba(255,255,255,.9)}
 .row-wrap{position:relative}
 .row-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:36px;height:36px;
   border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--txt);
@@ -1056,7 +1031,6 @@ body.light .row-nav{background:rgba(255,255,255,.9)}
 .links.row{cursor:grab;scrollbar-width:thin}
 .links.row.dragging{cursor:grabbing;scroll-snap-type:none}
 .links.row.dragging .lcard{pointer-events:none}
-body.light .row-nav{background:rgba(255,255,255,.9)}
 .cap-wrap{position:fixed;inset:0;z-index:125;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);
   display:flex;align-items:flex-end;opacity:0;transition:opacity .2s}
 .cap-wrap.in{opacity:1}
@@ -1498,7 +1472,6 @@ button:active,.chip:active,.jot-tab:active{transform:scale(.96)}
 .due-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .due-grid button,.due-grid input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line-2);
   background:var(--panel-2);font-size:15px;font-weight:600;color:var(--txt);color-scheme:dark}
-body.light .due-grid input{color-scheme:light}
 .due-grid button:hover{border-color:var(--sec)}
 .due-grid button.on{background:var(--sec);color:var(--on);border-color:transparent}
 
@@ -2489,7 +2462,6 @@ button:active:not(:disabled){transform:scale(.97)}
     <button class="tool" id="tHideDone"></button>
     <button class="tool" id="tArchive"></button>
     <button class="tool" id="tHints"></button>
-    <button class="tool" id="tTheme"></button>
     <button class="tool" id="tSound"></button>
     <button class="tool" id="tAi"></button>
     <button class="tool" id="tResort">Sort automatically again</button>
@@ -2959,7 +2931,7 @@ function toast(m,opt){
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')==='1',wishList:LS.get('pm:wishlist')==='1',qbar:{},ideaFolder:'',chipsOpen:false,boardOpen:{},refOpen:{},light:LS.get('pm:light')==='1',manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'other',capTo:LS.get('pm:capTo')||'inbox',capFocus:true,todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:LS.get('pm:wsort')||'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')==='1',wishList:LS.get('pm:wishlist')==='1',qbar:{},ideaFolder:'',chipsOpen:false,boardOpen:{},refOpen:{},manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'other',capTo:LS.get('pm:capTo')||'inbox',capFocus:true,todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:LS.get('pm:wsort')||'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -3361,8 +3333,6 @@ function renderSide(){
   const tx=$('#tExport'); if(tx&&!tx.innerHTML) tx.innerHTML=svg('arch',14,1.7)+' Export backup';
   const tz=$('#tRestore'); if(tz&&!tz.innerHTML) tz.innerHTML=svg('arrow',14,1.8)+' Restore from backup';
   const tk=$('#tKeys'); if(tk&&!tk.innerHTML) tk.innerHTML=svg('box',14,1.7)+' Keyboard shortcuts';
-  const tt=$('#tTheme');
-  if(tt){ tt.innerHTML=svg(st.light?'boxOk':'box',14,1.9)+' Light theme'; tt.classList.toggle('on',st.light) }
   const box=$('#sideList');
   if(!list.length){
     box.innerHTML=`<div class="empty-side">${st.query?'No matches.':'Nothing yet. Start your first project — even if it is just an idea.'}</div>`;
@@ -8467,7 +8437,7 @@ $('#sideFilter').addEventListener('click',openSettingsSheet);
 function openSettingsSheet(){
   if(document.querySelector('.set-sheet')) return;
   renderSide();
-  const SECT=[['Display',['tHideDone','tHints','tTheme','tSound','tCur']],['Reminders',['tRemind','tRemindRow']],['AI',['tAi']],
+  const SECT=[['Display',['tHideDone','tHints','tSound','tCur']],['Reminders',['tRemind','tRemindRow']],['AI',['tAi']],
     ['Your data',['tExport','tRestore','tFull']],['Projects',['tArchive','tResort']],['Help',['tKeys']]];
   const el=document.createElement('div'); el.className='sheet-wrap';
   el.innerHTML=`<div class="sheet set-sheet"><div class="sheet-head"><span>Settings</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
@@ -8509,14 +8479,6 @@ $('#tAi').addEventListener('click',openAiKey);
 $('#tSound').addEventListener('click',()=>{
   LS.set('pm:sound',LS.get('pm:sound')==='0'?'1':'0');
   renderSide(); blip('add');
-});
-$('#tTheme').addEventListener('click',()=>{
-  st.light=!st.light;
-  LS.set('pm:light',st.light?'1':'0');
-  document.body.classList.toggle('light',st.light);
-  const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute('content',st.light?'#F2F2F6':'#08080A');
-  renderSide();
 });
 $('#tExport').addEventListener('click',exportData);
 $('#tRemind').addEventListener('click',async()=>{
@@ -8570,7 +8532,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:02';
+const APP_VER='19 Nov 03:11';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
@@ -8710,7 +8672,7 @@ async function afterLogin(){
     const empty=st.projects.filter(p=>!SPECIAL(p.id)).length===0;
     if(empty&&LS.get('pm:migrated')!=='1'&&await localHasData()) migrateOffer=true;
     document.body.classList.toggle('no-hints',!st.hints);
-    document.body.classList.toggle('light',st.light);
+    try{ localStorage.removeItem('pm:light') }catch(e){}
     syncSidebarButton();
     window.addEventListener('resize',syncSidebarButton);
     route();
