@@ -313,8 +313,7 @@ body.board-open{overflow:hidden}
 .btn-nav .ncount{font-family:var(--ui);border-radius:999px}
 
 .side-label{display:flex;align-items:center;gap:8px}
-.lbl-btn{margin-left:auto;font-family:var(--ui);color:var(--dim);padding:3px 7px;border-radius:7px;border:1px solid transparent}
-.lbl-btn:hover,.lbl-btn.on{color:var(--txt);border-color:var(--line-2)}
+
 .side-tools{display:flex;flex-direction:column;gap:5px;padding:9px 11px;margin:0 9px;
   border:1px solid var(--line);border-radius:11px;background:var(--panel-2)}
 .side-tools .tool{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;
@@ -636,9 +635,6 @@ input,textarea{cursor:text}
 .sk-dot.c-violet{background:var(--violet)}.sk-dot.c-cyan{background:var(--cyan)}
 .sk-dot.c-magenta{background:var(--magenta)}.sk-dot.c-mint{background:var(--mint)}
 .sk-dot.c-amber{background:var(--amber)}.sk-dot.c-plain{background:#E4E4EC}
-body.no-hints .hint{display:none}
-body.no-hints .board-empty span{display:none}
-body.no-hints .lede{display:none}
 /* поиск */
 .sgroup{margin:0 auto 20px;overflow:hidden}
 .sgroup-h{display:flex;align-items:center;gap:10px;padding:13px 16px;text-decoration:none;color:var(--txt);
@@ -1131,7 +1127,7 @@ body{line-height:1.45}
 .btn-all,.btn-nav,.btn-new{font-family:var(--ui);font-size:14.5px;font-weight:600}
 
 .side-label{border-bottom:none}
-.lbl-btn{font-size:12.5px;font-weight:500}
+
 .row-text{font-size:14.5px}
 .row .picker,.row .btn-gear,.row .btn-pin:not(.on){display:none}
 .row .btn-gear{opacity:1}
@@ -1529,7 +1525,6 @@ body:has(.sheet-wrap) .fab-wrap,body:has(.pmenu) .fab-wrap{display:none}
 .kb-k{display:inline-flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .keys-sheet kbd,.kb-k kbd{display:inline-block;min-width:24px;padding:3px 7px;border-radius:7px;border:1px solid var(--line-2);border-bottom-width:2px;
   background:var(--bg);font-family:var(--ui);font-size:12.5px;font-weight:600;color:var(--soft);text-align:center}
-@media (hover:none){#tKeys{display:none}}
 .idea-name-in{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--line-2);background:var(--bg);font-size:15px;color:var(--txt)}
 .idea-edit-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
 .idea-edit-link{font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2180,12 +2175,8 @@ button:active:not(:disabled){transform:scale(.97)}
 
   <div class="side-label">
     <span id="sideLabel">Projects</span>
-    <button class="lbl-btn" id="sideFilter" hidden>settings</button>
   </div>
   <div class="side-tools" id="sideTools" style="display:none">
-    <button class="tool" id="tHideDone"></button>
-    <button class="tool" id="tArchive"></button>
-    <button class="tool" id="tHints"></button>
     <button class="tool" id="tSound"></button>
     <button class="tool" id="tAi"></button>
     <button class="tool" id="tResort">Sort automatically again</button>
@@ -2193,7 +2184,6 @@ button:active:not(:disabled){transform:scale(.97)}
     <label class="tool tool-time" id="tRemindRow" style="display:none">Morning reminder at <input type="time" id="tRemindAt"></label>
     <button class="tool" id="tExport"></button>
     <button class="tool" id="tRestore"></button>
-    <button class="tool" id="tKeys"></button>
   </div>
   <div id="sideList"></div>
 
@@ -2638,7 +2628,7 @@ function toast(m,opt){
 /* ───────── state ───────── */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',hints:LS.get('pm:hints')==='1',wishList:LS.get('pm:wishlist')==='1',qbar:{},ideaFolder:'',chipsOpen:false,boardOpen:{},refOpen:{},manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'other',capTo:LS.get('pm:capTo')||'inbox',capFocus:true,todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:LS.get('pm:wsort')||'new',photos:[],urls:[],maxZ:1};
+const st={projects:[],openId:null,focus:false,filter:'all',query:'',hideDone:LS.get('pm:hideDone')==='1',wishList:LS.get('pm:wishlist')==='1',qbar:{},ideaFolder:'',chipsOpen:false,boardOpen:{},refOpen:{},manual:LS.get('pm:manual')==='1',dragRow:false,wantFilter:'open',todoFilter:'open',todoCat:'other',capTo:LS.get('pm:capTo')||'inbox',capFocus:true,todoOpen:null,hist:false,review:false,histDays:14,histMonth:0,listView:LS.get('pm:list')==='1',refList:LS.get('pm:reflist')==='1',taskOpen:null,sideForced:false,linkShots:{},wishFile:null,wishSort:LS.get('pm:wsort')||'new',photos:[],urls:[],maxZ:1};
 let saveT=null;
 const cur=()=>st.projects.find(p=>p.id===st.openId)||null;
 
@@ -3024,11 +3014,7 @@ function renderSide(){
   $('#btnWant').classList.toggle('on',st.openId===WANT);
   $('#btnSpend').classList.toggle('on',!!st.spend);
   const sc=$('#scount'); if(sc){ const v=spendMonth(0); sc.textContent=v?moneyShort(v):'' }
-  const hd=$('#tHideDone'), ta=$('#tArchive');
-  if(hd){ hd.innerHTML=svg(st.hideDone?'boxOk':'box',14,1.9)+' Hide finished'; hd.classList.toggle('on',st.hideDone); }
-  if(ta) ta.innerHTML=svg('arch',14,1.7)+' Archive · '+an;
-  const th=$('#tHints');
-  if(th){ th.innerHTML=svg(st.hints?'boxOk':'box',14,1.9)+' Show hints'; th.classList.toggle('on',st.hints) }
+  const trs=$('#tResort'); if(trs) trs.hidden=!st.manual;
   const ts=$('#tSound'), sOn=LS.get('pm:sound')!=='0';
   if(ts){ ts.innerHTML=svg(sOn?'boxOk':'box',14,1.9)+' Sounds'; ts.classList.toggle('on',sOn) }
   const ta2=$('#tAi');
@@ -3038,7 +3024,6 @@ function renderSide(){
   const trr=$('#tRemindRow'); if(trr){ trr.style.display=rOn?'':'none'; const ti=$('#tRemindAt'); if(ti&&document.activeElement!==ti) ti.value=LS.get('pm:remindAt')||'09:00' }
   const tx=$('#tExport'); if(tx&&!tx.innerHTML) tx.innerHTML=svg('arch',14,1.7)+' Export backup';
   const tz=$('#tRestore'); if(tz&&!tz.innerHTML) tz.innerHTML=svg('arrow',14,1.8)+' Restore from backup';
-  const tk=$('#tKeys'); if(tk&&!tk.innerHTML) tk.innerHTML=svg('box',14,1.7)+' Keyboard shortcuts';
   const box=$('#sideList');
   if(!list.length){
     box.innerHTML=`<div class="empty-side">${st.query?'No matches.':'Nothing yet. Start your first project — even if it is just an idea.'}</div>`;
@@ -8028,7 +8013,6 @@ function acctMenu(btn){
     <div class="pm-sep"></div>
     <button data-a="set">${svg('gear',15,1.8)} Settings</button>
     <button data-a="keys">${svg('box',15,1.8)} Keyboard shortcuts</button>
-    <button data-a="backup">${svg('arch',15,1.8)} Export backup</button>
     <div class="pm-sep"></div>
     <button data-a="signOut">${svg('arrow',15,1.8)} Sign out</button>
     ${ver?`<button data-a="appVer" class="pm-ver">${esc(ver)}</button>`:''}`;
@@ -8041,7 +8025,6 @@ function acctMenu(btn){
     const a=b.dataset.a;
     if(a==='set') return openSettingsSheet();
     if(a==='keys') return openKeys();
-    if(a==='backup') return exportData();
     const t=$('#'+a); if(t) t.click();
   });
 }
@@ -8102,12 +8085,11 @@ function openHistory(){
   if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
   route();
 }
-$('#sideFilter').addEventListener('click',openSettingsSheet);
 function openSettingsSheet(){
   if(document.querySelector('.set-sheet')) return;
   renderSide();
-  const SECT=[['Display',['tHideDone','tHints','tSound','tCur']],['Reminders',['tRemind','tRemindRow']],['AI',['tAi']],
-    ['Your data',['tExport','tRestore','tFull']],['Projects',['tArchive','tResort']],['Help',['tKeys']]];
+  const SECT=[['Display',['tSound','tCur']],['Reminders',['tRemind','tRemindRow']],['AI',['tAi']],
+    ['Your data',['tExport','tRestore','tFull']],['Projects',['tResort']]];
   const el=document.createElement('div'); el.className='sheet-wrap';
   el.innerHTML=`<div class="sheet set-sheet"><div class="sheet-head"><span>Settings</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
     ${SECT.map(([h])=>`<section class="set-sec"><h3>${h}</h3><div class="set-list" data-sec="${h}"></div></section>`).join('')}
@@ -8119,31 +8101,16 @@ function openSettingsSheet(){
   let full=$('#tFull');
   if(!full){ full=document.createElement('button'); full.className='tool'; full.id='tFull'; full.innerHTML=svg('img',14,1.7)+' Full backup with photos'; full.addEventListener('click',exportAll); $('#sideTools').appendChild(full) }
   SECT.forEach(([h,ids])=>{ const box=el.querySelector(`[data-sec="${h}"]`); ids.forEach(id=>{ const n=$('#'+id); if(n) box.appendChild(n) }) });
-  el.querySelectorAll('.set-sec').forEach(sec=>{ if(!sec.querySelector('.tool')) sec.remove() });
+  el.querySelectorAll('.set-sec').forEach(sec=>{ if(!sec.querySelector('.tool:not([hidden])')) sec.style.display='none' });
   const close=()=>{ const home=$('#sideTools'); el.querySelectorAll('.tool').forEach(n=>home.appendChild(n)); el.remove() };
   el.addEventListener('click',e=>{
     if(e.target===el||e.target.closest('[data-close]')) return close();
-    if(e.target.closest('#tArchive,#tKeys,#tRestore,#tAi')) setTimeout(close,0);
+    if(e.target.closest('#tRestore,#tAi')) setTimeout(close,0);
   });
   el.addEventListener('keydown',e=>{ if(e.key==='Escape') close() });
   document.body.appendChild(el);
   new MutationObserver((m,o)=>{ if(!document.body.contains(el)){ const home=$('#sideTools'); el.querySelectorAll('.tool').forEach(n=>home.appendChild(n)); o.disconnect() } }).observe(document.body,{childList:true});
 }
-$('#tHideDone').addEventListener('click',()=>{
-  st.hideDone=!st.hideDone; LS.set('pm:hideDone',st.hideDone?'1':'0');
-  renderSide(); if(!st.openId&&!st.focus) renderAll();
-});
-$('#tArchive').addEventListener('click',()=>{
-  resetViews(); st.filter='archived';
-  if(window.innerWidth<900){document.body.classList.remove('side-open');st.sideForced=false;syncSidebarButton()}
-  route();
-});
-$('#tHints').addEventListener('click',()=>{
-  st.hints=!st.hints;
-  LS.set('pm:hints',st.hints?'1':'0');
-  document.body.classList.toggle('no-hints',!st.hints);
-  renderSide(); route();
-});
 $('#tAi').addEventListener('click',openAiKey);
 $('#tSound').addEventListener('click',()=>{
   LS.set('pm:sound',LS.get('pm:sound')==='0'?'1':'0');
@@ -8161,7 +8128,6 @@ $('#tRemind').addEventListener('click',async()=>{
   checkRemind();
 });
 $('#tRemindAt').addEventListener('change',e=>{ if(e.target.value){ LS.set('pm:remindAt',e.target.value); toast('Reminder at '+e.target.value) } });
-$('#tKeys').addEventListener('click',openKeys);
 $('#tRestore').addEventListener('click',()=>$('#jsonPick').click());
 $('#tResort').addEventListener('click',()=>{
   st.manual=false; LS.set('pm:manual','0');
@@ -8201,7 +8167,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:15';
+const APP_VER='19 Nov 03:16';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
@@ -8340,7 +8306,7 @@ async function afterLogin(){
     await reload();
     const empty=st.projects.filter(p=>!SPECIAL(p.id)).length===0;
     if(empty&&LS.get('pm:migrated')!=='1'&&await localHasData()) migrateOffer=true;
-    document.body.classList.toggle('no-hints',!st.hints);
+    try{ localStorage.removeItem('pm:hints') }catch(e){}
     try{ localStorage.removeItem('pm:light') }catch(e){}
     syncSidebarButton();
     window.addEventListener('resize',syncSidebarButton);
