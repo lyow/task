@@ -2161,6 +2161,12 @@ body:has(.paid-pop) .fab-wrap{display:none}
 .resurf-a{display:flex;gap:6px}
 .resurf-a button{min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);font-size:13px;font-weight:600;color:var(--soft)}
 .resurf-a button:hover{background:var(--raise);color:var(--txt)}
+.wwas{color:var(--dim);font-weight:500;font-size:.85em;margin-right:2px}
+.wnext{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0 0;padding:9px 14px;border-radius:999px;border:1px solid var(--line-2);font-size:14px;color:var(--soft);text-align:left}
+.wnext b{color:var(--txt);font-weight:600}
+.wnext svg{color:var(--amber)}
+.wnext small{color:var(--dim);font-size:12.5px}
+.wnext:hover{background:var(--raise)}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -4005,10 +4011,18 @@ function ideasPane(p){
   </section>`;
 }
 
+/* цена поменялась — показываем прежнюю зачёркнутой */
+const wasLabel=i=>{ const w=Number(layObj(i).was); return w&&w!==Number(i.price)?`<s class="wwas" title="Was ${money(w)}">${money(w)}</s> `:'' };
 function wishPane(p){
   const items=(p.tasks||[]).filter(i=>!isExp(i));
   const open=items.filter(i=>!i.done), got=items.filter(i=>i.done);
   const sum=open.reduce((n,i)=>n+(Number(i.price)||0),0);
+  const starSum=open.filter(i=>i.star).reduce((n,i)=>n+(Number(i.price)||0),0);
+  /* что купить следующим: сначала отмеченное звездой, потом дешевле; если в этом месяце есть доход — то, что влезает в остаток */
+  const next=(()=>{ const priced=open.filter(i=>Number(i.price)>0).sort((a,b)=>(b.star?1:0)-(a.star?1:0)||a.price-b.price); if(!priced.length) return null;
+    const m=monthSum(spendEntries().filter(e=>monthKey(e.at)===nowKey())); const left=m.inc?m.inc-m.v:null;
+    if(left!=null){ const f=priced.find(i=>i.price<=left); return f?{i:f,fits:true}:null }
+    return priced[0].star?{i:priced[0],fits:false}:null })();
   const f=st.wantFilter==='done'?'done':'open';
   let shown=(f==='done'?got:open).slice().reverse();
   if(st.wishSort==='cheap') shown=shown.slice().sort((a,b)=>(Number(a.price)||1e12)-(Number(b.price)||1e12));
@@ -4022,11 +4036,13 @@ function wishPane(p){
       <button class="wish-shot ${st.wishFile?'has':''}" id="wShot" title="Add a photo">${svg(st.wishFile?'boxOk':'img',17,1.7)}</button>
       <button class="go" id="wAdd">${svg('plus',16,2.5)}</button>
     </div>
+    ${f==='open'&&next?`<button class="wnext" data-wnext="${next.i.id}">${svg('star',13,1.9)} Buy next: <b>${esc(next.i.text)}</b> ${money(next.i.price)}${next.fits?' <small>· fits what’s left this month</small>':''}</button>`:''}
     <div class="chips" style="margin:14px 0 0;align-items:center">
       <button class="chip ${f==='open'?'on':''}" data-wf="open">To buy${open.length?` <span class="chip-n">${open.length}</span>`:''}</button>
       <button class="chip ${f==='done'?'on':''}" data-wf="done">Bought${got.length?` <span class="chip-n">${got.length}</span>`:''}</button>
-      ${sum&&f==='open'?`<span class="wsum">${money(sum)} <small>to buy</small></span>`:''}
+      ${sum&&f==='open'?`<span class="wsum">${money(sum)} <small>to buy${starSum&&starSum<sum?' · '+money(starSum)+' starred':''}</small></span>`:''}
       <span style="flex:1"></span>
+      ${f==='open'&&open.length?`<button class="chip tog" id="wCopy" title="Copy the list as text">${svg('link',12,2)} Copy</button>`:''}
       <button class="chip tog" data-ws="${{new:'cheap',cheap:'dear',dear:'star'}[st.wishSort]||'new'}" title="Change the order">${{new:'Newest',cheap:'Cheapest',dear:'Priciest',star:'Starred first'}[st.wishSort]||'Newest'}</button>
       <button class="chip tog ${st.wishList?'on':''}" id="wView" title="Photos or a plain list">${svg(st.wishList?'boxOk':'box',12,2)} List</button>
       <div class="cur-pick">${CURS.map(c=>`<button data-cur="${c}" class="${curSym()===c?'on':''}">${c}</button>`).join('')}</div>
@@ -4035,7 +4051,7 @@ function wishPane(p){
       <div class="wrow ${i.done?'got':''}" data-id="${i.id}">
         <button class="check" data-wtog="${i.id}" aria-label="Toggle">${svg(i.done?'boxOk':'box',18,1.8)}</button>
         <span class="wrow-name">${esc(i.text)}</span>
-        ${i.price?`<span class="wrow-price">${layObj(i).approx?'≈ ':''}${money(i.price)}</span>`:`<button data-wai="${i.id}" title="Find the price">${svg('spark',14,1.8)}</button>`}
+        ${i.price?`<span class="wrow-price">${wasLabel(i)}${layObj(i).approx?'≈ ':''}${money(i.price)}</span>`:`<button data-wai="${i.id}" title="Find the price">${svg('spark',14,1.8)}</button>`}
         ${i.url?`<button data-wopen="${i.id}" title="Open the link">${svg('link',14,1.9)}</button>`:'<span class="wgap"></span>'}
         <button data-wed="${i.id}" title="Edit">${svg('pen',14,1.8)}</button>
         <button data-wdel="${i.id}" title="Delete">${svg('trash',14,1.8)}</button>
@@ -4046,7 +4062,7 @@ function wishPane(p){
         <img data-img="${i.id}" alt="" ${i.preview?`src="${esc(i.preview)}" class="has" onerror="this.classList.remove('has')"`:''}>
         <div class="shade"></div>
         ${i.done?'<span class="got-tag">bought</span>':''}
-        ${i.price?`<span class="wprice">${layObj(i).approx?'≈ ':''}${money(i.price)}</span>`:''}
+        ${i.price?`<span class="wprice">${wasLabel(i)}${layObj(i).approx?'≈ ':''}${money(i.price)}</span>`:''}
         <div class="wname">
           <b>${esc(i.text)}</b>
           <span>${ago(i.created)}${i.url?' · has link':''}</span>
@@ -4161,7 +4177,8 @@ function itemEdit(p,item,isWish){
       if(t) item.text=t;
       if(isWish){
         const pr=parseFloat(String(el.querySelector('#ePrice').value).replace(',','.'));
-        item.price=isNaN(pr)?null:pr; setLay(item,'approx','');      // цену вписали руками — она уже не примерная
+        const np=isNaN(pr)?null:pr; if(item.price&&np&&np!==Number(item.price)) setLay(item,'was',item.price);
+        item.price=np; setLay(item,'approx','');      // цену вписали руками — она уже не примерная
       }
       let u=el.querySelector('#eUrl').value.trim();
       if(u&&!/^https?:\/\//i.test(u)) u='https://'+u;
@@ -4460,6 +4477,14 @@ function bindWish(p){
   $('#view').querySelectorAll('[data-cur]').forEach(b=>b.addEventListener('click',()=>{LS.set('pm:cur',b.dataset.cur);renderProject()}));
   $('#view').querySelectorAll('[data-wf]').forEach(b=>b.addEventListener('click',()=>{st.wantFilter=b.dataset.wf;renderProject()}));
   $('#view').querySelectorAll('[data-ws]').forEach(b=>b.addEventListener('click',()=>{st.wishSort=b.dataset.ws;LS.set('pm:wsort',st.wishSort);renderProject()}));
+  const wc=$('#wCopy');
+  if(wc) wc.addEventListener('click',async()=>{
+    const list=(p.tasks||[]).filter(i=>!i.done&&!isExp(i)).sort((a,b)=>(b.star?1:0)-(a.star?1:0));
+    const txt=list.map(i=>'• '+i.text+(i.price?' — '+money(i.price):'')+(i.url?' '+i.url:'')).join('\n');
+    try{ await navigator.clipboard.writeText(txt); toast('Copied '+list.length+' items') }catch(e){ toast('Could not copy',{kind:'warn'}) }
+  });
+  const wn=$('#view').querySelector('[data-wnext]');
+  if(wn) wn.addEventListener('click',()=>{ const it=(p.tasks||[]).find(x=>x.id===wn.dataset.wnext); if(it) itemEdit(p,it,true) });
   const wv=$('#wView');
   if(wv) wv.addEventListener('click',()=>{st.wishList=!st.wishList;LS.set('pm:wishlist',st.wishList?'1':'0');renderProject()});
   if(st.wishRefocus){ st.wishRefocus=false; $('#wText').focus() }
@@ -8117,7 +8142,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:46';
+const APP_VER='19 Nov 02:47';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
