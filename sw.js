@@ -30,3 +30,20 @@ self.addEventListener('fetch', e => {
     return Response.redirect(new URL('./?shared=1', self.registration.scope).href, 303);
   })());
 });
+
+/* Closed-app reminders (web push). Only used once the server side from docs/push-setup.md is set up. */
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {} } catch (err) { d = { title: e.data ? e.data.text() : '' } }
+  e.waitUntil(self.registration.showNotification(d.title || 'For today', {
+    body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'pm-today', data: { url: d.url || './#focus' }
+  }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || './#focus', self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) { if ('focus' in c) { c.navigate(url); return c.focus() } }
+    return self.clients.openWindow(url);
+  }));
+});

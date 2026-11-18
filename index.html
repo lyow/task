@@ -2206,6 +2206,7 @@ b,strong{font-weight:600}
     <button class="tool" id="tAi"></button>
     <button class="tool" id="tResort">Sort automatically again</button>
     <button class="tool" id="tRemind"></button>
+    <button class="tool" id="tPush" hidden></button>
     <label class="tool tool-time" id="tRemindRow" style="display:none">Morning reminder at <input type="time" id="tRemindAt"></label>
     <button class="tool" id="tExport"></button>
     <button class="tool" id="tRestore"></button>
@@ -3074,6 +3075,7 @@ function renderSide(){
   if(ta2){ ta2.innerHTML=svg('spark',14,1.8)+(aiKey()?' AI key · on':' AI key'); ta2.classList.toggle('on',!!aiKey()) }
   const tr=$('#tRemind'), rOn=LS.get('pm:remind')==='1';
   if(tr){ tr.innerHTML=svg(rOn?'boxOk':'box',14,1.9)+' Reminders'; tr.classList.toggle('on',rOn) }
+  const tp=$('#tPush'); if(tp){ tp.hidden=!pushReady(); tp.innerHTML=svg(LS.get('pm:push')==='1'?'boxOk':'box',14,1.9)+' Also when the app is closed'; tp.classList.toggle('on',LS.get('pm:push')==='1') }
   const trr=$('#tRemindRow'); if(trr){ trr.style.display=rOn?'':'none'; const ti=$('#tRemindAt'); if(ti&&document.activeElement!==ti) ti.value=LS.get('pm:remindAt')||'09:00' }
   const tx=$('#tExport'); if(tx&&!tx.innerHTML) tx.innerHTML=svg('arch',14,1.7)+' Export backup';
   const tz=$('#tRestore'); if(tz&&!tz.innerHTML) tz.innerHTML=svg('arrow',14,1.8)+' Restore from backup';
@@ -7956,7 +7958,7 @@ function openHistory(){
 function openSettingsSheet(){
   if(document.querySelector('.set-sheet')) return;
   renderSide();
-  const SECT=[['Display',['tSound','tCur']],['Reminders',['tRemind','tRemindRow']],['AI',['tAi']],
+  const SECT=[['Display',['tSound','tCur']],['Reminders',['tRemind','tRemindRow','tPush']],['AI',['tAi']],
     ['Your data',['tExport','tRestore','tFull']],['Projects',['tResort']]];
   const el=document.createElement('div'); el.className='sheet-wrap';
   el.innerHTML=`<div class="sheet set-sheet"><div class="sheet-head"><span>Settings</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
@@ -7985,6 +7987,47 @@ $('#tSound').addEventListener('click',()=>{
   renderSide(); blip('add');
 });
 $('#tExport').addEventListener('click',exportData);
+/* напоминания при закрытом приложении (web push). Выключено, пока нет настроек сервера: см. docs/push-setup.md.
+   Настройки вводятся один раз на странице #push-setup и хранятся только в этом браузере. */
+const pushCfg=()=>lsMap('pm:pushCfg');
+const pushReady=()=>{ const c=pushCfg(); return !!(c.vapid&&c.fn&&'PushManager' in window&&'serviceWorker' in navigator) };
+function b64u(k){ const p='='.repeat((4-k.length%4)%4), b=atob((k+p).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from(b,c=>c.charCodeAt(0)) }
+async function pushCall(body){
+  const c=pushCfg(); const {data}=await sb.auth.getSession(); const tok=data&&data.session&&data.session.access_token;
+  const r=await fetch(c.fn,{method:'POST',headers:{'content-type':'application/json',apikey:SUPA_KEY,Authorization:'Bearer '+(tok||SUPA_KEY)},body:JSON.stringify(body)});
+  if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,120));
+}
+async function pushToggle(){
+  if(!pushReady()) return;
+  const reg=await navigator.serviceWorker.ready, cur=await reg.pushManager.getSubscription();
+  try{
+    if(cur){ await pushCall({action:'unsubscribe',endpoint:cur.endpoint}).catch(()=>{}); await cur.unsubscribe(); LS.set('pm:push',''); toast('Closed-app reminders off') }
+    else{
+      if(Notification.permission!=='granted'&&await Notification.requestPermission()!=='granted'){ toast('Notifications are blocked',{kind:'warn'}); return }
+      const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(pushCfg().vapid)});
+      await pushCall({action:'subscribe',subscription:sub.toJSON(),tz:Intl.DateTimeFormat().resolvedOptions().timeZone,at:LS.get('pm:remindAt')||'09:00'});
+      LS.set('pm:push','1'); toast('Reminders will come even when the app is closed');
+    }
+  }catch(e){ console.error(e); toast('Could not set up closed-app reminders',{kind:'bad',sub:String(e.message||e).slice(0,120)}) }
+  renderSide();
+}
+function pushSetupSheet(){
+  const c=pushCfg(), el=document.createElement('div'); el.className='sheet-wrap';
+  el.innerHTML=`<form class="sheet"><div class="sheet-head"><span>Closed-app reminders</span><button type="button" data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    <p class="hint" style="margin:0 0 14px">Paste the two values from docs/push-setup.md, step 5. They stay in this browser only.</p>
+    <label class="f"><span>Public key (VAPID)</span><input id="pVapid" value="${esc(c.vapid||'')}" autocomplete="off" spellcheck="false"></label>
+    <label class="f"><span>Function address</span><input id="pFn" value="${esc(c.fn||'')}" placeholder="https://….functions.supabase.co/push-reminders" autocomplete="off" spellcheck="false"></label>
+    <button type="submit" class="gate-go">Save</button></form>`;
+  el.addEventListener('click',e=>{ if(e.target===el||e.target.closest('[data-close]')) el.remove() });
+  el.querySelector('form').addEventListener('submit',e=>{ e.preventDefault();
+    const v=el.querySelector('#pVapid').value.trim(), f=el.querySelector('#pFn').value.trim();
+    LS.set('pm:pushCfg',v&&/^https:\/\//.test(f)?JSON.stringify({vapid:v,fn:f}):''); el.remove(); renderSide();
+    toast(v&&f?'Saved — turn it on in Settings → Reminders':'Cleared') });
+  document.body.appendChild(el);
+}
+window.addEventListener('hashchange',e=>{ if(/#push-setup$/.test(e.newURL||'')){ setTimeout(()=>{ history.replaceState(null,'',location.pathname+'#all'); pushSetupSheet() },50) } });
+if(location.hash==='#push-setup') setTimeout(()=>{ history.replaceState(null,'',location.pathname+'#all'); pushSetupSheet() },1500);
+$('#tPush').addEventListener('click',pushToggle);
 $('#tRemind').addEventListener('click',async()=>{
   if(LS.get('pm:remind')==='1'){ LS.set('pm:remind',''); renderSide(); toast('Reminders off'); return }
   if(!('Notification' in window)){ toast('This browser cannot show notifications',{kind:'warn'}); return }
@@ -8035,7 +8078,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:36';
+const APP_VER='19 Nov 03:38';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
