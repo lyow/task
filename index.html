@@ -1932,6 +1932,10 @@ body:has(.paid-pop) .fab-wrap{display:none}
 .keys-sheet kbd,.kb-k kbd{display:inline-block;min-width:24px;padding:3px 7px;border-radius:7px;border:1px solid var(--line-2);border-bottom-width:2px;
   background:var(--bg);font-family:var(--ui);font-size:12.5px;font-weight:600;color:var(--soft);text-align:center}
 @media (hover:none){#tKeys{display:none}}
+.idea-name-in{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--line-2);background:var(--bg);font-size:15px;color:var(--txt)}
+.idea-edit-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.idea-edit-link{font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-btn:disabled{opacity:.7;cursor:progress}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -3553,7 +3557,7 @@ function ideaCard(p,i,cur){
       :`<span class="idea-thumb">${svg('spark',15,1.8)}</span>`}
       <span class="idea-main">
         ${url?`<a class="idea-title"${pv} href="${esc(url)}" target="_blank" rel="noopener">${title}</a>`:`<b class="idea-title">${title}</b>`}
-        ${url?`<span class="idea-host"><img src="${esc(favOf(url))}" alt="" onerror="this.style.display='none'">${esc(kind.name)}${named?'':` · <button class="idea-name" data-ied="${i.id}">name it</button>`}</span>`:''}
+        ${url?`<span class="idea-host"><img src="${esc(favOf(url))}" alt="" onerror="this.style.display='none'">${esc(kind.name)}${named?'':` · <button class="idea-name" data-iname="${i.id}">name it</button>`}</span>`:''}
       </span>
     </div>
     <div class="idea-foot">
@@ -3637,7 +3641,7 @@ function ideasPane(p){
       <button class="chip ${st.ideaSrc?'':'on'}" data-isrc="">All <span class="chip-n">${total}</span></button>
       ${srcList.map(k=>`<button class="chip ${st.ideaSrc===k?'on':''}" data-isrc="${esc(k)}">${esc(k)} <span class="chip-n">${srcs[k]}</span></button>`).join('')}
     </div>`:''}
-    ${(()=>{const n=all.filter(i=>ideaUrl(i)&&!ideaNamed(i)&&i.cat!==ARCHIVE).length;
+    ${(()=>{const sk=aiSkip(), n=all.filter(i=>ideaUrl(i)&&!ideaNamed(i)&&i.cat!==ARCHIVE&&!sk[i.id]).length;
       return n?`<button class="ai-btn" id="aiNameAll" style="margin-top:14px">${svg('spark',14,1.9)} Name ${n} ${n===1?'link':'links'} with AI</button>`:''})()}
     ${shown.length?`<div class="ideas" id="ideas">${shown.map(i=>ideaCard(p,i,cur)).join('')}</div>`
     :`<p class="hint" style="margin-top:18px;max-width:60ch">${cur===ARCHIVE?'Archive is empty.'
@@ -3875,10 +3879,13 @@ async function aiAsk(prompt,tool){
   throw lastErr;
 }
 const lastJson=text=>{ const all=String(text||'').match(/\{[^{}]*\}/g); if(!all) return null; try{ return JSON.parse(all[all.length-1]) }catch(e){ return null } };
+const aiWhy=e=>{ const m=((typeof e.status==='number'?'HTTP '+e.status+' · ':'')+String((e&&e.message)||'')).trim(); return m.length>120?m.slice(0,119)+'…':m };
+/* ссылки, которые AI не смог прочитать — больше не пробуем и не считаем в кнопке */
+const aiSkip=()=>{ try{ return JSON.parse(LS.get('pm:ainame')||'{}')||{} }catch(e){ return {} } };
 function aiFail(e){
   console.error(e);
-  toast(e.status==='cap'?'Monthly AI limit reached':e.status===401?'The AI key was rejected':e.status===429?'AI is busy, try later':'AI could not do that',
-    {kind:'bad',sub:e.status==='cap'?'raise it in settings → AI key':e.status===401?'check it in settings → AI key':''});
+  toast(e.status==='cap'?'Monthly AI limit reached':e.status===401?'The AI key was rejected':e.status===429?'AI is busy, try later':'AI request failed',
+    {kind:'bad',sub:e.status==='cap'?'raise it in settings → AI key':e.status===401?'check it in settings → AI key':aiWhy(e)});
 }
 const aiReady=()=>{ if(aiKey()) return true; openAiKey(); return false };
 async function aiProduct(name){
@@ -3905,22 +3912,44 @@ async function aiNameIdea(p,i){
 let aiBusy=false;
 async function aiNameAll(p){
   if(!aiReady()||aiBusy) return;
-  const list=ideasOf(p).filter(i=>ideaUrl(i)&&!ideaNamed(i)&&i.cat!==ARCHIVE).reverse();
+  const sk=aiSkip();
+  const list=ideasOf(p).filter(i=>ideaUrl(i)&&!ideaNamed(i)&&i.cat!==ARCHIVE&&!sk[i.id]).reverse();
   if(!list.length) return;
-  aiBusy=true; let ok=0;
-  try{
-    for(let k=0;k<list.length;k++){
-      toast('Naming '+(k+1)+' of '+list.length+'…');
-      if(await aiNameIdea(p,list[k])){
-        ok++;
-        const el=document.querySelector('.idea[data-id="'+list[k].id+'"]');
-        if(el&&st.openId===p.id) el.outerHTML=ideaCard(p,list[k],st.ideaFolder||'');
-      }
+  aiBusy=true;
+  let ok=0, tried=0, miss=0, inRow=0, err=null, fatal=null;
+  const hosts={};
+  const btn=()=>$('#aiNameAll');
+  const show=t=>{ const b=btn(); if(b){ b.disabled=true; b.innerHTML=svg('spark',14,1.9)+' '+t } };
+  for(let k=0;k<list.length;k++){
+    show('Naming '+(k+1)+' of '+list.length+'…');
+    tried++;
+    let named=false;
+    try{ named=await aiNameIdea(p,list[k]) }
+    catch(e){
+      if(e.status==='cap'||e.status===401||e.status===429){ fatal=e; break }
+      err=e; inRow++;
+      if(inRow>=3) break;
+      continue;
     }
-    toast(ok?'Named '+ok+' of '+list.length:'Could not read those links',{kind:ok?'ok':'warn'});
-    if(st.openId===p.id) renderProject();
-  }catch(e){ aiFail(e); if(st.openId===p.id) renderProject() }
+    if(named){
+      ok++; inRow=0;
+      const el=document.querySelector('.idea[data-id="'+list[k].id+'"]');
+      if(el&&st.openId===p.id) el.outerHTML=ideaCard(p,list[k],st.ideaFolder||'');
+    }else{
+      miss++; inRow++;
+      sk[list[k].id]=1; LS.set('pm:ainame',JSON.stringify(sk));
+      const h=linkKind(ideaUrl(list[k])).name; hosts[h]=(hosts[h]||0)+1;
+      if(inRow>=3) break;
+    }
+  }
   aiBusy=false;
+  if(st.openId===p.id) renderProject();
+  if(fatal) return aiFail(fatal);
+  const left=list.length-tried;
+  const host=Object.keys(hosts).sort((a,b)=>hosts[b]-hosts[a])[0];
+  if(err&&!ok) return toast('AI request failed',{kind:'bad',sub:aiWhy(err)});
+  if(!ok) return toast(host?'Could not read '+host+' links':'Nothing named',{kind:'warn',sub:'Name them by hand: “name it” under each link'});
+  toast('Named '+ok+' of '+list.length,{kind:'ok',sub:[miss?miss+' could not be read'+(host?' ('+host+')':''):'',err?'some requests failed: '+aiWhy(err):'',left?left+' left for later':''].filter(Boolean).join(' · ')});
 }
 /* шаги для задачи и план для пустого проекта */
 async function aiSteps(p,tid){
@@ -5085,10 +5114,10 @@ function bindIdeas(p){
     if(e.target.closest('a')) return;
     const mk=e.target.closest('[data-mk]'), mv=e.target.closest('[data-mv]'),
           ed=e.target.closest('[data-ied]'), dl=e.target.closest('[data-idel]'),
-          fo=e.target.closest('[data-ifol]');
-    const id=(mk||mv||ed||dl||fo||{}).dataset;
+          fo=e.target.closest('[data-ifol]'), nm=e.target.closest('[data-iname]');
+    const id=(mk||mv||ed||dl||fo||nm||{}).dataset;
     if(!id) return;
-    const key=mk?id.mk:mv?id.mv:ed?id.ied:fo?id.ifol:id.idel;
+    const key=mk?id.mk:mv?id.mv:ed?id.ied:fo?id.ifol:nm?id.iname:id.idel;
     const idea=(p.tasks||[]).find(x=>x.id===key); if(!idea) return;
 
     if(mk){
@@ -5123,25 +5152,50 @@ function bindIdeas(p){
       return;
     }
     if(dl){
+      const at=p.tasks.indexOf(idea);
       p.tasks=p.tasks.filter(x=>x.id!==key);
       saveProject(p,true); renderProject(); renderSide();
+      toast('Deleted',{action:'Undo',onAction:()=>{ p.tasks.splice(Math.min(at,p.tasks.length),0,idea); saveProject(p,true); refreshView() }});
+      return;
+    }
+    if(nm){                                       /* название ссылки: адрес уходит в url и не теряется */
+      const card=box.querySelector(`.idea[data-id="${key}"]`); if(!card) return;
+      const holder=card.querySelector('.idea-main'); if(!holder||card.querySelector('.idea-edit')) return;
+      const inp=document.createElement('input');
+      inp.className='idea-edit idea-name-in'; inp.placeholder='Name'; inp.setAttribute('aria-label','Name this link'); inp.autocomplete='off';
+      holder.replaceWith(inp); inp.focus();
+      let done=false;
+      const finish=keep=>{
+        if(done) return; done=true;
+        const v=inp.value.trim();
+        if(keep&&v){ idea.url=ideaUrl(idea); idea.text=v; saveProject(p,true); renderSide() }
+        renderProject();
+      };
+      inp.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ev.preventDefault();finish(true)} if(ev.key==='Escape'){ev.preventDefault();finish(false)} });
+      inp.addEventListener('blur',()=>finish(true));
       return;
     }
     if(ed){
       const card=box.querySelector(`.idea[data-id="${key}"]`); if(!card) return;
       const holder=card.querySelector('.idea-main'); if(!holder||card.querySelector('.idea-edit')) return;
+      const u=ideaUrl(idea);
+      if(u&&!idea.url){ idea.url=u; saveProject(p,true) }            /* голая ссылка: сначала прячем адрес в url, чтобы текстом его не стереть */
+      const was=u?noUrl(idea.text):idea.text;
+      const wrap=document.createElement('div'); wrap.className='idea-edit-wrap';
       const ta=document.createElement('textarea');
-      ta.className='idea-edit'; ta.value=idea.text;
-      holder.replaceWith(ta); ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length);
+      ta.className='idea-edit'; ta.value=u&&was===shortUrl(u)?'':was; ta.placeholder=u?'Name or note':'';
+      wrap.appendChild(ta);
+      if(u){ const l=document.createElement('span'); l.className='idea-edit-link'; l.textContent=shortUrl(u); wrap.appendChild(l) }
+      holder.replaceWith(wrap); ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length);
       const finish=()=>{
         const v=ta.value.trim();
-        if(v) idea.text=v;
+        if(v) idea.text=v; else if(u) idea.text='';
         saveProject(p,true); renderProject(); renderSide();
       };
       ta.addEventListener('blur',finish);
       ta.addEventListener('keydown',ev=>{
         if(ev.key==='Enter'&&(ev.metaKey||ev.ctrlKey)){ev.preventDefault();ta.blur()}
-        if(ev.key==='Escape'){ta.value=idea.text;ta.blur()}
+        if(ev.key==='Escape'){ta.value=was;ta.blur()}
       });
     }
   });
