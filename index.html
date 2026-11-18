@@ -452,25 +452,6 @@ input,textarea{cursor:text}
 
 .qa-wrap{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.76);backdrop-filter:blur(7px);
   display:flex;align-items:flex-start;justify-content:center;padding:12vh 18px 18px}
-.qa{width:100%;max-width:620px;border-radius:20px;overflow:hidden}
-.qa-in{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
-
-.qa-in input{flex:1;background:none;border:none}
-.qa-in input:focus{outline:none}
-.qa-targets{display:flex;gap:7px;flex-wrap:wrap;padding:14px 20px}
-.qa-t{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:11px;
-  border:1px solid var(--line);background:var(--panel-2);font-size:14px;color:var(--soft);transition:.14s}
-.qa-t:hover{border-color:var(--line-2);color:var(--txt)}
-.qa-t.on{color:var(--on);border-color:transparent}
-.qa-t.on[data-t="inbox"]{background:var(--violet)}
-.qa-t.on[data-t="wishlist"]{background:var(--mint)}
-.qa-t.on[data-t="todolist"]{background:var(--magenta)}
-.qa-t.on[data-t="proj"]{background:var(--amber)}
-.qa-foot{display:flex;align-items:center;padding:11px 20px;border-top:1px solid var(--line);font-family:var(--ui);font-size:12px;color:var(--dim);flex-wrap:wrap}
-.qa-foot b{color:var(--soft);font-weight:400}
-.qa-hint{font-size:14px;line-height:1.5}
-.qa-hint em{font-style:normal;color:var(--violet)}
-.qa-price{font-family:var(--ui);font-size:14px;color:var(--lime)}
 
 .due-badge{color:var(--amber)}
 .rev-tag{color:var(--cyan)}
@@ -683,7 +664,7 @@ input,textarea{cursor:text}
 .prow.tinted{box-shadow:inset 3px 0 0 var(--pc)}
 .pname{flex:0 1 auto;min-width:0;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-family:var(--display);font-weight:600;font-size:15px}
-.pflag{flex:0 0 auto;display:flex;align-items:center}
+
 .prow .flag svg{display:block}
 .pnext{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:14px;color:var(--soft)}
@@ -772,8 +753,6 @@ body.shared-view .topbar{justify-content:center}
 .trash-acts button[data-restore]:hover{background:var(--mint);color:var(--on)}
 .trash-acts button[data-purge]:hover{background:var(--magenta);color:var(--on)}
 .qbar{max-width:1500px;margin:-6px auto 20px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
-.qtoggle{display:inline-flex;align-items:center;gap:7px;border-radius:10px;font-family:var(--ui);flex:0 0 auto}
-.qtoggle:hover{box-shadow:inset 0 0 0 1px var(--line-2)}
 
 .qchev{display:flex;transition:transform .16s}
 .qbar:not(.closed) .qchev{transform:rotate(90deg)}
@@ -785,12 +764,7 @@ body.shared-view .topbar{justify-content:center}
 .qchip button{padding:7px 8px 7px 2px;color:var(--dim);opacity:0;transition:.14s}
 .qchip:hover button{opacity:1}
 .qchip button:hover{color:var(--magenta)}
-.qadd{display:inline-flex;align-items:center;gap:5px;border-radius:10px}
-.qadd input{padding:5px 8px;border:none;background:none;color:var(--txt)}
-.qadd input:focus{outline:none}
 
-.qadd button{border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
-.qadd button:hover{color:var(--txt)}
 .chips-toggle{display:none}
 .board-toggle{display:inline-flex;align-items:center;gap:8px;font:inherit;color:inherit;
   letter-spacing:inherit;text-transform:inherit}
@@ -924,7 +898,7 @@ body.shared-view .fab-wrap{display:none!important}.refs-pane.collapsed .link-add
 .fab.small{animation-delay:.06s}
 
 .lb img,.refprev img{animation:popIn .22s cubic-bezier(.2,.8,.2,1) both}
-.qa{animation:fadeUp .2s cubic-bezier(.2,.8,.2,1) both}
+
 .tasks li .check svg,.tditem .check svg,.want .check svg{transition:transform .16s cubic-bezier(.2,1.6,.4,1)}
 .tasks li.done .check svg,.tditem.done .check svg,.want.done .check svg{transform:scale(1.16)}
 .chip,.ghost-btn,.qchip{transition:transform .12s ease,color .14s,background .14s,box-shadow .14s}
@@ -939,7 +913,7 @@ body.shared-view .panes>*:nth-child(3){animation-delay:.18s}
 body.shared-view .panes>*:nth-child(4){animation-delay:.24s}
 
 @media (prefers-reduced-motion:reduce){
-  .grid>*,.plist>*,.links>*,.wish-grid>*,.tdlist>*,.ideas>*,.sgroup,.rrow,.fab,.sheet,.qa,.lb img,.refprev img,body.shared-view .head,body.shared-view .qbar,body.shared-view .panes>*{animation:none!important}
+  .grid>*,.plist>*,.links>*,.wish-grid>*,.tdlist>*,.ideas>*,.sgroup,.rrow,.fab,.sheet,.lb img,.refprev img,body.shared-view .head,body.shared-view .qbar,body.shared-view .panes>*{animation:none!important}
   .lrow-thumb,.pthumb,.boot-mark{animation:none!important}
 }
 
@@ -1012,8 +986,7 @@ body,button,.row,.card,a,input,textarea{cursor:auto}
 .card .next{display:none}
 
 .panes{gap:18px}
-  .task-add input,.want-add input,.wish-add input,.notes,.f input,.tdlink input,.tdmore textarea,
-  .search input,.idea-edit,.sub-add input,.qa-in input{font-size:16px}
+  .task-add input,.want-add input,.wish-add input,.notes,.f input,.tdlink input,.tdmore textarea,.search input,.idea-edit,.sub-add input{font-size:16px}
   .p-meta{gap:8px}
   .picker.big{width:100%}
   .picker.big .pick{flex:1;justify-content:center}
@@ -1078,9 +1051,9 @@ body,button,.row,.card,a,input,textarea{cursor:auto}
 
 .sheet{max-width:none}
   .qa-wrap{padding:0;align-items:flex-end}
-  .qa{max-width:none;border-radius:20px 20px 0 0}
   
-  .qa-foot{font-size:12px;padding-bottom:calc(11px + env(safe-area-inset-bottom))}
+  
+  
   .lb-bar button{padding:11px 14px}
   .board-x{right:14px;top:calc(14px + env(safe-area-inset-top))}
   #board.full{inset:0}
@@ -1105,9 +1078,6 @@ body{line-height:1.45}
 
 .lede{max-width:60ch}
 .crumb{font-size:15px;font-weight:500;color:var(--soft)}
-
-.qa-in input{font-family:var(--ui);font-size:18px;font-weight:500}
-.qa-in svg{color:var(--lime)}
 
 .gate-go,.cap-send{font-family:var(--ui);font-size:15px;font-weight:700}
 #toast .t-act{color:var(--lime);box-shadow:inset 0 0 0 1px var(--line-2)}
@@ -1162,9 +1132,6 @@ body[data-sec=cyan]{--sec:var(--cyan)}
 .task-add input:focus,.want-add input:focus,.wish-add input:focus,.link-add input:focus,.notes:focus,.search input:focus{border-color:var(--sec)}
 .check:hover{color:var(--sec)}
 .fab{background:var(--sec)}
-
-.qa-hint{padding:0 20px 14px;color:var(--lime);font-weight:600}
-.qa-foot{gap:18px}
 
 .tditem .idea-acts button{padding:7px;border:none;color:var(--dim)}
 .tditem .idea-acts button:hover{color:var(--txt);background:var(--raise)}
@@ -1343,7 +1310,7 @@ a.idea-title:hover{text-decoration:underline}
 .view-in{animation:viewFade .18s ease}
 input,textarea{transition:border-color .15s,box-shadow .15s}
 input:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--lime) 15%,transparent)}
-.p-title:focus,.qa-in input:focus,.qadd input:focus,#capText:focus{box-shadow:none}
+.p-title:focus,#capText:focus{box-shadow:none}
 
 .card,.wcard,.lcard,.idea{transition:transform .18s cubic-bezier(.2,.8,.2,1),border-color .15s,box-shadow .18s}
 @media (hover:hover){
@@ -1477,13 +1444,10 @@ input:focus-visible,textarea:focus-visible{outline:none}
 .row-more.big:hover{background:var(--raise);color:var(--txt)}
 @media (hover:hover){.pane-h .row-more{opacity:1}}
 /* quick links */
-.qtoggle{min-height:34px;font-size:13px;font-weight:600;padding:7px 12px}
+
 .qchip a{min-height:34px;font-size:14px}
 .qchip:hover{box-shadow:inset 0 0 0 1px var(--line-2)}
-.qadd{padding:3px 3px 3px 4px}
-.qadd input{width:190px;font-size:14px}
-.qadd button{width:28px;height:28px}
-.qadd button:hover{box-shadow:inset 0 0 0 1px var(--line-2);background:var(--raise)}
+
 /* task steps: quiet until wanted */
 .sub-toggle{min-height:26px;border-color:var(--line);color:var(--dim)}
 .sub-toggle.has{color:var(--soft);border-color:var(--line-2)}
@@ -1572,7 +1536,7 @@ body:has(.digest) .fab-wrap{display:none}
 .rs-replace .danger{width:100%;min-height:42px}
 .rs-replace .danger:disabled{opacity:.4}
 /* v7 — rhythm, numbers, motion */
-.ncount,.chip-n,.sec-n,.card-n,.bar b,.wrow-price,.wprice,.wsum,.msum-c b,.dg-n,.qcount,.count,.hday-h span,.sp-v,.sp-day-h span,.sp-row b,.due,.idea-date,.rmeta,.scount,.day-done{font-variant-numeric:tabular-nums}
+.ncount,.chip-n,.sec-n,.card-n,.bar b,.wrow-price,.wprice,.wsum,.msum-c b,.dg-n,.count,.hday-h span,.sp-v,.sp-day-h span,.sp-row b,.due,.idea-date,.rmeta,.scount,.day-done{font-variant-numeric:tabular-nums}
 .btn-nav svg,.pmenu>button svg,.side-tools .tool svg,.row-more,.ghost-btn svg,.tsnooze svg{stroke-width:1.8}
 .side-tools .tool svg,.btn-nav svg{width:15px;height:15px;flex:0 0 15px}
 
@@ -1804,7 +1768,7 @@ body:has(.paid-pop) .fab-wrap{display:none}
 .jot .capture input,.sp-add input{min-height:0;height:56px;border-radius:14px;font-size:16px}
 .jot #capBtn,.sp-add .sp-go,.jot #capShot{min-height:56px;border-radius:14px}
 /* counters */
-.chip-n,.sec-n,.qcount,.pane-h .count,.ncount{font-variant-numeric:tabular-nums}
+.chip-n,.sec-n,.pane-h .count,.ncount{font-variant-numeric:tabular-nums}
 
 .sp-three{display:grid;grid-template-columns:repeat(3,auto);gap:6px 28px;margin:4px 0 2px}
 .sp-three span{display:flex;flex-direction:column;gap:2px}
@@ -1903,10 +1867,10 @@ img{content-visibility:auto}
 @media (max-width:760px){
   .row-more{width:40px;height:40px}
   .ghost-btn{min-height:40px}
-  .qtoggle,.qchip a{min-height:40px}
+  .qchip a{min-height:40px}
   .qchip button{opacity:1;min-width:34px}
-  .qadd input{width:150px}
-  .qadd button{width:34px;height:34px}
+  
+  
   .sub-toggle{min-height:34px;min-width:40px;justify-content:center}
   .msum-h button{width:40px;height:40px}
   .racts button{min-height:40px}
@@ -1950,7 +1914,7 @@ small,.hint{color:var(--dim)}
 .idea,.tditem,.card,.wcard,.lcard{background:var(--s1);border-radius:var(--r-card);box-shadow:var(--sh-card)}
 .empty-line{background:transparent;border-color:var(--line-2);border-radius:var(--r-card)}
 /* floating: dark glass */
-.pmenu,.sheet,.cmdk,.toast,.digest,.paid-pop,.qa,.cap{background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);
+.pmenu,.sheet,.cmdk,.toast,.digest,.paid-pop,.cap{background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);
   border:0;box-shadow:var(--sh-float)}
 .pmenu{border-radius:14px;padding:6px}
 .sheet,.cmdk{border-radius:var(--r-f)}
@@ -1962,7 +1926,7 @@ small,.hint{color:var(--dim)}
 .pm-ver{font-size:12px!important;color:var(--dim)!important;min-height:30px!important}
 /* inputs: slightly recessed */
 input:not([type=checkbox]):not([type=radio]):not([type=file]),textarea,select{border-radius:var(--r-c)}
-.task-add input,.want-add input,.wish-add input,.link-add input,#tdText,.sp-add input,.jot .capture input,.f input,.sp-need input,.paid-pop input,.sp-bin,.qadd,.iprev-name{
+.task-add input,.want-add input,.wish-add input,.link-add input,#tdText,.sp-add input,.jot .capture input,.f input,.sp-need input,.paid-pop input,.sp-bin,.iprev-name{
   background:#0A0A0D;border:1px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.45)}
 .task-add input:focus,.want-add input:focus,.wish-add input:focus,.link-add input:focus,#tdText:focus,.sp-add input:focus,.jot .capture input:focus,.f input:focus{
   border-color:color-mix(in srgb,var(--lime) 45%,transparent);box-shadow:inset 0 1px 2px rgba(0,0,0,.45),0 0 0 3px color-mix(in srgb,var(--lime) 12%,transparent)}
@@ -1970,9 +1934,9 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]),textarea,select{bo
 .jot #capBtn,.sp-go,.gate-go,.task-add button,.wish-add .go,.link-add .go,.want-add .go,.dg-done,.paid-go,.fab:not(.small){
   background:var(--lime);color:var(--on);border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 1px 2px rgba(0,0,0,.4);transition:filter .14s var(--ease),transform .12s var(--ease)}
 .jot #capBtn:hover,.sp-go:hover,.gate-go:hover,.task-add button:hover,.wish-add .go:hover,.link-add .go:hover,.dg-done:hover{filter:brightness(1.07)}
-.ghost-btn,.sec-new,.racts button,.resurf-a button,.sp-ok-acts>button,.sp-ok-date,.dg-later,.td-when,.wnext,.home-money,.sp-big,.opt,.btn-inline,.chips-toggle,.qtoggle{
+.ghost-btn,.sec-new,.racts button,.resurf-a button,.sp-ok-acts>button,.sp-ok-date,.dg-later,.td-when,.wnext,.home-money,.sp-big,.opt,.btn-inline,.chips-toggle{
   background:var(--s2);border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--edge);color:var(--soft);transition:background .14s var(--ease),color .14s var(--ease),border-color .14s var(--ease)}
-.ghost-btn:hover,.sec-new:hover,.racts button:hover,.resurf-a button:hover,.sp-ok-acts>button:hover,.sp-ok-date:hover,.dg-later:hover,.td-when:hover,.wnext:hover,.home-money:hover,.sp-big:hover,.opt:hover,.btn-inline:hover,.chips-toggle:hover,.qtoggle:hover{
+.ghost-btn:hover,.sec-new:hover,.racts button:hover,.resurf-a button:hover,.sp-ok-acts>button:hover,.sp-ok-date:hover,.dg-later:hover,.td-when:hover,.wnext:hover,.home-money:hover,.sp-big:hover,.opt:hover,.btn-inline:hover,.chips-toggle:hover{
   background:var(--s3);color:var(--txt);border-color:var(--line-2)}
 button:disabled{opacity:.45;cursor:default}
 :focus-visible{outline:2px solid color-mix(in srgb,var(--lime) 80%,transparent);outline-offset:2px}
@@ -1985,7 +1949,7 @@ button:disabled{opacity:.45;cursor:default}
 kbd,.kb{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:6px;
   background:var(--s2);border:1px solid var(--line-2);border-bottom-width:2px;color:var(--dim);font:600 11.5px/1 var(--ui);letter-spacing:0;font-variant-numeric:tabular-nums}
 /* counts: quiet badges */
-.sec-n,.pane-h .count,.qcount,.dg-n{background:var(--s3);color:var(--soft);border-radius:999px;padding:1px 8px;font-size:12px;font-weight:600;box-shadow:inset 0 1px 0 var(--edge)}
+.sec-n,.pane-h .count,.dg-n{background:var(--s3);color:var(--soft);border-radius:999px;padding:1px 8px;font-size:12px;font-weight:600;box-shadow:inset 0 1px 0 var(--edge)}
 /* list rows */
 .tlist li,.tasks li{min-height:40px}
 .tlist li+li,.sp-row+.sp-row{border-top:1px solid var(--line)}
@@ -2160,6 +2124,15 @@ b,strong{font-weight:600}
 .sp-go,.jot #capBtn,.gate-go,.paid-go,.dg-done{font-weight:700}
 .tasks li>span:not(.check),.tdtext,.sp-name,.wrow-name,.idea-title,.dg-text b{overflow-wrap:anywhere;hyphens:auto}
 .money,.sp-row>b,.sp-amtc b,.wprice,.wrow-price,.wsum,.ncount,.chip-n,.sp-v,.sp-stats b{font-variant-numeric:tabular-nums lining-nums}
+
+.lpin{display:inline-flex;font-style:normal;color:var(--lime);margin-right:6px;vertical-align:-1px}
+.lacts button[data-lpin].on{color:var(--lime)}
+
+.isrc-hint{display:flex;flex-wrap:wrap;gap:4px 12px}
+.isrc-hint button{font-size:13px;color:var(--dim);padding:2px 0}
+.isrc-hint button span{color:var(--dim);opacity:.7;font-variant-numeric:tabular-nums}
+.isrc-hint button:hover{color:var(--txt)}
+.ideas-pane>.isrc-hint{order:6;flex:1 1 auto}
 </style>
 </head>
 <body class="side-open">
@@ -2312,7 +2285,6 @@ const localPhotos=()=>req(tx('photos').getAll());
 
 /* ───────── cloud data layer ───────── */
 const tasksOf=p=>(p.tasks||[]).filter(t=>t.kind!=='link'&&t.kind!=='sticky'&&t.kind!=='quick');
-const quickOf=p=>(p.tasks||[]).filter(t=>t.kind==='quick');
 const linksOf=p=>(p.tasks||[]).filter(t=>t.kind==='link');
 const KIND_OF=pid=>pid===INBOX?'idea':pid===WANT?'wish':pid===TODO?'todo':'task';
 
@@ -3067,7 +3039,7 @@ function renderSide(){
       <a class="row-name" href="#p/${p.id}" data-open="${p.id}">
         <span class="dot" data-s="${p.status}"></span>
         <span class="row-text">${esc(p.name)}</span>
-        ${p.important?`<span class="flag">${svg('flag',11,2.1)}</span>`:''}
+        
       </a>
       ${p.pinned?`<span class="row-pin" title="Pinned">${svg('pin',12,1.7)}</span>`:''}
       <button class="row-more" data-pmenu="${p.id}" title="Status, pin, archive…" aria-label="Project actions"><i></i><i></i><i></i></button>
@@ -3303,7 +3275,7 @@ function renderAll(){
         <span class="pthumb"></span>
         <span class="dot" data-s="${p.status}"></span>
         <span class="pname">${esc(p.name)}</span>
-        ${p.important?`<span class="flag pflag">${svg('flag',11,2.2)}</span>`:''}
+        
         <span class="pnext">${nx&&p.status!=='done'?esc(nx.text):''}</span>
         <span class="pmeta">${isDue(p)?'<span class="due-badge">due back</span>':(t.length?`${d}/${t.length}`:'—')}</span>
       </a>`}).join('')}</div>`
@@ -3313,7 +3285,7 @@ function renderAll(){
         <div class="veil"></div>
         <div class="card-top">
           <span class="card-status" data-s="${p.status}" title="${sMeta(p.status).short}">${svg(p.status,14,2)}${p.status==='done'?' Done':''}</span>
-          ${p.important?`<span class="flag">${svg('flag',12,2.1)}</span>`:''}
+          
           <button class="row-more card-more" data-pmenu="${p.id}" title="Status, pin, archive…" aria-label="Project actions"><i></i><i></i><i></i></button>
         </div>
         ${(()=>{const open=t.filter(x=>!x.done).slice(0,3);
@@ -3915,11 +3887,9 @@ function ideasPane(p){
   const srcOf=i=>{const u=ideaUrl(i); return u?linkKind(u).name:'Notes'};
   const srcs={}; shown.forEach(i=>{const k=srcOf(i); srcs[k]=(srcs[k]||0)+1});
   const srcList=Object.keys(srcs).sort((a,b)=>(a==='Notes')-(b==='Notes')||srcs[b]-srcs[a]);
-  if(st.ideaSrc&&!srcs[st.ideaSrc]) st.ideaSrc='';
   const iq=normName(st.ideaQ||'');
-  if(iq) shown=all.filter(i=>normName(ideaTitle(i)+' '+(ideaUrl(i)||'')+' '+(i.note||'')+' '+(i.text||'')).indexOf(iq)>=0).slice().reverse();
+  if(iq) shown=all.filter(i=>normName(ideaTitle(i)+' '+(ideaUrl(i)||'')+' '+(i.note||'')+' '+(i.text||'')+' '+srcOf(i)).indexOf(iq)>=0).slice().reverse();
   const total=shown.length;
-  if(st.ideaSrc&&!iq) shown=shown.filter(i=>srcOf(i)===st.ideaSrc);
   const old=!iq&&cur===''?resurfaceIdea(p):null;
   const countOf=id=>id===''?inbox.length:id===ARCHIVE?archived.length:all.filter(i=>i.cat===id).length;
 
@@ -3939,16 +3909,13 @@ function ideasPane(p){
       <input id="taskInput" placeholder="${cur&&cur!==ARCHIVE?'Add to '+esc(folderName(p,cur)):'Paste a link or write it down'}">
       <button id="taskAdd">${svg('plus',15,2.4)}</button>
     </div>
-    ${all.length>6?`<label class="sp-q idea-q ${iq?'on':''}">${svg('search',14,2)}<input id="ideaQ" value="${esc(st.ideaQ||'')}" placeholder="Filter ideas" autocomplete="off" aria-label="Filter ideas"></label>`:''}
+    ${all.length>6?`<label class="sp-q idea-q ${iq?'on':''}">${svg('search',14,2)}<input id="ideaQ" value="${esc(st.ideaQ||'')}" placeholder="Filter: words, or youtube, threads…" autocomplete="off" aria-label="Filter ideas"></label>`:''}
     ${iq?`<p class="sp-found">${total} found in all folders</p>`:''}
     ${old?`<div class="resurf"><span class="resurf-k">From ${esc(ago(old.created))}</span>
       <span class="resurf-t">${ideaUrl(old)?`<a href="${esc(ideaUrl(old))}" target="_blank" rel="noopener">${esc(ideaTitle(old))}</a>`:esc(ideaTitle(old))}</span>
       <span class="resurf-a"><button data-rkeep>Keep</button><button data-rarch="${old.id}">Archive it</button></span></div>`:''}
 
-    ${srcList.length>1?`<div class="chips" style="margin:14px 0 0">
-      <button class="chip ${st.ideaSrc?'':'on'}" data-isrc="">All <span class="chip-n">${total}</span></button>
-      ${srcList.map(k=>`<button class="chip ${st.ideaSrc===k?'on':''}" data-isrc="${esc(k)}">${esc(k)} <span class="chip-n">${srcs[k]}</span></button>`).join('')}
-    </div>`:''}
+    ${srcList.length>1&&!iq?`<div class="isrc-hint">${srcList.slice(0,6).map(k=>`<button data-isrc="${esc(k)}">${esc(k)} <span>${srcs[k]}</span></button>`).join('')}</div>`:''}
     ${(()=>{const sk=aiSkip(), n=all.filter(i=>ideaUrl(i)&&!ideaNamed(i)&&i.cat!==ARCHIVE&&!sk[i.id]).length;
       return n?`<button class="ai-btn" id="aiNameAll" style="margin-top:14px">${svg('spark',14,1.9)} Name ${n} ${n===1?'link':'links'} with AI</button>`:''})()}
     ${shown.length?`<div class="ideas" id="ideas">${shown.map(i=>ideaCard(p,i,cur)).join('')}</div>`
@@ -4706,77 +4673,13 @@ async function fetchPreview(u){
   }catch(e){ return '' }
 }
 
-function qbarHidden(pid){
-  if(pid in st.qbar) return st.qbar[pid];          // память — источник правды
-  return LS.get('pm:qbar:'+pid)==='0';             // localStorage только переживает перезапуск
-}
 
-function quickBar(p){
-  const items=quickOf(p);
-  const hidden=qbarHidden(p.id);
-  return `<div class="qbar ${hidden?'closed':''}" id="qbar">
-    <button class="qtoggle" id="qToggle" title="${hidden?'Show links':'Hide links'}">
-      ${svg('link',12,1.9)} Links${items.length?` <span class="qcount">${items.length}</span>`:''}
-      <span class="qchev">${svg('chev',11,2.2)}</span>
-    </button>
-    ${hidden?'':`
-      <div class="qlist" id="qlist">
-        ${items.map(i=>`<span class="qchip" data-q="${i.id}">
-          <a href="${esc(i.url)}" target="_blank" rel="noopener">
-            <img src="${esc(favOf(i.url))}" alt="" onerror="this.style.visibility='hidden'">
-            ${esc(i.text||hostOf(i.url)||'link')}
-          </a>
-          <button data-qdel="${i.id}" title="Remove">${svg('x',10,2.4)}</button>
-        </span>`).join('')}
-        <span class="qadd">
-          <input id="qUrl" placeholder="Paste a link" autocomplete="off" aria-label="Paste a link, a name after it is optional">
-          <button id="qAdd" title="Add link">${svg('plus',12,2.6)}</button>
-        </span>
-      </div>`}
-  </div>`;
-}
 
 function boardOpen(pid){
   if(pid in st.boardOpen) return st.boardOpen[pid];
   return !isPhone();                       // на телефоне доска закрыта по умолчанию
 }
 
-function bindQuickBar(p){
-  const t=$('#qToggle');
-  if(t) t.addEventListener('click',()=>{
-    const next=!qbarHidden(p.id);
-    st.qbar[p.id]=next;
-    LS.set('pm:qbar:'+p.id, next?'0':'1');
-    renderProject();
-  });
-  const add=()=>{
-    const ui=$('#qUrl');
-    const raw=(ui.value||'').trim(); if(!raw) return;
-    const m=raw.match(/^(\S+)\s*(.*)$/);
-    let u=m[1]; const nm=m[2].trim();
-    if(!/^https?:\/\//i.test(u)) u='https://'+u;
-    p.tasks=p.tasks||[];
-    p.tasks.push({id:uid(),kind:'quick',text:nm,url:u,done:false,created:Date.now()});
-    ui.value='';
-    saveProject(p,true); renderProject();
-    const f=$('#qUrl'); if(f) f.focus();
-  };
-  const ab=$('#qAdd');
-  if(ab){
-    ab.addEventListener('click',add);
-    $('#qUrl').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
-  }
-  const box=$('#qlist');
-  if(box) box.addEventListener('click',e=>{
-    const d=e.target.closest('[data-qdel]');
-    if(!d) return;
-    e.preventDefault();
-    const gone=p.tasks.find(x=>x.id===d.dataset.qdel), at=p.tasks.indexOf(gone);
-    p.tasks=p.tasks.filter(x=>x.id!==d.dataset.qdel);
-    saveProject(p,true); renderProject();
-    if(gone) toast('Link removed',{action:'Undo',onAction:()=>{ p.tasks.splice(at,0,gone); saveProject(p,true); renderProject() }});
-  });
-}
 
 function refListOn(){ return st.refList }
 function refHidden(pid){
@@ -4785,10 +4688,10 @@ function refHidden(pid){
 }
 
 function linksPane(p){
-  const items=linksOf(p).slice().reverse();
+  const items=linksOf(p).slice().reverse().sort((a,b)=>(layObj(b).pin?1:0)-(layObj(a).pin?1:0));
   return `<section class="pane wide refs-pane ${refHidden(p.id)?'collapsed':''}">
     <h2 class="pane-h">
-      <button class="board-toggle" id="refToggle">References ${items.length?`<span class="count">${items.length}</span>`:''}
+      <button class="board-toggle" id="refToggle">Links ${items.length?`<span class="count">${items.length}</span>`:''}
         <span class="qchev">${svg('chev',11,2.2)}</span></button>
       ${items.length?`<button class="ghost-btn" id="refView" style="margin-left:auto">${refListOn()?'grid':'list'}</button>`:''}
     </h2>
@@ -4801,9 +4704,10 @@ function linksPane(p){
     ${items.length?(refListOn()?`<div class="links list" id="links">${items.map(i=>`
       <${i.url?'a':'div'} class="lrow" draggable="true" data-ref="${i.id}" data-id="${i.id}" ${i.url?`href="${esc(i.url)}" target="_blank" rel="noopener"`:'data-shot tabindex="0" role="button"'}>
         <span class="lrow-thumb"><img data-limg="${i.id}" alt="" ${i.preview?`src="${esc(i.preview)}"`:''}></span>
-        <span class="lrow-name">${esc(i.text||hostOf(i.url)||'Untitled')}</span>
+        <span class="lrow-name">${layObj(i).pin?`<i class="lpin">${svg('pin',11,2)}</i>`:''}${esc(i.text||hostOf(i.url)||'Untitled')}</span>
         <span class="lrow-host">${esc(hostOf(i.url)||'photo')}</span>
         <span class="lacts">
+          <button data-lpin="${i.id}" class="${layObj(i).pin?'on':''}" title="${layObj(i).pin?'Unpin':'Pin to top'}">${svg('pin',13,1.7)}</button>
           <button data-led="${i.id}" title="Settings">${svg('gear',13,1.6)}</button>
           <button data-ldel="${i.id}" title="Delete">${svg('trash',13,1.7)}</button>
         </span>
@@ -4817,11 +4721,12 @@ function linksPane(p){
         <span class="lfall">${favOf(i.url)?`<img class="lfav" src="${esc(favOf(i.url))}" alt="">`:svg('img',22,1.5)}</span>
         <span class="lshade"></span>
         <span class="lbody">
-          <b>${esc(i.text||hostOf(i.url)||'Untitled')}</b>
+          <b>${layObj(i).pin?`<i class="lpin">${svg('pin',11,2)}</i>`:''}${esc(i.text||hostOf(i.url)||'Untitled')}</b>
           <span>${esc(hostOf(i.url)||'photo')}</span>
         </span>
         <span class="lacts">
           ${!i.preview&&i.url?`<button data-lshot="${i.id}" title="Add your own photo">${svg('img',13,1.7)}</button>`:''}
+          <button data-lpin="${i.id}" class="${layObj(i).pin?'on':''}" title="${layObj(i).pin?'Unpin':'Pin to top'}">${svg('pin',13,1.7)}</button>
           <button data-led="${i.id}" title="Settings">${svg('gear',13,1.6)}</button>
           <button data-ldel="${i.id}" title="Delete">${svg('trash',13,1.7)}</button>
         </span>
@@ -5442,13 +5347,14 @@ function bindLinks(p){
   });
   box.addEventListener('click',async e=>{
     const shot=e.target.closest('[data-shot]');
-    if(shot&&!e.target.closest('[data-led]')&&!e.target.closest('[data-ldel]')){
+    if(shot&&!e.target.closest('[data-led]')&&!e.target.closest('[data-ldel]')&&!e.target.closest('[data-lpin]')){
       const ph=st.linkShots[shot.dataset.id];
       if(ph) lightbox(ph,ph.url);
       return;
     }
     const ed=e.target.closest('[data-led]'), dl=e.target.closest('[data-ldel]'),
-          ls=e.target.closest('[data-lshot]');
+          ls=e.target.closest('[data-lshot]'), lp=e.target.closest('[data-lpin]');
+    if(lp){ e.preventDefault(); e.stopPropagation(); const it=(p.tasks||[]).find(x=>x.id===lp.dataset.lpin); if(it){ setLay(it,'pin',layObj(it).pin?'':1); saveProject(p,true); renderProject() } return }
     if(!ed&&!dl&&!ls) return;
     e.preventDefault(); e.stopPropagation();
     const key=ed?ed.dataset.led:dl?dl.dataset.ldel:ls.dataset.lshot;
@@ -5464,10 +5370,11 @@ function bindLinks(p){
       inp.click();
       return;
     }
-    const ph=(await photosOf(p.id)).filter(x=>x.item===key);
-    for(const o of ph) await delPhotoDB(o.id);
+    const at=p.tasks.indexOf(item); let back=false;
     p.tasks=p.tasks.filter(x=>x.id!==key);
     saveProject(p,true); renderProject();
+    toast('Link removed',{action:'Undo',onAction:()=>{ back=true; p.tasks.splice(Math.min(at,p.tasks.length),0,item); saveProject(p,true); renderProject() }});
+    setTimeout(async()=>{ if(back) return; try{ for(const o of (await photosOf(p.id)).filter(x=>x.item===key)) await delPhotoDB(o.id) }catch(_){} },6000);
   });
 }
 
@@ -5498,7 +5405,7 @@ function bindIdeas(p){
     const b=e.target.closest('[data-fol]');
     if(b){ st.ideaFolder=b.dataset.fol; renderProject() }
   });
-  $('#view').querySelectorAll('[data-isrc]').forEach(b=>b.addEventListener('click',()=>{st.ideaSrc=b.dataset.isrc;renderProject()}));
+  $('#view').querySelectorAll('[data-isrc]').forEach(b=>b.addEventListener('click',()=>{ st.ideaQ=b.dataset.isrc; renderProject(); const n=$('#ideaQ'); if(n) n.focus() }));
   const na=$('#aiNameAll'); if(na) na.addEventListener('click',()=>aiNameAll(p));
   const iqi=$('#ideaQ');
   if(iqi){ iqi.addEventListener('input',()=>{ const pos=iqi.selectionStart; st.ideaQ=iqi.value; renderProject(); const n=$('#ideaQ'); if(n){ n.focus(); n.setSelectionRange(pos,pos) } });
@@ -5627,6 +5534,8 @@ function bindIdeas(p){
 /* ───────── project ───────── */
 async function renderProject(){
   const p=cur(); if(!p) return renderAll();
+  /* старая полоса ссылок слилась со списком ссылок: такие ссылки становятся закреплёнными, ничего не теряется */
+  if(!SPECIAL(p.id)&&(p.tasks||[]).some(t=>t.kind==='quick')){ p.tasks.forEach(t=>{ if(t.kind==='quick'){ t.kind='link'; setLay(t,'pin',1) } }); saveProject(p,true) }
   $('#crumb').textContent=p.name||'Untitled';
   const t=tasksOf(p), d=t.filter(x=>x.done).length;
   $('#view').innerHTML=`
@@ -5641,13 +5550,12 @@ async function renderProject(){
         </div>`}
         ${p.archived?`<span class="tag">${svg('arch',11,1.7)} archived</span>`:''}
         ${p.revisit?`<span class="tag ${isDue(p)?'due-badge':'rev-tag'}">${svg('clock',11,1.8)} ${isDue(p)?'due back':'back on '+ru(p.revisit)}</span>`:''}
-        ${p.important?`<span class="tag-imp">${svg('flag',11,2.1)} important</span>`:''}
+        
         ${p.startDate&&!SPECIAL(p.id)?`<span class="tag">${svg('cal',11,1.8)} since ${ru(p.startDate)}</span>`:''}
         <span id="save"></span>
       </div>
       ${t.length&&!SPECIAL(p.id)?`<div class="bar"><i style="width:${(d/t.length)*100}%"></i><b>${d}/${t.length}</b></div>`:''}
     </header>
-    ${SPECIAL(p.id)?'':quickBar(p)}
     <div class="panes">
       ${p.id===INBOX?ideasPane(p):p.id===WANT?wishPane(p):p.id===TODO?todoPane(p):`<section class="pane">
         <h2 class="pane-h">Tasks</h2>
@@ -5839,7 +5747,6 @@ function bindProject(p){
   const ta=$('#taskAdd'), ti=$('#taskInput');
   if(ta) ta.addEventListener('click',add);
   if(ti) ti.addEventListener('keydown',e=>{if(e.key==='Enter')add()});
-  bindQuickBar(p);
   bindIdeas(p);
   if(p.id===INBOX) enrichIdeas(p);
   bindWish(p);
@@ -6582,14 +6489,14 @@ function exportData(){
   toast('Backup saved',{sub:st.projects.length+' lists, '+n+' items, no photos'});
 }
 /* Ctrl/Cmd+K: перейти куда угодно, сделать что угодно, добавить что угодно */
-function openPalette(){
+function openPalette(prefill){
   if(document.querySelector('.cmdk')) return;
   const go=fn=>()=>{ if(window.innerWidth<900) document.body.classList.remove('side-open'); fn() };
   const NAV=[['Today','star',go(()=>{ resetViews(); st.focus=true; route() })],['Ideas','spark',go(()=>openProject(INBOX))],['Wishlist','cart',go(()=>openProject(WANT))],
     ['Spending','arch',go(()=>{ resetViews(); st.spend=true; route() })],['To do','boxOk',go(()=>openProject(TODO))],['All projects','box',go(()=>{ resetViews(); route() })],
     ['History','clock',go(openHistory)],['Review','done',go(()=>{ resetViews(); st.review=true; route() })]].map(([l,ic,run])=>({l,ic,run,k:'Go to'}));
   const ACT=[['New project','plus',newProject],['Add expense or income','arch',go(()=>{ resetViews(); st.spend=true; route(); setTimeout(()=>{ const i=$('#spIn'); if(i) i.focus() },80) })],
-    ['Quick add…','plus',openQuick],['Settings','gear',openSettingsSheet],['Export backup','arch',exportData],['Restore from backup','arrow',()=>$('#jsonPick').click()],
+    ['Settings','gear',openSettingsSheet],['Export backup','arch',exportData],['Restore from backup','arrow',()=>$('#jsonPick').click()],
     ['Keyboard shortcuts','box',openKeys]].map(([l,ic,run])=>({l,ic,run,k:'Action'}));
   const PRJ=st.projects.filter(p=>!SPECIAL(p.id)&&!p.archived).map(p=>({l:p.name||'Untitled',ic:'idle',run:go(()=>openProject(p.id)),k:'Project'}));
   let recent=[]; try{ recent=JSON.parse(LS.get('pm:recentQ')||'[]') }catch(e){}
@@ -6607,12 +6514,18 @@ function openPalette(){
     if(!raw){ out=recent.map(r=>({l:r,ic:'search',k:'Recent search',run:()=>{ const qq=$('#q'); st.query=r; if(qq) qq.value=r; resetViews(); route() }})).concat(NAV,ACT) }
     else{
       const qp=parseQuick(raw), sp=parseSpend(raw);
+      /* «!идея», «$покупка», «?дело», «>в проект» — как раньше в быстром вводе; внутри раздела по умолчанию пишем в него */
+      const here=st.openId, F=qp.forced, w=(id,base)=>F?(F===id?9:base-5):(here===id?base+2:base);
+      const hp=here&&!SPECIAL(here)?st.projects.find(x=>x.id===here):(F==='proj'?quickTargets().find(t=>t.key==='proj'):null);
+      const hpo=hp&&(hp.name!=null?hp:st.projects.find(x=>x.id===hp.id));
+      const txt=qp.full;
       const add=[
-        {l:'Add “'+raw+'” to Ideas',ic:'spark',k:'Add',w:qp.url?3:0,run:()=>saveCapture(INBOX,qp.full,qp.url,null,{})},
-        {l:'Add “'+(qp.task||raw)+'” to To do'+(qp.due?' · '+dueLabel(qp.due):''),ic:'boxOk',k:'Add',w:qp.due?3:1,run:()=>saveCapture(TODO,qp.task,qp.url,null,{cat:'other',due:qp.due,rep:qp.rep})},
-        {l:'Add “'+(qp.text||raw)+'” to Wishlist'+(qp.price?' · '+money(qp.price):''),ic:'cart',k:'Add',w:0,run:()=>saveCapture(WANT,qp.text||raw,qp.url,null,{price:qp.price})},
-        {l:(sp.inc?'Income: “':'Money: “')+raw+'”',ic:'arch',k:'Add',w:(sp.price>0||sp.gin!=null)&&(recognise(sp.text).cat||sp.inc||sp.gin!=null)?4:-1,run:()=>{ const it=addExpense(raw); if(it){ spentToast(it); refreshView() } }}
-      ].filter(x=>x.w>=0).sort((a,b)=>b.w-a.w);
+        {l:'Add “'+txt+'” to Ideas',ic:'spark',k:'Add',w:w(INBOX,qp.url?3:0),run:()=>saveCapture(INBOX,qp.full,qp.url,null,{})},
+        {l:'Add “'+(qp.task||txt)+'” to To do'+(qp.due?' · '+dueLabel(qp.due):''),ic:'boxOk',k:'Add',w:w(TODO,qp.due?3:1),run:()=>saveCapture(TODO,qp.task,qp.url,null,{cat:'other',due:qp.due,rep:qp.rep})},
+        {l:'Add “'+(qp.text||txt)+'” to Wishlist'+(qp.price?' · '+money(qp.price):''),ic:'cart',k:'Add',w:w(WANT,0),run:()=>saveCapture(WANT,qp.text||txt,qp.url,null,{price:qp.price})},
+        hpo?{l:'Add “'+(qp.task||txt)+'” to '+(hpo.name||'project'),ic:'idle',k:'Add',w:F==='proj'?9:(here===hpo.id?5:-1),run:()=>saveCapture(hpo.id,qp.task||txt,qp.url,null,{due:qp.due})}:null,
+        {l:(sp.inc?'Income: “':'Money: “')+raw+'”',ic:'arch',k:'Add',w:F?-1:(sp.price>0||sp.gin!=null)&&(recognise(sp.text).cat||sp.inc||sp.gin!=null)?4:-1,run:()=>{ const it=addExpense(raw); if(it){ spentToast(it); refreshView() } }}
+      ].filter(x=>x&&x.w>=0).sort((a,b)=>b.w-a.w);
       const hits=NAV.concat(ACT,PRJ).filter(m);
       out=(add[0].w>=3?[add[0]]:[]).concat(hits,add.slice(add[0].w>=3?1:0),[{l:'Search everything for “'+raw+'”',ic:'search',k:'Search',run:()=>{ const qq=$('#q'); st.query=raw; if(qq) qq.value=raw; resetViews(); route() }}]);
     }
@@ -6632,7 +6545,8 @@ function openPalette(){
   });
   box.addEventListener('click',e=>{ const b=e.target.closest('[data-i]'); if(b) run(+b.dataset.i) });
   el.addEventListener('click',e=>{ if(e.target===el) close() });
-  build(); setTimeout(()=>inp.focus(),20);
+  if(prefill){ inp.value=prefill }
+  build(); setTimeout(()=>{ inp.focus(); const n=inp.value.length; inp.setSelectionRange(n,n) },20);
 }
 function openKeys(){
   if(document.querySelector('.keys-sheet')) return;
@@ -6946,92 +6860,8 @@ async function openCapture(){
   document.addEventListener('keydown',esckey,true);
 }
 
-function openQuick(prefill){
-  if(document.querySelector('.qa-wrap')) return;
-  if(typeof prefill!=='string') prefill='';
-  const targets=quickTargets();
-  let sel=targets[0].id;
-  if(st.openId){ const here=targets.find(t=>t.id===st.openId); if(here) sel=here.id }   // внутри раздела — пишем в него
-  const el=document.createElement('div');
-  el.className='qa-wrap';
-  el.innerHTML=`<div class="qa">
-    <div class="qa-in">
-      ${svg('plus',20,2.6)}
-      <input id="qaIn" placeholder="Type anything…" autocomplete="off">
-      <span class="qa-price" id="qaPrice"></span>
-    </div>
-    <div class="qa-targets" id="qaT">
-      ${targets.map(t=>`<button class="qa-t ${t.id===sel?'on':''}" data-id="${t.id}" data-t="${t.key}">
-        ${esc(t.label)} <kbd>${t.hint}</kbd></button>`).join('')}
-    </div>
-    <p class="qa-hint" id="qaHint"></p>
-    <div class="qa-foot">
-      <span><b>Enter</b> add</span><span><b>Shift+Enter</b> add more</span><span><b>Tab</b> switch list</span>
-    </div>
-  </div>`;
-  document.body.appendChild(el);
-
-  const input=el.querySelector('#qaIn');
-  const paint=()=>{
-    el.querySelectorAll('.qa-t').forEach(b=>b.classList.toggle('on',b.dataset.id===sel));
-    const {text,price,url}=parseQuick(input.value);
-    el.querySelector('#qaPrice').textContent=(sel===WANT&&price)?money(price):'';
-    const name=(targets.find(t=>t.id===sel)||{}).label||'';
-    el.querySelector('#qaHint').innerHTML=text
-      ? [sel===WANT&&price?money(price):'', sel!==WANT&&sel!==INBOX&&parseQuick(input.value).due?'due '+dueLabel(parseQuick(input.value).due):'', url?'link attached':''].filter(Boolean).map(esc).join(', ')
-      : '';
-    el.querySelector('#qaHint').style.display=el.querySelector('#qaHint').textContent?'':'none';
-  };
-  input.addEventListener('input',()=>{
-    const f=parseQuick(input.value).forced;
-    if(f==='proj'){ const t=targets.find(x=>x.key==='proj'); if(t) sel=t.id }
-    else if(f) sel=f;
-    paint();
-  });
-  el.querySelector('#qaT').addEventListener('click',e=>{
-    const b=e.target.closest('.qa-t'); if(!b) return;
-    sel=b.dataset.id; paint(); input.focus();
-  });
-
-  const submit=async(keep)=>{
-    const q=parseQuick(input.value);
-    const dated=sel!==WANT&&sel!==INBOX;
-    const price=q.price, url=q.url, text=sel===WANT?q.text:dated?q.task:q.full;
-    if(!text) return;
-    const target=st.projects.find(x=>x.id===sel); if(!target) return;
-    target.tasks=target.tasks||[];
-    if(sel===WANT) target.tasks.push({id:uid(),text,price:price||null,url,done:false,created:Date.now()});
-    else if(sel===TODO) target.tasks.push({id:uid(),text,cat:st.todoCat||'other',url,note:'',done:false,created:Date.now()});
-    else if(sel===INBOX) target.tasks.push({id:uid(),text,done:false,created:Date.now()});
-    else { target.tasks.push({id:uid(),text,done:false,created:Date.now()}); touchProject(target) }
-    if(dated&&q.due) setDue(target.tasks[target.tasks.length-1],q.due);
-    if(dated&&q.rep) setLay(target.tasks[target.tasks.length-1],'rep',q.rep);
-    target.updated=Date.now();
-    await putProject(target);
-    toast('Added to '+target.name);
-    input.value=''; paint();
-    renderSide();
-    if(st.openId===target.id) renderProject();
-    else if(!st.openId&&!st.focus&&!st.hist) renderAll();
-    if(!keep) close();
-  };
-  const close=()=>{ el.remove(); document.removeEventListener('keydown',keys,true) };
-  const keys=e=>{
-    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close()}
-    else if(e.key==='Enter'){e.preventDefault();submit(e.shiftKey)}
-    else if(e.key==='Tab'){
-      e.preventDefault();
-      const i=targets.findIndex(t=>t.id===sel);
-      sel=targets[(i+(e.shiftKey?targets.length-1:1))%targets.length].id;
-      paint();
-    }
-  };
-  document.addEventListener('keydown',keys,true);
-  el.addEventListener('click',e=>{ if(e.target===el) close() });
-  input.value=prefill;
-  paint();
-  input.focus();
-}
+/* быстрый ввод теперь — та же палитра с уже набранным текстом; горячие клавиши и «просто начни печатать» прежние */
+function openQuick(prefill){ openPalette(typeof prefill==='string'?prefill:'') }
 
 /* ───────── spending ─────────
    an expense is a wishlist item born done: layout.exp=1, ecat=<category id>, rep='month' + rday for monthly ones,
@@ -7849,7 +7679,6 @@ function projectMenu(pid,x,y){
     <div class="pmenu-name">${esc(p.name||'Untitled')}</div>
     <div class="pmenu-status">${STATUSES.map(z=>`<button class="${p.status===z.id?'on':''}" data-m="status" data-s="${z.id}">${svg(z.id,15,2)}<span>${z.short}</span></button>`).join('')}</div>
     <button data-m="pin">${svg('pin',15,1.8)} ${p.pinned?'Unpin':'Pin to top'}</button>
-    <button data-m="imp">${svg('flag',15,2)} ${p.important?'Not important':'Mark important'}</button>
     <button data-m="arch">${svg('arch',15,1.8)} ${p.archived?'Take out of archive':'Move to archive'}</button>
     <button data-m="gear">${svg('gear',15,1.6)} Settings</button>
     <button data-m="del" class="pmenu-del">${svg('trash',15,1.8)} Delete…</button>`;
@@ -7865,7 +7694,6 @@ function projectMenu(pid,x,y){
     if(m==='status'){ setStatus(p,b.dataset.s); toast(sMeta(b.dataset.s).short); return }
     if(m==='gear') return openSettings(p.id);
     if(m==='pin'){ p.pinned=!p.pinned; saveProject(p,true); sortProjects(); refreshView(); return }
-    if(m==='imp'){ p.important=!p.important; saveProject(p,true); sortProjects(); refreshView(); return }
     if(m==='arch'){
       p.archived=!p.archived;
       if(p.archived&&st.openId===p.id) st.openId=null;
@@ -8214,7 +8042,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:20';
+const APP_VER='19 Nov 03:24';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
@@ -8359,6 +8187,8 @@ async function afterLogin(){
     window.addEventListener('resize',syncSidebarButton);
     route();
     if(spendRoll()) renderSide();
+    /* «важное» теперь — это закреплённое; флаг в данных остаётся как был */
+    st.projects.forEach(p=>{ if(p.important&&!p.pinned&&!SPECIAL(p.id)){ p.pinned=true; saveProject(p,true) } }); sortProjects();
     loadRates().then(c=>{ if(c){ renderSide(); if(st.spend) renderSpend() } });
     setTimeout(()=>{ showDigest(); checkRemind() },700);
   }catch(e){
