@@ -1983,6 +1983,48 @@ body:has(.digest) .fab-wrap{display:none}
 .rs-replace input{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line-2);background:var(--bg);color:var(--txt);margin-bottom:10px}
 .rs-replace .danger{width:100%;min-height:42px}
 .rs-replace .danger:disabled{opacity:.4}
+/* v7 — rhythm, numbers, motion */
+.ncount,.chip-n,.sec-n,.card-n,.bar b,.wrow-price,.wprice,.wsum,.msum-c b,.stat b,.dg-n,.qcount,.count,.hday-h span,.sp-v,.sp-day-h span,.sp-row b,.sp-crow b,.due,.idea-date,.rmeta,.scount,.day-done{font-variant-numeric:tabular-nums}
+.btn-nav svg,.pmenu>button svg,.side-tools .tool svg,.row-more,.ghost-btn svg,.tsnooze svg{stroke-width:1.8}
+.side-tools .tool svg,.btn-nav svg{width:15px;height:15px;flex:0 0 15px}
+.pmenu>button{min-height:38px}
+.pmenu>button svg{width:16px;height:16px;flex:0 0 16px}
+.chip{font-variant-numeric:tabular-nums}
+.chip-n{opacity:.75;margin-left:2px}
+.pane-h{letter-spacing:0}
+.sec-h h2,.pane-h{line-height:1.25}
+.empty-line{margin:20px 0 0;max-width:none}
+.empty-main.empty-line{max-width:1500px;margin:12px auto;display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty-main.empty-line p{margin:0}
+/* motion: short, and none when asked */
+.sheet-wrap{animation:fadeIn .16s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.sheet{animation:sheetIn .2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes sheetIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+.toast.on{animation:sheetIn .18s cubic-bezier(.2,.8,.2,1)}
+.new-in{animation:newIn .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes newIn{0%{opacity:0;transform:translateY(-6px)}60%{opacity:1}100%{transform:none}}
+.tditem.new-in,.wrow.new-in,.sp-row.new-in,.tasks li.new-in{background:color-mix(in srgb,var(--lime) 6%,transparent);transition:background 1.2s ease}
+.jot #capBtn:active,.sp-go:active,.gate-go:active,.dg-done:active,.paid-go:active{transform:scale(.95)}
+/* spending: the one rich place */
+.sp-bars{position:relative;padding:16px 14px 12px}
+.sp-col i{transform-origin:bottom;animation:barUp .5s cubic-bezier(.2,.8,.2,1) both}
+.sp-bar:nth-child(2) .sp-col i{animation-delay:.03s}.sp-bar:nth-child(3) .sp-col i{animation-delay:.06s}
+.sp-bar:nth-child(4) .sp-col i{animation-delay:.09s}.sp-bar:nth-child(5) .sp-col i{animation-delay:.12s}.sp-bar:nth-child(6) .sp-col i{animation-delay:.15s}
+@keyframes barUp{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.sp-bar.on .sp-col i{background:linear-gradient(180deg,var(--lime),color-mix(in srgb,var(--lime) 62%,var(--panel)))}
+.sp-bar.on .sp-v{color:var(--lime);font-weight:700}
+.sp-bar:hover:not(:disabled) .sp-col i{background:var(--dim)}
+.sp-bar.on:hover .sp-col i{background:var(--lime)}
+.sp-total{animation:newIn .35s ease}
+.sp-budget{position:relative;height:6px;border-radius:6px;overflow:visible;background:var(--line)}
+.sp-budget i{border-radius:6px}
+.sp-budget s{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--txt);opacity:.55}
+.sp-crow:first-of-type i{background:var(--lime)}
+.sp-crow i{transition:width .5s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -3173,7 +3215,7 @@ function renderAll(){
           :''})()}<span class="card-n">${t.length?d+'/'+t.length:''}</span></div>
         ${t.length?`<div class="mini"><i style="width:${(d/t.length)*100}%"></i></div>`:''}
       </a>`}).join('')}</div>`)
-    :`<div class="empty-main"><p>Nothing to show.</p><button class="btn-inline" id="emptyNew">${svg('plus',14,2.2)} New project</button></div>`}`;
+    :`<div class="empty-main empty-line"><p>Nothing to show here.</p><button class="btn-inline" id="emptyNew">${svg('plus',14,2.2)} New project</button></div>`}`;
   paintCovers();
   const mg=$('#migGo'), mk=$('#migSkip');
   if(mg) mg.addEventListener('click',migrateLocal);
@@ -3756,9 +3798,9 @@ function ideasPane(p){
     ${(()=>{const sk=aiSkip(), n=all.filter(i=>ideaUrl(i)&&!ideaNamed(i)&&i.cat!==ARCHIVE&&!sk[i.id]).length;
       return n?`<button class="ai-btn" id="aiNameAll" style="margin-top:14px">${svg('spark',14,1.9)} Name ${n} ${n===1?'link':'links'} with AI</button>`:''})()}
     ${shown.length?`<div class="ideas" id="ideas">${shown.map(i=>ideaCard(p,i,cur)).join('')}</div>`
-    :`<p class="hint" style="margin-top:18px;max-width:60ch">${cur===ARCHIVE?'Archive is empty.'
+    :`<p class="empty-line">${cur===ARCHIVE?'Archive is empty.'
       :cur?'Nothing in this folder yet.'
-      :'Empty. Paste a link while scrolling at night — it lands here with a preview, and you sort it into folders later.'}</p>`}
+      :'No ideas yet. Paste a link or write a thought above.'}</p>`}
   </section>`;
 }
 
@@ -3818,8 +3860,8 @@ function wishPane(p){
           <button data-wdel="${i.id}">${svg('trash',18,1.7)}delete</button>
         </div>
       </div>`).join('')}</div>`
-    :`<p class="hint" style="margin-top:20px;max-width:62ch">${f==='done'?'Nothing bought yet.'
-      :'Empty. A lens, a jacket, a chair you keep going back to look at — put it here with a photo and a price. Seeing the total is usually enough to decide.'}</p>`}
+    :`<p class="empty-line">${f==='done'?'Nothing bought yet.'
+      :'Nothing to buy yet. Add it above, with the price at the end.'}</p>`}
   </section>`;
 }
 
@@ -3874,8 +3916,8 @@ function todoPane(p){
           <textarea data-tdnote="${i.id}" placeholder="Who recommended it, why you want it, where you stopped…">${esc(i.note||'')}</textarea>
         </div>`:''}
       </div>`}).join('')}</div>`
-    :`<p class="hint" style="margin-top:20px;max-width:62ch">${f==='done'?'Nothing crossed off yet.'
-      :'Empty. Books you mean to read, films people keep recommending, a city you want to see. Park them here so they stop rattling around.'}</p>`}
+    :`<p class="empty-line">${f==='done'?'Nothing crossed off yet.'
+      :'Nothing here yet. Books, films, places, errands: add them above.'}</p>`}
   </section>`;
 }
 
@@ -4526,7 +4568,7 @@ function linksPane(p){
           <button data-ldel="${i.id}" title="Delete">${svg('trash',13,1.7)}</button>
         </span>
       </${i.url?'a':'div'}>`).join('')}</div></div>`)
-    :`<p class="hint" style="margin-top:16px;max-width:62ch">Nothing pinned yet. Drop in a reel, a reference photo, a shop page — it lands here as a preview card you can open with one tap.</p>`}
+    :`<p class="hint" style="margin-top:14px">Nothing pinned yet. Paste a link or drop a photo.</p>`}
   </section>`;
 }
 
@@ -5379,7 +5421,7 @@ async function renderProject(){
         <p class="hint">Drop images here or paste a screenshot. Drag to move, pull the corner to resize, double click to open.</p>
       </section>`}
     </div>`;
-  bindProject(p);
+  bindProject(p); markNew(p);
   if(p.id===WANT) await loadWishPhotos();
   else if(p.id!==TODO){ await loadPhotos(p.id); await loadLinkPhotos(p.id) }
 }
@@ -6879,7 +6921,7 @@ function renderSpend(){
         </div>
         <b class="sp-total">${money2(total)}</b>
         <span class="sp-diff">${prev?(Math.abs(diff)<0.5?'Same as '+MONL[mo(k-1)]:`${money(Math.round(Math.abs(diff)))} ${diff>0?'more':'less'} than ${MONL[mo(k-1)]}`):(total?'Nothing in '+MONL[mo(k-1)]:'Nothing spent yet')}</span>
-        ${budget?`<div class="sp-budget ${ratio>1?'over':ratio>=.85?'near':''}"><i style="width:${Math.min(100,ratio*100)}%"></i></div>
+        ${budget?`<div class="sp-budget ${ratio>1?'over':ratio>=.85?'near':''}"><i style="width:${Math.min(100,ratio*100)}%"></i>${off===0?`<s style="left:${Math.min(100,new Date().getDate()/new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate()*100)}%" title="Where an even pace would be today"></s>`:''}</div>
           <button class="sp-blabel" id="spBudget">${ratio>1?`${money(Math.round(total-budget))} over the ${money(budget)} budget`:`${money(Math.round(budget-total))} left of ${money(budget)}`}</button>`
         :`<button class="sp-blabel" id="spBudget">Set a monthly budget</button>`}
       </div>
@@ -6899,6 +6941,7 @@ function renderSpend(){
           <i style="width:${(cats[c]/total)*100}%"></i></div>`).join('')}</section>
       </div>`:`<p class="empty-line">${off?'Nothing recorded in '+name(k)+'.':'Nothing yet this month. Type what you paid for above, or tick a wish as bought.'}</p>`}
     </div>`;
+  markNew(wantP());
   const inp=$('#spIn');
   const add=()=>{
     const it=addExpense(inp.value,LS.get('pm:ecat')||'');
@@ -7008,6 +7051,13 @@ function flashItem(id){
     el.scrollIntoView({block:'center',behavior:'smooth'}); el.classList.add('flash');
     setTimeout(()=>el.classList.remove('flash'),1800);
   },60);
+}
+/* только что добавленное слегка «приезжает» — видно, куда оно легло */
+function markNew(p){
+  if(!p) return; const t0=Date.now()-1600;
+  (p.tasks||[]).forEach(t=>{ if((t.created||0)>t0){
+    const el=document.querySelector(`#view [data-id="${t.id}"],#view [data-task="${t.id}"],#view [data-sp="${t.id}"]`);
+    if(el) el.classList.add('new-in') } });
 }
 function resetViews(){ st.openId=null; st.focus=false; st.hist=false; st.review=false; st.spend=false }
 function openProject(id){st.openId=id;st.focus=false;st.hist=false;st.review=false;st.spend=false;if(window.innerWidth<900)document.body.classList.remove('side-open');route()}
