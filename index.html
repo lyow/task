@@ -2196,6 +2196,15 @@ body:has(.paid-pop) .fab-wrap{display:none}
 .set-list .tool.on svg{color:var(--lime)}
 .set-ver{margin:6px 0 0;font-size:12px;color:var(--dim);text-align:center}
 @media (max-width:760px){.cmdk-wrap{padding-top:10px}.cmdk{max-width:none}}
+/* phones: sheets clear the home bar, lists don't jump */
+@media (max-width:760px){
+  .sheet{padding-bottom:calc(22px + env(safe-area-inset-bottom))}
+  .sheet-wrap{align-items:flex-end;padding:0}
+  .sheet{max-height:92vh;border-radius:20px 20px 0 0}
+  .cmdk-wrap{align-items:flex-start}
+}
+img{content-visibility:auto}
+.sp-row,.tditem,.idea{contain:layout style}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -7168,8 +7177,16 @@ const STEMS=[
 ].map(([cat,w])=>({cat,w:w.split(' ')}));
 const normName=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim();
 const lsMap=k=>{ try{ return JSON.parse(LS.get(k)||'{}')||{} }catch(e){ return {} } };
-const svcOf=text=>{ const n=normName(text); return n?SVCS.find(s=>s.re.test(' '+n+' '))||null:null };
+const svcCache=new Map();
+const svcOf=text=>{ const k=String(text||''); if(svcCache.has(k)) return svcCache.get(k); const n=normName(text); const r=n?SVCS.find(s=>s.re.test(' '+n+' '))||null:null; svcCache.set(k,r); return r };
+/* одно и то же название узнаём один раз; сбрасываем, когда меняются поправки */
+const recCache=new Map();
 function recognise(text){
+  const k=String(text||'');
+  if(recCache.has(k)) return recCache.get(k);
+  const r=recognise0(text); recCache.set(k,r); return r;
+}
+function recognise0(text){
   const n=normName(text); if(!n) return {cat:'',svc:null,how:''};
   const svc=svcOf(text);
   const learned=lsMap('pm:ecatLearn')[n]; if(learned&&SCAT[learned]&&!ICAT_ID[learned]) return {cat:learned,svc,how:'learned'};
@@ -7181,7 +7198,7 @@ function recognise(text){
   const ai=lsMap('pm:ecatAi')[n]; if(ai&&SCAT[ai]) return {cat:ai,svc:null,how:'ai'};
   return {cat:'',svc:null,how:''};
 }
-function learnCat(text,cat){ const n=normName(text); if(!n||!SCAT[cat]) return; const m=lsMap('pm:ecatLearn'); m[n]=cat; LS.set('pm:ecatLearn',JSON.stringify(m)) }
+function learnCat(text,cat){ recCache.clear(); const n=normName(text); if(!n||!SCAT[cat]) return; const m=lsMap('pm:ecatLearn'); m[n]=cat; LS.set('pm:ecatLearn',JSON.stringify(m)) }
 /* категория записи: своя новая → по названию → старая подпись → по умолчанию */
 function catIdOf(t){
   const L=layObj(t);
@@ -7371,7 +7388,7 @@ async function aiCatFor(it){
     const a=await aiAsk('Expense name: "'+it.text+'". Pick the category id from: '+SCATS.map(c=>c.id).join(', ')+'. Reply with the id only.');
     const id=(String(a||'').toLowerCase().match(/[a-z]+/g)||[]).find(x=>SCAT[x]);
     if(!id) return;
-    cache[n]=id; LS.set('pm:ecatAi',JSON.stringify(cache));
+    cache[n]=id; LS.set('pm:ecatAi',JSON.stringify(cache)); recCache.clear();
     if(layObj(it).ecat==='other'&&id!=='other'){ setLay(it,'ecat',id); saveProject(wantP(),true); if(st.spend) renderSpend() }
   }catch(e){ console.error(e) }
 }
@@ -8247,7 +8264,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:49';
+const APP_VER='19 Nov 02:50';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
