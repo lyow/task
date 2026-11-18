@@ -2418,6 +2418,20 @@ button:active:not(:disabled){transform:scale(.97)}
 .sp-sheet .sp-grid13 button{padding:7px 4px;gap:3px}
 .gate{background:radial-gradient(520px 260px at 50% 18%,rgba(212,255,58,.05),transparent 70%),var(--ink)}
 .gate-box{background:var(--s1);border:1px solid var(--line);box-shadow:var(--sh-card),0 40px 90px -40px #000;border-radius:var(--r-f)}
+
+/* phones: tabs never wrap, rows stay one gesture, content clears the + button */
+@media (max-width:760px){
+  .jot-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:2px}
+  .jot-tabs::-webkit-scrollbar{display:none}
+  .jot-tab{flex:0 0 auto;white-space:nowrap;padding:0 12px}
+  .tlist .tsnooze{display:none}
+  .tlist .tsrc{max-width:28%}
+  #view{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+  .day{gap:6px 10px}
+  .day-streak{display:none}
+}
+@media (max-width:760px){.sp-hero{margin-top:0}}
+@media (hover:none){.acct-menu [data-a=keys]{display:none}}
 </style>
 </head>
 <body class="side-open">
@@ -8502,7 +8516,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:58';
+const APP_VER='19 Nov 03:00';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
