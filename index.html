@@ -1969,6 +1969,20 @@ body:has(.digest) .fab-wrap{display:none}
 .sp-rep.on{color:var(--txt);border-color:color-mix(in srgb,var(--lime) 45%,var(--line-2))}
 .sp-rep.on svg{color:var(--lime)}
 .sp-rep-mark{font-style:normal;color:var(--dim);font-size:13px;margin-left:4px}
+.rs-when{margin:-8px 0 14px;font-size:13px;color:var(--dim)}
+.rs-grid{display:grid;grid-template-columns:1fr auto auto;gap:8px 18px;padding:14px;border-radius:12px;background:var(--bg);border:1px solid var(--line);font-size:14px}
+.rs-grid b{font-size:12.5px;font-weight:600;color:var(--dim);text-align:right}
+.rs-grid em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.rs-sum{margin:14px 0;font-size:14.5px;color:var(--soft);line-height:1.5}
+.rs-merge{width:100%}
+.rs-merge:disabled{background:var(--raise);color:var(--dim)}
+.rs-more{display:block;margin:12px auto 0;padding:8px;font-size:13px;color:var(--dim)}
+.rs-more:hover{color:var(--magenta)}
+.rs-replace{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.rs-replace p{margin:0 0 10px;font-size:13.5px;color:var(--soft);line-height:1.5}
+.rs-replace input{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line-2);background:var(--bg);color:var(--txt);margin-bottom:10px}
+.rs-replace .danger{width:100%;min-height:42px}
+.rs-replace .danger:disabled{opacity:.4}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -2046,6 +2060,7 @@ body:has(.digest) .fab-wrap{display:none}
     <button class="tool" id="tRemind"></button>
     <label class="tool tool-time" id="tRemindRow" style="display:none">Morning reminder at <input type="time" id="tRemindAt"></label>
     <button class="tool" id="tExport"></button>
+    <button class="tool" id="tRestore"></button>
     <button class="tool" id="tKeys"></button>
   </div>
   <div id="sideList"></div>
@@ -2883,6 +2898,7 @@ function renderSide(){
   if(tr){ tr.innerHTML=svg(rOn?'boxOk':'box',14,1.9)+' Reminders'; tr.classList.toggle('on',rOn) }
   const trr=$('#tRemindRow'); if(trr){ trr.style.display=rOn?'':'none'; const ti=$('#tRemindAt'); if(ti&&document.activeElement!==ti) ti.value=LS.get('pm:remindAt')||'09:00' }
   const tx=$('#tExport'); if(tx&&!tx.innerHTML) tx.innerHTML=svg('arch',14,1.7)+' Export backup';
+  const tz=$('#tRestore'); if(tz&&!tz.innerHTML) tz.innerHTML=svg('arrow',14,1.8)+' Restore from backup';
   const tk=$('#tKeys'); if(tk&&!tk.innerHTML) tk.innerHTML=svg('box',14,1.7)+' Keyboard shortcuts';
   const tt=$('#tTheme');
   if(tt){ tt.innerHTML=svg(st.light?'boxOk':'box',14,1.9)+' Light theme'; tt.classList.toggle('on',st.light) }
@@ -6299,11 +6315,70 @@ async function exportAll(){
   LS.set('pm:lastBackup',String(Date.now()));
   toast('Backup saved');
 }
-async function importAll(file){
+/* восстановление: по умолчанию только добавляем недостающее; заменить всё — только после слова REPLACE */
+async function restoreSheet(file){
+  let data=null;
+  try{ data=JSON.parse(await file.text()) }catch(e){}
+  if(!data||!Array.isArray(data.projects)){ toast('That file is not a backup from this app',{kind:'bad'}); return }
+  const haveP={}, haveI={};
+  st.projects.forEach(p=>{ haveP[p.id]=p; (p.tasks||[]).forEach(t=>{ haveI[t.id]=1 }) });
+  let havePh={};
+  try{ const {data:rows}=await sb.from('photos').select('id'); (rows||[]).forEach(r=>{ havePh[r.id]=1 }) }catch(e){}
+  const fileItems=data.projects.reduce((n,p)=>n+(p.tasks||[]).length,0);
+  const newP=data.projects.filter(p=>p&&p.id&&!haveP[p.id]);
+  const addI=[]; data.projects.forEach(p=>{ if(!haveP[p.id]) return; (p.tasks||[]).forEach(t=>{ if(t&&t.id&&!haveI[t.id]) addI.push({pid:p.id,t}) }) });
+  const newPItems=newP.reduce((n,p)=>n+(p.tasks||[]).filter(t=>!haveI[t.id]).length,0);
+  const pids={}; st.projects.forEach(p=>{ pids[p.id]=1 }); newP.forEach(p=>{ pids[p.id]=1 });
+  const addPh=(data.photos||[]).filter(ph=>ph&&ph.id&&ph.data&&!havePh[ph.id]&&pids[ph.pid]);
+  const nowItems=st.projects.reduce((n,p)=>n+(p.tasks||[]).length,0);
+  const when=data.exported?new Date(data.exported):null;
+  const nothing=!newP.length&&!addI.length&&!addPh.length;
+  const el=document.createElement('div');
+  el.className='sheet-wrap';
+  el.innerHTML=`<div class="sheet rs-sheet">
+    <div class="sheet-head"><span>Restore from backup</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    <p class="rs-when">${when&&!isNaN(when)?'Saved '+esc(MON[when.getMonth()]+' '+when.getDate()+', '+when.getFullYear()):'Backup file'} · ${esc(file.name||'')}</p>
+    <div class="rs-grid">
+      <span></span><b>In the file</b><b>Here now</b>
+      <span>Lists and projects</span><em>${data.projects.length}</em><em>${st.projects.length}</em>
+      <span>Items</span><em>${fileItems}</em><em>${nowItems}</em>
+      <span>Photos</span><em>${(data.photos||[]).length}</em><em>${Object.keys(havePh).length}</em>
+    </div>
+    <p class="rs-sum">${nothing?'Everything in this file is already here.'
+      :`Adds ${[newP.length?newP.length+' project'+(newP.length===1?'':'s'):'',addI.length+newPItems?(addI.length+newPItems)+' item'+(addI.length+newPItems===1?'':'s'):'',addPh.length?addPh.length+' photo'+(addPh.length===1?'':'s'):''].filter(Boolean).join(', ')}. Nothing here is changed or deleted.`}</p>
+    <button class="gate-go rs-merge" ${nothing?'disabled':''}>${nothing?'Nothing to add':'Add what’s missing'}</button>
+    <button class="rs-more" data-rsmore>Replace everything instead…</button>
+    <div class="rs-replace" hidden>
+      <p>This deletes everything here, photos included, and loads only the file. Type <b>REPLACE</b> to continue.</p>
+      <input id="rsWord" autocomplete="off" aria-label="Type REPLACE">
+      <button class="danger" id="rsGo" disabled>Replace everything</button>
+    </div>
+  </div>`;
+  const close=()=>el.remove();
+  el.addEventListener('click',async e=>{
+    if(e.target===el||e.target.closest('[data-close]')) return close();
+    if(e.target.closest('[data-rsmore]')){ el.querySelector('.rs-replace').hidden=false; e.target.closest('[data-rsmore]').hidden=true; el.querySelector('#rsWord').focus(); return }
+    if(e.target.closest('.rs-merge')&&!nothing){
+      close(); toast('Adding…');
+      try{
+        for(const p of newP){ const cp=Object.assign({},p,{tasks:(p.tasks||[]).filter(t=>!haveI[t.id])}); await putProject(cp); st.projects.push(cp) }
+        const touched={};
+        addI.forEach(x=>{ const p=haveP[x.pid]; p.tasks=p.tasks||[]; p.tasks.push(x.t); touched[p.id]=p });
+        for(const id in touched) await putProject(touched[id]);
+        for(const ph of addPh) await putPhoto({id:ph.id,pid:ph.pid,item:ph.item||null,name:ph.name,created:ph.created,x:ph.x,y:ph.y,w:ph.w,r:ph.r,z:ph.z,blob:d2b(ph.data)});
+        sortProjects(); route();
+        const pl=(n,w)=>n+' '+w+(n===1?'':'s');
+        toast('Restored',{sub:[newP.length?pl(newP.length,'project'):'',addI.length+newPItems?pl(addI.length+newPItems,'item'):'',addPh.length?pl(addPh.length,'photo'):''].filter(Boolean).join(', ')});
+      }catch(err){ console.error(err); toast('Could not finish restoring',{kind:'bad',sub:String(err&&err.message||'').slice(0,120)}) }
+      return;
+    }
+    if(e.target.closest('#rsGo')&&el.querySelector('#rsWord').value.trim()==='REPLACE'){ close(); await replaceAll(data) }
+  });
+  el.addEventListener('input',e=>{ if(e.target.id==='rsWord') el.querySelector('#rsGo').disabled=e.target.value.trim()!=='REPLACE' });
+  document.body.appendChild(el);
+}
+async function replaceAll(data){
   try{
-    const data=JSON.parse(await file.text());
-    if(!Array.isArray(data.projects)) throw new Error('format');
-    if(!confirm('Load this backup? Your current data will be replaced.')) return;
     const {data:oldRows}=await sb.from('photos').select('id');
     for(const ph of (oldRows||[])) await delPhotoDB(ph.id);
     for(const p of st.projects) await delProject(p.id);
@@ -7220,6 +7295,7 @@ $('#tRemind').addEventListener('click',async()=>{
 });
 $('#tRemindAt').addEventListener('change',e=>{ if(e.target.value){ LS.set('pm:remindAt',e.target.value); toast('Reminder at '+e.target.value) } });
 $('#tKeys').addEventListener('click',openKeys);
+$('#tRestore').addEventListener('click',()=>$('#jsonPick').click());
 $('#tResort').addEventListener('click',()=>{
   st.manual=false; LS.set('pm:manual','0');
   st.projects.forEach(p=>{p.ord=null});
@@ -7234,7 +7310,7 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='E'||e.key==='e')){e.preventDefault();exportAll()}
   if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='I'||e.key==='i')){e.preventDefault();$('#jsonPick').click()}
 });
-$('#jsonPick').addEventListener('change',e=>{if(e.target.files[0])importAll(e.target.files[0]);e.target.value=''});
+$('#jsonPick').addEventListener('change',e=>{if(e.target.files[0])restoreSheet(e.target.files[0]);e.target.value=''});
 $('#filePick').addEventListener('change',e=>{addPhotos(e.target.files);e.target.value=''});
 
 window.addEventListener('paste',e=>{
