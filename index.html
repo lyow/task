@@ -2026,16 +2026,6 @@ body:has(.digest) .fab-wrap{display:none}
 .sp-subs .sp-row{border-top:none;padding:8px 0;min-height:52px}
 .sp-subs .sp-row:hover{background:none}
 .sp-subs .sp-row:hover .sp-name{text-decoration:underline}
-.sp-crow{position:relative;width:100%;display:grid;grid-template-columns:26px 1fr auto 40px;align-items:center;gap:8px;padding:9px 6px 13px;border-radius:10px;font-size:14px;text-align:left}
-.sp-crow:hover{background:var(--panel-2)}
-.sp-crow.on{background:var(--raise)}
-.sp-ce{font-size:17px;line-height:1}
-.sp-cl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sp-crow b{font-weight:600;font-variant-numeric:tabular-nums}
-.sp-crow small{font-size:12.5px;color:var(--dim);text-align:right;font-variant-numeric:tabular-nums}
-.sp-crow i{position:absolute;left:40px;bottom:5px;max-width:calc(100% - 46px);height:3px;border-radius:3px;background:var(--line-2);transition:width .5s cubic-bezier(.2,.8,.2,1)}
-.sp-crow:first-of-type i{background:var(--lime)}
-.sp-filter{display:inline-flex;align-items:center;gap:8px;min-height:36px;margin-bottom:12px;padding:0 12px;border-radius:999px;background:var(--raise);font-size:13.5px;font-weight:600}
 .sp-day{margin-bottom:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
 .sp-day-h{display:flex;justify-content:space-between;align-items:baseline;padding:11px 14px 6px;font-size:13.5px}
 .sp-day-h b{font-weight:600}
@@ -2088,6 +2078,37 @@ body:has(.paid-pop) .fab-wrap{display:none}
   .sp-grid13{grid-template-columns:repeat(4,1fr)}
   .sp-ok-amt{font-size:21px}
 }
+.sp-amtc{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.sp-amtc b{font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.sp-amtc small,.sp-ok-r small{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.sp-ok-r{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.g-win{color:var(--mint)!important}.g-loss{color:var(--magenta)!important}.g-even{color:var(--soft)!important}
+.sp-gline{font-size:13.5px;font-weight:600}
+.sp-approx{font-style:normal;color:var(--dim);font-weight:500;margin-right:6px}
+.sp-gnote{margin:-6px 0 14px;font-size:13.5px;color:var(--soft)}
+.sp-switch{display:inline-flex;gap:2px;padding:3px;margin-bottom:12px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.sp-switch button{min-height:34px;padding:0 14px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--soft)}
+.sp-switch button.on{background:var(--raise);color:var(--txt)}
+.sp-groups{display:flex;flex-direction:column;gap:10px}
+.sp-grp{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
+.sp-grp-h{position:relative;width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px 15px;text-align:left}
+.sp-grp-h:hover{background:var(--panel-2)}
+.sp-stack{display:flex;flex:0 0 auto;min-width:36px}
+.sp-stack i{font-style:normal;width:32px;height:32px;border-radius:10px;background:var(--raise);display:inline-flex;align-items:center;justify-content:center;font-size:16px;border:2px solid var(--panel)}
+.sp-stack i+i{margin-left:-12px}
+.sp-grp-n{flex:1;min-width:0;display:flex;flex-direction:column}
+.sp-grp-n b{font-size:15.5px;font-weight:600}
+.sp-grp-n small{font-size:12.5px;color:var(--dim)}
+.sp-grp-v{display:flex;flex-direction:column;align-items:flex-end}
+.sp-grp-v b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.sp-grp-v small{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.sp-chev{display:flex;color:var(--dim);transition:transform .16s}
+.sp-grp.open .sp-chev{transform:rotate(90deg)}
+.sp-grp-bar{position:absolute;left:14px;bottom:6px;max-width:calc(100% - 28px);height:3px;border-radius:3px;background:var(--line-2)}
+.sp-grp:first-child .sp-grp-bar{background:var(--lime)}
+.sp-cat-h{display:flex;justify-content:space-between;gap:10px;padding:10px 14px 4px;border-top:1px solid var(--line);font-size:13px;font-weight:600;color:var(--soft)}
+.sp-cat-h b{font-variant-numeric:tabular-nums;color:var(--txt)}
+.sp-grp .sp-row{padding-left:22px}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -6825,7 +6846,7 @@ const wantP=()=>st.projects.find(x=>x.id===WANT);
 const monthKey=ms=>{const d=new Date(ms);return d.getFullYear()*12+d.getMonth()};
 const nowKey=()=>monthKey(Date.now());
 const fmtNum=n=>{n=Math.round(n*100)/100;return n.toLocaleString('en-US',{minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2})};
-const amtStr=(n,cur)=>(cur||curSym())+fmtNum(n);
+const amtStr=(n,cur)=>(cur||curSym())+fmtNum(Math.abs(n)>=1000?Math.round(n):n);
 const money2=n=>amtStr(n,'');
 const moneyShort=n=>n>=10000?curSym()+(n/1000).toLocaleString('en-US',{maximumFractionDigits:n>=100000?0:1})+'k':money(Math.round(n));
 
@@ -6902,13 +6923,60 @@ function spName(t){ const s=svcOf(t.text); const raw=String(t.text||'').trim();
   return raw?raw.charAt(0).toUpperCase()+raw.slice(1):SCAT[catIdOf(t)].l }
 function spIcon(t,big){ const s=svcOf(t.text), c=SCAT[catIdOf(t)];
   return `<span class="sp-ic${big?' big':''}">${s?`<img src="${esc(favOf('https://'+s.dom))}" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('${c.e}'))">`:c.e}</span>` }
-const curOf=t=>layObj(t).cur||'';
+const curOf=t=>{ const c=layObj(t).cur||''; return c===curSym()?'':c };
+const SIGN_ISO={'$':'USD','€':'EUR','֏':'AMD','₽':'RUB','£':'GBP'};
+/* курсы: раз в день с open.er-api.com (без ключа), храним с датой; без таблицы итоги показываем по валютам */
+const rates=()=>lsMap('pm:rates');
+let ratesLoading=false;
+async function loadRates(){
+  if(rates().day===ld()||ratesLoading) return false;
+  ratesLoading=true;
+  try{
+    const r=await fetch('https://open.er-api.com/v6/latest/USD'); const j=await r.json();
+    if(j&&j.result==='success'&&j.rates){
+      const keep={}; Object.values(SIGN_ISO).forEach(k=>{ if(j.rates[k]) keep[k]=j.rates[k] });
+      const d=new Date((j.time_last_update_unix||0)*1000||Date.now());
+      LS.set('pm:rates',JSON.stringify({day:ld(),date:MON[d.getMonth()]+' '+d.getDate(),usd:keep}));
+      ratesLoading=false; return true;
+    }
+  }catch(e){}
+  ratesLoading=false; return false;
+}
+function fxRate(from,to){ if(from===to) return 1; const u=rates().usd||{}, a=u[SIGN_ISO[from]], b=u[SIGN_ISO[to]]; return a&&b?b/a:null }
+/* сумма в основной валюте: по курсу, сохранённому при записи, иначе по последней таблице */
+function inMain(t,amt){
+  const c=curOf(t); if(!c) return {v:amt,fx:false};
+  const L=layObj(t); if(L.fx&&L.fxm===curSym()) return {v:amt*L.fx,fx:true};
+  const r=fxRate(c,curSym()); return {v:r?amt*r:null,fx:true};
+}
+/* казино: храним, сколько внесли и сколько вывели, считаем только итог */
+const isGamble=t=>{ const L=layObj(t); return L.gin!=null||L.gout!=null };
+const gNet=t=>{ const L=layObj(t); return (Number(L.gout)||0)-(Number(L.gin)||0) };
+const gLabel=(net,cur)=>Math.abs(net)<0.005?'even':(net>0?'+':'−')+amtStr(Math.abs(net),cur);
 function spendEntries(){
   const p=wantP(); if(!p) return [];
-  return (p.tasks||[]).filter(t=>t.done&&t.doneAt&&Number(t.price)>0)
-    .map(t=>({t,at:Number(t.doneAt),amt:Number(t.price),cur:curOf(t),cat:catIdOf(t)}));
+  return (p.tasks||[]).filter(t=>t.done&&t.doneAt&&(Number(t.price)>0||isGamble(t))).map(t=>{
+    const g=isGamble(t), net=g?gNet(t):0, amt=g?Math.abs(net):Number(t.price), cur=curOf(t), m=inMain(t,amt);
+    return {t,at:Number(t.doneAt),amt,cur,cat:catIdOf(t),g,net,main:m.v,fx:m.fx,
+      spend:g?(net<0?m.v:0):m.v, win:g&&net>0?(m.v||0):0};
+  });
 }
-function spendMonth(off){ const k=nowKey()-off; return spendEntries().filter(e=>!e.cur&&monthKey(e.at)===k).reduce((n,e)=>n+e.amt,0) }
+/* итог: траты в основной валюте («≈», если что-то пересчитано); выигрыш не вычитается, он отдельно */
+function monthSum(list){
+  let v=0, approx=false, gs=0; const miss={};
+  list.forEach(e=>{
+    if(e.main==null){ if(!e.g||e.net<0) miss[e.cur]=(miss[e.cur]||0)+e.amt; return }
+    if(e.g){ gs+=e.net>0?e.main:-e.main; if(e.fx&&e.main) approx=true; return }   /* казино — только итог за период */
+    v+=e.main; if(e.fx) approx=true;
+  });
+  v+=Math.max(0,-gs);
+  return {v,approx,miss,win:Math.max(0,gs),gnet:gs};
+}
+const sumLabel=s=>(s.approx?'≈ ':'')+money2(s.v)+Object.keys(s.miss).map(c=>' + '+amtStr(s.miss[c],c)).join('');
+function spendMonth(off){ const k=nowKey()-off; return monthSum(spendEntries().filter(e=>monthKey(e.at)===k)).v }
+const GROUPS=[{id:'everyday',l:'Everyday',cats:['coffee','food','groceries','transport']},{id:'subs',l:'Subscriptions',cats:['subs']},
+  {id:'shop',l:'Shopping',cats:['shopping','gifts']},{id:'fun',l:'Fun',cats:['fun','gambling']},{id:'homehealth',l:'Home & Health',cats:['home','health']},
+  {id:'travel',l:'Travel',cats:['travel']},{id:'other',l:'Other',cats:['other']}];
 const spendCats=()=>SCATS.map(c=>c.id);
 /* «claude 200», «200 claude», «кофе 4,5», «$15 netflix», «такси 300р», «spotify 10 monthly» */
 const REP_SPEND=/(?:^|\s)(monthly|every month|каждый месяц|ежемесячно|в месяц)$/i;
@@ -6922,6 +6990,20 @@ function curTok(x){ x=String(x||'').toLowerCase();
 function parseSpend(raw){
   let s=String(raw||'').trim(), rep=false;
   const rr=s.match(REP_SPEND); if(rr){ rep=true; s=s.slice(0,rr.index).trim() }
+  /* казино: «-200 +350», «200 350», «+150», «-200»; одно число без знака — проигрыш */
+  const parts=s.split(/\s+/).filter(Boolean);
+  const NUM=/^([+\-−])?([$€֏₽£])?(\d+(?:[.,]\d+)?)([$€֏₽£]|р|руб)?$/i;
+  const nums=parts.filter(x=>NUM.test(x)), gw=parts.filter(x=>!NUM.test(x)&&!curTok(x)).join(' ');
+  if(nums.length&&nums.length<=2&&recognise(gw).cat==='gambling'){
+    let gc=''; parts.forEach(x=>{ const m=x.match(NUM); const c=m?curTok(m[2]||m[4]||''):curTok(x); if(c&&!gc) gc=c });
+    const val=x=>parseFloat(x.match(NUM)[3].replace(',','.')), sg=x=>x.match(NUM)[1]||'';
+    let gin=0, gout=0;
+    if(nums.length===2){ gin=val(nums[0]); gout=val(nums[1]) }
+    else if(sg(nums[0])==='+') gout=val(nums[0]);
+    else gin=val(nums[0]);
+    if(gc===curSym()) gc='';
+    return {text:gw.replace(/^(на|за|for|on)\s+/i,'').trim(),price:Math.max(0,gin-gout),cur:gc,rep:false,gin,gout};
+  }
   let tk=s.split(/\s+/).filter(Boolean), cur='', price=null;
   const AMT=/^([$€֏₽£])?(\d+(?:[.,]\d+)?)(k|к|[$€֏₽£]|р|руб)?$/i;
   const take=m=>{ let v=parseFloat(m[2].replace(',','.')); if(/^[kк]$/i.test(m[3]||'')) v*=1000;
@@ -6957,19 +7039,28 @@ function spendRoll(){
 function nextCharge(t){ const d=new Date(t.doneAt), k=monthKey(t.doneAt)+1, y=Math.floor(k/12), m=k%12;
   return new Date(y,m,Math.min(layObj(t).rday||d.getDate(),new Date(y,m+1,0).getDate())) }
 /* одна запись — одна строка текста; категорию, валюту и «каждый месяц» понимаем сами */
+function setLayRaw(t,o){ const L=layObj(t); Object.assign(L,o); Object.keys(L).forEach(k=>{ if(L[k]===undefined||L[k]===null||L[k]==='') delete L[k] }); t.layout=JSON.stringify(L) }
+function fxStamp(t){ const c=curOf(t); if(!c){ setLayRaw(t,{fx:undefined,fxm:undefined}); return } const r=fxRate(c,curSym()); setLayRaw(t,r?{fx:r,fxm:curSym()}:{fx:undefined,fxm:undefined}) }
 function addExpense(raw,_cat,at){
   const p=wantP(); if(!p) return null;
   const r=typeof raw==='object'?raw:parseSpend(raw);
-  if(!(r.price>0)){ toast('Add an amount, like “coffee 4”'); return null }
+  const gamble=r.gin!=null||r.gout!=null;
+  if(!gamble&&!(r.price>0)){ toast('Add an amount, like “coffee 4”'); return null }
   const rc=recognise(r.text);
-  const it={id:uid(),text:r.text||(rc.cat?SCAT[rc.cat].l:'Expense'),price:r.price,url:'',done:true,doneAt:at||r.at||Date.now(),created:Date.now()};
-  setLay(it,'exp',1); setLay(it,'ecat',r.cat||rc.cat||'other');
-  if(r.cur) setLay(it,'cur',r.cur);
-  if(r.rep){ setLay(it,'rep','month'); setLay(it,'rday',new Date(it.doneAt).getDate()) }
+  let cur=r.cur;
+  if(!cur&&rc.svc){                                     /* сервис — в той валюте, в которой его записывали последний раз */
+    const n=normName(r.text), prev=(p.tasks||[]).slice().reverse().find(t=>isExp(t)&&normName(t.text)===n&&layObj(t).cur);
+    if(prev) cur=layObj(prev).cur;
+  }
+  const it={id:uid(),text:r.text||(rc.cat?SCAT[rc.cat].l:'Expense'),price:gamble?Math.max(0,(r.gin||0)-(r.gout||0)):r.price,url:'',done:true,doneAt:at||r.at||Date.now(),created:Date.now()};
+  setLayRaw(it,{exp:1,ecat:r.cat||rc.cat||(gamble?'gambling':'other'),cur:cur||curSym()});
+  if(gamble) setLayRaw(it,{gin:Number(r.gin)||0,gout:Number(r.gout)||0});
+  fxStamp(it);
+  if(r.rep&&!gamble) setLayRaw(it,{rep:'month',rday:new Date(it.doneAt).getDate()});
   p.tasks=p.tasks||[]; p.tasks.push(it);
   saveProject(p,true); blip('add');
   st.spLast=it.id;
-  if(!rc.cat&&!r.cat&&r.text) aiCatFor(it);
+  if(!rc.cat&&!r.cat&&r.text&&!gamble) aiCatFor(it);
   return it;
 }
 /* не узнали название — один короткий вопрос AI без инструментов, ответ запоминаем по названию */
@@ -6992,7 +7083,7 @@ function dropExpense(it){
 }
 function spentToast(it){
   const c=SCAT[catIdOf(it)];
-  toast(spName(it)+' · '+amtStr(Number(it.price),curOf(it)),{sub:c.e+' '+c.l+(layObj(it).rep?' · every month':''),action:'Undo',onAction:()=>{ dropExpense(it); refreshView() }});
+  toast(spName(it)+' · '+entryAmt(it),{sub:c.e+' '+c.l+(layObj(it).rep?' · every month':''),action:'Undo',onAction:()=>{ dropExpense(it); refreshView() }});
 }
 /* отметили покупку без цены — спрашиваем, сколько заплатили */
 function askPaid(p,item){
@@ -7021,26 +7112,34 @@ const ordN=n=>n+((n%10===1&&n!==11)?'st':(n%10===2&&n!==12)?'nd':(n%10===3&&n!==
 const catGrid=(on,attr)=>`<div class="sp-grid13">${SCATS.map(c=>`<button type="button" class="${on===c.id?'on':''}" ${attr}="${c.id}"><i>${c.e}</i>${c.l}</button>`).join('')}</div>`;
 function spendEdit(it){
   const p=wantP(); if(!p) return;
-  const exp=isExp(it);
+  const exp=isExp(it), g=isGamble(it), L0=layObj(it);
   const d=new Date(it.doneAt||Date.now());
-  let pick=catIdOf(it), wantRep=!!layObj(it).rep;
+  let pick=catIdOf(it), wantRep=!!L0.rep;
+  const cur0=L0.cur||curSym();
   const el=document.createElement('div');
   el.className='sheet-wrap';
   el.innerHTML=`<form class="sheet sp-sheet">
-    <div class="sheet-head"><span class="sp-sh">${spIcon(it,true)} ${exp?'Expense':'Bought'}</span><button type="button" data-close aria-label="Close">${svg('x',15,2)}</button></div>
+    <div class="sheet-head"><span class="sp-sh">${spIcon(it,true)} ${g?'Session':exp?'Expense':'Bought'}</span><button type="button" data-close aria-label="Close">${svg('x',15,2)}</button></div>
     <label class="f"><span>Name</span><input id="eName" value="${esc(it.text||'')}" autocomplete="off"></label>
+    ${g?`<div class="sp-two">
+      <label class="f"><span>Put in</span><input id="eIn" inputmode="decimal" value="${esc(String(L0.gin||0))}" autocomplete="off"></label>
+      <label class="f"><span>Took out</span><input id="eOut" inputmode="decimal" value="${esc(String(L0.gout||0))}" autocomplete="off"></label>
+    </div>
+    <p class="sp-gnote">Only the result counts: <b id="eNet">${gLabel(gNet(it),curOf(it))}</b></p>`:''}
     <div class="sp-two">
-      <label class="f"><span>Amount</span><span class="sp-amt"><select id="eCur" aria-label="Currency">${CURS.map(c=>`<option ${(curOf(it)||curSym())===c?'selected':''}>${c}</option>`).join('')}</select><input id="eAmt" inputmode="decimal" value="${esc(String(it.price||''))}" autocomplete="off"></span></label>
+      <label class="f"><span>${g?'Currency':'Amount'}</span><span class="sp-amt"><select id="eCur" aria-label="Currency">${CURS.map(c=>`<option ${cur0===c?'selected':''}>${c}</option>`).join('')}</select>${g?'':`<input id="eAmt" inputmode="decimal" value="${esc(String(it.price||''))}" autocomplete="off">`}</span></label>
       <label class="f"><span>Date</span><input id="eDate" type="date" value="${ld(d)}"></label>
     </div>
     <div class="f"><span>Category</span>${catGrid(pick,'data-ec')}</div>
-    ${exp?`<button type="button" class="sp-rep ${wantRep?'on':''}" data-erep>${svg(wantRep?'boxOk':'box',15,1.9)} Monthly${wantRep?' · next '+esc(MON[nextCharge(it).getMonth()]+' '+nextCharge(it).getDate()):''}</button>`:''}
+    ${exp&&!g?`<button type="button" class="sp-rep ${wantRep?'on':''}" data-erep>${svg(wantRep?'boxOk':'box',15,1.9)} Monthly${wantRep?' · next '+esc(MON[nextCharge(it).getMonth()]+' '+nextCharge(it).getDate()):''}</button>`:''}
     <div class="sheet-foot sp-foot">
       <button type="button" class="danger" data-edel>${exp?svg('trash',14,1.8)+' Delete':svg('box',14,1.8)+' Not bought'}</button>
       <button type="submit" class="gate-go sp-save">Save</button>
     </div>
   </form>`;
   const close=()=>el.remove();
+  const num=id=>{ const x=el.querySelector(id); return x?parseFloat(String(x.value).replace(',','.')):NaN };
+  el.addEventListener('input',()=>{ const n=el.querySelector('#eNet'); if(n){ const i=num('#eIn')||0, o=num('#eOut')||0; n.textContent=gLabel(o-i,el.querySelector('#eCur').value===curSym()?'':el.querySelector('#eCur').value) } });
   el.addEventListener('click',e=>{
     if(e.target===el||e.target.closest('[data-close]')) return close();
     const c=e.target.closest('[data-ec]');
@@ -7057,39 +7156,43 @@ function spendEdit(it){
   el.querySelector('form').addEventListener('submit',e=>{
     e.preventDefault();
     const nm=el.querySelector('#eName').value.trim();
-    const v=parseFloat(String(el.querySelector('#eAmt').value).replace(',','.'));
     const dv=el.querySelector('#eDate').value, cu=el.querySelector('#eCur').value;
     if(nm) it.text=nm;
-    if(v>0) it.price=v;
+    if(g){ const i=Math.max(0,num('#eIn')||0), o=Math.max(0,num('#eOut')||0); setLayRaw(it,{gin:i,gout:o}); it.price=Math.max(0,i-o) }
+    else{ const v=num('#eAmt'); if(v>0) it.price=v }
     if(/^\d{4}-\d\d-\d\d$/.test(dv)&&dv!==ld(d)){ const [y,m,dd]=dv.split('-').map(Number); it.doneAt=new Date(y,m-1,dd,12).getTime() }
     if(pick!==catIdOf(it)) learnCat(it.text,pick);
-    setLay(it,'ecat',pick); setLay(it,'approx','');
-    setLay(it,'cur',cu&&cu!==curSym()?cu:'');
-    if(exp){ setLay(it,'rep',wantRep?'month':''); setLay(it,'rday',wantRep?new Date(it.doneAt).getDate():'') }
+    setLayRaw(it,{ecat:pick,approx:undefined});
+    if(cu!==cur0||!layObj(it).cur){ setLayRaw(it,{cur:cu}); fxStamp(it) }
+    if(exp&&!g) setLayRaw(it,{rep:wantRep?'month':undefined,rday:wantRep?new Date(it.doneAt).getDate():undefined});
     saveProject(p,true); close(); refreshView();
   });
   document.body.appendChild(el);
 }
-/* часто повторяющиеся траты — одной кнопкой ещё раз на сегодня */
+/* часто повторяющиеся траты — одной кнопкой ещё раз на сегодня (без казино и без ежемесячных) */
 function spendFrequent(){
   const since=Date.now()-120*864e5, g={};
-  spendEntries().filter(e=>isExp(e.t)&&e.at>=since).sort((a,b)=>a.at-b.at).forEach(e=>{
+  spendEntries().filter(e=>isExp(e.t)&&!e.g&&e.at>=since).sort((a,b)=>a.at-b.at).forEach(e=>{
     const k=normName(e.t.text)+'|'+e.cur; if(!k.split('|')[0]) return;
     g[k]=g[k]||{n:0,e:null}; g[k].n++; g[k].e=e });
   const monthly={}; (wantP().tasks||[]).forEach(t=>{ if(isExp(t)&&layObj(t).rep) monthly[normName(t.text)]=1 });
   return Object.values(g).filter(x=>x.n>=2&&!monthly[normName(x.e.t.text)]).sort((a,b)=>b.n-a.n||b.e.at-a.e.at).slice(0,6).map(x=>x.e);
 }
+const entryAmt=t=>isGamble(t)?gLabel(gNet(t),curOf(t)):amtStr(Number(t.price),curOf(t));
+const entryCls=t=>isGamble(t)?(Math.abs(gNet(t))<0.005?'g-even':gNet(t)>0?'g-win':'g-loss'):'';
+function approxMain(t){ if(!curOf(t)) return ''; const m=inMain(t,isGamble(t)?Math.abs(gNet(t)):Number(t.price)); return m.v==null?'':'≈ '+money2(m.v) }
 function spConfirm(it){
-  const c=SCAT[catIdOf(it)], rep=!!layObj(it).rep, d=ld(new Date(it.doneAt)), suggest=c.id==='subs'&&!rep;
+  const c=SCAT[catIdOf(it)], rep=!!layObj(it).rep, d=ld(new Date(it.doneAt)), g=isGamble(it), suggest=c.id==='subs'&&!rep;
+  const am=approxMain(it);
   return `<div class="sp-ok" data-ok="${it.id}">
     <div class="sp-ok-top">${spIcon(it,true)}<span class="sp-ok-name"><b>${esc(spName(it))}</b>
       <button class="sp-ok-cat" data-okcatbtn>${c.e} ${c.l} ${svg('chev',11,2.2)}</button></span>
-      <b class="sp-ok-amt">${amtStr(Number(it.price),curOf(it))}</b></div>
+      <span class="sp-ok-r"><b class="sp-ok-amt ${entryCls(it)}">${entryAmt(it)}</b>${am?`<small>${am}</small>`:''}</span></div>
     <div class="sp-ok-acts">
       <button class="${d===ld()?'on':''}" data-okday="0">Today</button>
       <button class="${d===ldPlus(-1)?'on':''}" data-okday="1">Yesterday</button>
       <label class="sp-ok-date ${d!==ld()&&d!==ldPlus(-1)?'on':''}">${svg('cal',13,1.9)}<input type="date" data-okdate value="${d}" aria-label="Another date"></label>
-      <button class="sp-ok-rep ${rep?'on':''} ${suggest?'suggest':''}" data-okrep>↻ ${suggest?'Monthly?':'Monthly'}</button>
+      ${g?`<button data-okedit>Cash out…</button>`:`<button class="sp-ok-rep ${rep?'on':''} ${suggest?'suggest':''}" data-okrep>↻ ${suggest?'Monthly?':'Monthly'}</button>`}
       <span class="sp-ok-sp"></span>
       <button data-okundo>Undo</button>
       <button class="sp-ok-x" data-okx aria-label="Done">${svg('x',13,2.2)}</button>
@@ -7100,35 +7203,60 @@ function spConfirm(it){
 function renderSpend(){
   $('#crumb').textContent='Spending';
   spendRoll();
-  const all=spendEntries();
+  if(rates().day!==ld()) loadRates().then(ch=>{ if(ch&&st.spend) renderSpend(); if(ch) renderSide() });
+  const all=spendEntries(), R=rates();
   const nk=nowKey(), off=Math.max(0,st.spMonth||0), k=nk-off;
   const inK=kk=>all.filter(e=>monthKey(e.at)===kk);
-  const sumK=kk=>inK(kk).filter(e=>!e.cur).reduce((n,e)=>n+e.amt,0);
   const yr=kk=>Math.floor(kk/12), mo=kk=>kk%12;
   const name=kk=>MONL[mo(kk)]+(yr(kk)!==yr(nk)?' '+yr(kk):'');
   const month=inK(k).sort((a,b)=>b.at-a.at);
-  const main=month.filter(e=>!e.cur);
-  const total=sumK(k), prev=sumK(k-1), diff=total-prev;
+  const S=monthSum(month), P=monthSum(inK(k-1)), total=S.v, prev=P.v, diff=total-prev;
   const days=off===0?new Date().getDate():new Date(yr(k),mo(k)+1,0).getDate();
-  const other={}; month.filter(e=>e.cur).forEach(e=>{ other[e.cur]=(other[e.cur]||0)+e.amt });
-  const big=main.slice().sort((a,b)=>b.amt-a.amt)[0];
+  const big=month.filter(e=>e.spend).sort((a,b)=>b.spend-a.spend)[0];
   const budget=Number(LS.get('pm:budget'))||0, ratio=budget?total/budget:0;
   const win=[]; for(let i=5;i>=0;i--) win.push(Math.min(nk,k+5)-i);
-  const bars=win.map(kk=>({kk,v:sumK(kk)})), max=Math.max(1,...bars.map(b=>b.v),budget);
-  const cats={}; main.forEach(e=>{ cats[e.cat]=(cats[e.cat]||0)+e.amt });
-  const catList=Object.keys(cats).sort((a,b)=>cats[b]-cats[a]);
-  if(st.spCat&&!month.some(e=>e.cat===st.spCat)) st.spCat='';
-  const list=st.spCat?month.filter(e=>e.cat===st.spCat):month;
-  const groups=[]; list.forEach(e=>{ const dk=dayKey(e.at); let g=groups.find(x=>x.k===dk); if(!g){ g={k:dk,at:e.at,items:[],sum:0,o:{}}; groups.push(g) } g.items.push(e); if(e.cur) g.o[e.cur]=(g.o[e.cur]||0)+e.amt; else g.sum+=e.amt });
-  const subs=(wantP().tasks||[]).filter(t=>isExp(t)&&layObj(t).rep==='month').sort((a,b)=>Number(b.price)-Number(a.price));
-  const subsMo=subs.filter(t=>!curOf(t)).reduce((n,t)=>n+Number(t.price),0);
+  const bars=win.map(kk=>({kk,v:monthSum(inK(kk)).v})), max=Math.max(1,...bars.map(b=>b.v),budget);
+  const gam=month.filter(e=>e.g), gNetM=gam.reduce((n,e)=>n+(e.main==null?0:(e.net>0?e.main:-e.main)),0);
+  const subs=(wantP().tasks||[]).filter(t=>isExp(t)&&layObj(t).rep==='month').map(t=>({t,m:inMain(t,Number(t.price))})).sort((a,b)=>(b.m.v||0)-(a.m.v||0));
+  const subsMo=subs.reduce((n,s)=>n+(s.m.v||0),0), subsFx=subs.some(s=>s.m.fx);
   const last=st.spLast&&(wantP().tasks||[]).find(t=>t.id===st.spLast);
   if(!last) st.spLast=null;
   const freq=spendFrequent();
-  const oth=Object.keys(other).map(c=>amtStr(other[c],c)).join(' · ');
+  const view=LS.get('pm:spView')||'group';
+  const open=lsMap('pm:spOpen');
   const row=e=>`<button class="sp-row" data-sp="${e.t.id}">${spIcon(e.t)}
-      <span class="sp-main"><span class="sp-name">${esc(spName(e.t))}${layObj(e.t).rep?'<i class="sp-rep-mark" title="Monthly">↻</i>':''}</span><small>${SCAT[e.cat].l}</small></span>
-      <b>${amtStr(e.amt,e.cur)}</b></button>`;
+      <span class="sp-main"><span class="sp-name">${esc(spName(e.t))}${layObj(e.t).rep?'<i class="sp-rep-mark" title="Monthly">↻</i>':''}</span><small>${SCAT[e.cat].l}${e.g?' · session':''}${view==='group'?' · '+dayLabel(e.at):''}</small></span>
+      <span class="sp-amtc"><b class="${entryCls(e.t)}">${entryAmt(e.t)}</b>${e.cur&&e.main!=null?`<small>≈ ${money2(e.g?Math.abs(e.main):e.main)}</small>`:''}</span></button>`;
+  /* по группам: строка группы → категории → записи */
+  const groupHtml=()=>{
+    const gs=GROUPS.map(G=>{ const es=month.filter(e=>G.cats.indexOf(e.cat)>=0); return {G,es,s:monthSum(es)} }).filter(x=>x.es.length).sort((a,b)=>b.s.v-a.s.v);
+    if(!gs.length) return '';
+    const top=Math.max(1,...gs.map(x=>x.s.v));
+    return `<div class="sp-groups">${gs.map(({G,es,s})=>{
+      const cats=G.cats.map(c=>({c,es:es.filter(e=>e.cat===c)})).filter(x=>x.es.length).map(x=>Object.assign(x,{s:monthSum(x.es)})).sort((a,b)=>b.s.v-a.s.v);
+      const isOpen=!!open[G.id];
+      const lead=[...new Set(cats.map(x=>SCAT[x.c].e))].slice(0,3);
+      const gOnly=G.id==='fun'&&cats.length===1&&cats[0].c==='gambling';
+      return `<section class="sp-grp ${isOpen?'open':''}">
+        <button class="sp-grp-h" data-grp="${G.id}" aria-expanded="${isOpen}">
+          <span class="sp-stack">${lead.map(x=>`<i>${x}</i>`).join('')}</span>
+          <span class="sp-grp-n"><b>${G.l}</b><small>${es.length} ${es.length===1?'entry':'entries'}</small></span>
+          <span class="sp-grp-v"><b>${gOnly&&!s.v?'–':sumLabel(s)}</b>${total?`<small>${Math.round(s.v/total*100)}%</small>`:''}</span>
+          <span class="sp-chev">${svg('chev',13,2.2)}</span>
+          <i class="sp-grp-bar" style="width:${s.v/top*100}%"></i>
+        </button>
+        ${isOpen?cats.map(x=>{
+          const isG=x.c==='gambling', gn=isG?x.es.reduce((n,e)=>n+(e.main==null?0:(e.net>0?e.main:-e.main)),0):0;
+          return `<div class="sp-cat-h"><span>${SCAT[x.c].e} ${SCAT[x.c].l}</span><b class="${isG?(Math.abs(gn)<0.005?'g-even':gn>0?'g-win':'g-loss'):''}">${isG?gLabel(gn,'')+' · '+x.es.length+' session'+(x.es.length===1?'':'s'):sumLabel(x.s)}</b></div>
+            ${x.es.map(row).join('')}` }).join(''):''}
+      </section>` }).join('')}</div>`;
+  };
+  const dayHtml=()=>{
+    const groups=[]; month.forEach(e=>{ const dk=dayKey(e.at); let g=groups.find(x=>x.k===dk); if(!g){ g={k:dk,at:e.at,items:[]}; groups.push(g) } g.items.push(e) });
+    return groups.map(g=>{ const s=monthSum(g.items); return `<div class="sp-day">
+      <div class="sp-day-h"><b>${dayLabel(g.at)}</b><span>${s.v||Object.keys(s.miss).length?sumLabel(s):''}</span></div>
+      ${g.items.map(row).join('')}</div>` }).join('');
+  };
   $('#view').innerHTML=`
     <div class="sp">
       <div class="sp-addwrap">
@@ -7136,7 +7264,7 @@ function renderSpend(){
         ${st.spNeed?`<div class="sp-need"><span>How much was <b>${esc(st.spNeed.text)}</b>?</span><input id="spAmt" inputmode="decimal" autocomplete="off" placeholder="${curSym()}" aria-label="Amount"><button class="sp-go" id="spAmtGo">Add</button></div>`:''}
         ${freq.length&&!st.spNeed?`<div class="sp-freq">${freq.map(e=>`<button data-again="${e.t.id}">${spIcon(e.t)}${esc(spName(e.t))} <b>${amtStr(e.amt,e.cur)}</b></button>`).join('')}</div>`:''}
         <div class="sp-add">
-          <input id="spIn" placeholder="claude 200 · кофе 4 · taxi 12" autocomplete="off" enterkeyhint="done" aria-label="What did you pay for, and how much">
+          <input id="spIn" placeholder="taxi 1000 · claude 200$ · кофе 4" autocomplete="off" enterkeyhint="done" aria-label="What did you pay for, and how much">
           <button class="sp-go" id="spGo">Add</button>
         </div>
       </div>
@@ -7146,11 +7274,13 @@ function renderSpend(){
           <span>${name(k)}</span>
           <button id="spNext" aria-label="Later month" ${off===0?'disabled':''}>${svg('chev',14,2.2)}</button>
         </div>
-        <b class="sp-total">${money2(total)}</b>
+        <b class="sp-total">${S.approx?'<i class="sp-approx">≈</i>':''}${money2(total)}</b>
+        ${Object.keys(S.miss).length?`<span class="sp-oth">+ ${Object.keys(S.miss).map(c=>amtStr(S.miss[c],c)).join(' + ')} · no exchange rates yet</span>`:''}
         <span class="sp-diff">${[prev?(Math.abs(diff)<0.5?'Same as '+MONL[mo(k-1)]:`${money(Math.round(Math.abs(diff)))} ${diff>0?'more':'less'} than ${MONL[mo(k-1)]}`):'',
           total?money(Math.round(total/days))+' a day':''].filter(Boolean).join(' · ')||'Nothing spent yet'}</span>
-        ${oth?`<span class="sp-oth">Also ${oth}, not converted</span>`:''}
-        ${big?`<button class="sp-big" data-sp="${big.t.id}">Biggest: ${spIcon(big.t)} ${esc(spName(big.t))} <b>${money2(big.amt)}</b></button>`:''}
+        ${S.approx&&R.date?`<span class="sp-oth">Other currencies at rates of ${esc(R.date)}</span>`:''}
+        ${gam.length?`<span class="sp-gline ${Math.abs(gNetM)<0.5?'g-even':gNetM>0?'g-win':'g-loss'}">🎰 Gambling: ${Math.abs(gNetM)<0.5?'even':(gNetM>0?'+':'−')+money2(Math.abs(gNetM))} this month${gNetM>0?' · not counted as spending':''}</span>`:''}
+        ${big?`<button class="sp-big" data-sp="${big.t.id}">Biggest: ${spIcon(big.t)} ${esc(spName(big.t))} <b>${entryAmt(big.t)}</b></button>`:''}
         ${budget?`<div class="sp-budget ${ratio>1?'over':ratio>=.85?'near':''}"><i style="width:${Math.min(100,ratio*100)}%"></i>${off===0?`<s style="left:${Math.min(100,new Date().getDate()/new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate()*100)}%" title="Where an even pace would be today"></s>`:''}</div>
           <button class="sp-blabel" id="spBudget">${ratio>1?`${money(Math.round(total-budget))} over the ${money(budget)} budget`:`${money(Math.round(budget-total))} left of ${money(budget)}`}</button>`
         :`<button class="sp-blabel" id="spBudget">Set a monthly budget</button>`}
@@ -7160,20 +7290,15 @@ function renderSpend(){
         <small>${MON[mo(b.kk)]}</small><span class="sp-v">${b.v?moneyShort(b.v):'–'}</span></button>`).join('')}</div>
       <div class="sp-cols">
         <div class="sp-side">
-          ${catList.length?`<section class="sp-box"><h2 class="pane-h">Where it went</h2>${catList.map(c=>`<button class="sp-crow ${st.spCat===c?'on':''}" data-fcat="${c}">
-            <span class="sp-ce">${SCAT[c].e}</span><span class="sp-cl">${SCAT[c].l}</span><b>${money(Math.round(cats[c]))}</b><small>${Math.round(cats[c]/total*100)}%</small>
-            <i style="width:${(cats[c]/cats[catList[0]])*100}%"></i></button>`).join('')}</section>`:''}
-          ${subs.length?`<section class="sp-box sp-subs"><h2 class="pane-h">Monthly <span class="sp-subs-t">${money2(subsMo)} a month · ${money(Math.round(subsMo*12))} a year</span></h2>
-            ${subs.map(t=>{ const nx=nextCharge(t); return `<button class="sp-row" data-sp="${t.id}">${spIcon(t)}
+          ${subs.length?`<section class="sp-box sp-subs"><h2 class="pane-h">Monthly <span class="sp-subs-t">${subsFx?'≈ ':''}${money2(subsMo)} a month · ${subsFx?'≈ ':''}${money(Math.round(subsMo*12))} a year</span></h2>
+            ${subs.map(({t,m})=>{ const nx=nextCharge(t); return `<button class="sp-row" data-sp="${t.id}">${spIcon(t)}
               <span class="sp-main"><span class="sp-name">${esc(spName(t))}</span><small>next ${MON[nx.getMonth()]} ${nx.getDate()}</small></span>
-              <b>${amtStr(Number(t.price),curOf(t))}</b></button>` }).join('')}</section>`:''}
+              <span class="sp-amtc"><b>${amtStr(Number(t.price),curOf(t))}</b>${curOf(t)&&m.v!=null?`<small>≈ ${money2(m.v)}</small>`:''}</span></button>` }).join('')}</section>`:''}
         </div>
         <div class="sp-list">
-          ${st.spCat?`<button class="sp-filter" data-fcat="${st.spCat}">${SCAT[st.spCat].e} ${SCAT[st.spCat].l} ${svg('x',12,2.2)}</button>`:''}
-          ${groups.length?groups.map(g=>`<div class="sp-day">
-            <div class="sp-day-h"><b>${dayLabel(g.at)}</b><span>${[g.sum?money2(g.sum):'',...Object.keys(g.o).map(c=>amtStr(g.o[c],c))].filter(Boolean).join(' + ')}</span></div>
-            ${g.items.map(row).join('')}</div>`).join('')
-          :`<p class="empty-line">${off?'Nothing recorded in '+name(k)+'.':'Nothing yet this month. Type what you paid for above, like “coffee 4”.'}</p>`}
+          ${month.length?`<div class="sp-switch" role="tablist"><button class="${view==='group'?'on':''}" data-view="group">By group</button><button class="${view==='day'?'on':''}" data-view="day">By day</button></div>`:''}
+          ${month.length?(view==='day'?dayHtml():groupHtml())
+          :`<p class="empty-line">${off?'Nothing recorded in '+name(k)+'.':'Nothing yet this month. Type what you paid for above, like “taxi 1000”.'}</p>`}
         </div>
       </div>
     </div>`;
@@ -7183,7 +7308,7 @@ function renderSpend(){
   const add=()=>{
     const v=inp.value.trim(); if(!v) return;
     const r=parseSpend(v);
-    if(!(r.price>0)){ if(!r.text) return; st.spNeed=r; renderSpend(); const a=$('#spAmt'); if(a) a.focus(); return }
+    if(r.gin==null&&r.gout==null&&!(r.price>0)){ if(!r.text) return; st.spNeed=r; renderSpend(); const a=$('#spAmt'); if(a) a.focus(); return }
     const it=addExpense(r); if(it) after(it);
   };
   inp.addEventListener('keydown',e=>{ if(e.key==='Enter') add() });
@@ -7198,7 +7323,7 @@ function renderSpend(){
   const v=$('#view');
   v.querySelectorAll('[data-again]').forEach(b=>b.addEventListener('click',()=>{
     const src=(wantP().tasks||[]).find(t=>t.id===b.dataset.again); if(!src) return;
-    const it=addExpense({text:src.text,price:Number(src.price),cur:curOf(src),cat:catIdOf(src)}); if(it) after(it);
+    const it=addExpense({text:src.text,price:Number(src.price),cur:layObj(src).cur||'',cat:catIdOf(src)}); if(it) after(it);
   }));
   const ok=v.querySelector('.sp-ok');
   if(ok){
@@ -7207,20 +7332,22 @@ function renderSpend(){
     ok.addEventListener('click',e=>{
       if(e.target.closest('[data-okcatbtn]')){ st.spGrid=!st.spGrid; return renderSpend() }
       const c=e.target.closest('[data-okcat]');
-      if(c){ if(c.dataset.okcat!==catIdOf(it)) learnCat(it.text,c.dataset.okcat); setLay(it,'ecat',c.dataset.okcat); st.spGrid=false; return save() }
+      if(c){ if(c.dataset.okcat!==catIdOf(it)) learnCat(it.text,c.dataset.okcat); setLayRaw(it,{ecat:c.dataset.okcat}); st.spGrid=false; return save() }
       const d=e.target.closest('[data-okday]');
-      if(d){ const x=new Date(); x.setDate(x.getDate()-Number(d.dataset.okday)); x.setHours(12,0,0,0); it.doneAt=x.getTime(); if(layObj(it).rep) setLay(it,'rday',x.getDate()); return save() }
-      if(e.target.closest('[data-okrep]')){ const on=!layObj(it).rep; setLay(it,'rep',on?'month':''); setLay(it,'rday',on?new Date(it.doneAt).getDate():''); if(on) toast('Monthly',{sub:'Added again on the '+ordN(new Date(it.doneAt).getDate())+' of each month'}); return save() }
+      if(d){ const x=new Date(); x.setDate(x.getDate()-Number(d.dataset.okday)); x.setHours(12,0,0,0); it.doneAt=x.getTime(); if(layObj(it).rep) setLayRaw(it,{rday:x.getDate()}); return save() }
+      if(e.target.closest('[data-okedit]')) return spendEdit(it);
+      if(e.target.closest('[data-okrep]')){ const on=!layObj(it).rep; setLayRaw(it,{rep:on?'month':undefined,rday:on?new Date(it.doneAt).getDate():undefined}); if(on) toast('Monthly',{sub:'Added again on the '+ordN(new Date(it.doneAt).getDate())+' of each month'}); return save() }
       if(e.target.closest('[data-okundo]')){ dropExpense(it); st.spLast=null; st.spGrid=false; renderSpend(); renderSide(); toast('Removed'); return }
       if(e.target.closest('[data-okx]')){ st.spLast=null; st.spGrid=false; renderSpend() }
     });
     const di=ok.querySelector('[data-okdate]');
-    if(di) di.addEventListener('change',()=>{ if(!/^\d{4}-\d\d-\d\d$/.test(di.value)) return; const [y,m,dd]=di.value.split('-').map(Number); it.doneAt=new Date(y,m-1,dd,12).getTime(); if(layObj(it).rep) setLay(it,'rday',dd); save() });
+    if(di) di.addEventListener('change',()=>{ if(!/^\d{4}-\d\d-\d\d$/.test(di.value)) return; const [y,m,dd]=di.value.split('-').map(Number); it.doneAt=new Date(y,m-1,dd,12).getTime(); if(layObj(it).rep) setLayRaw(it,{rday:dd}); save() });
   }
-  $('#spPrev').addEventListener('click',()=>{ st.spMonth=off+1; st.spCat=''; renderSpend() });
-  $('#spNext').addEventListener('click',()=>{ st.spMonth=Math.max(0,off-1); st.spCat=''; renderSpend() });
-  v.querySelectorAll('[data-mk]').forEach(b=>b.addEventListener('click',()=>{ st.spMonth=nk-Number(b.dataset.mk); st.spCat=''; renderSpend() }));
-  v.querySelectorAll('[data-fcat]').forEach(b=>b.addEventListener('click',()=>{ st.spCat=st.spCat===b.dataset.fcat?'':b.dataset.fcat; renderSpend() }));
+  $('#spPrev').addEventListener('click',()=>{ st.spMonth=off+1; renderSpend() });
+  $('#spNext').addEventListener('click',()=>{ st.spMonth=Math.max(0,off-1); renderSpend() });
+  v.querySelectorAll('[data-mk]').forEach(b=>b.addEventListener('click',()=>{ st.spMonth=nk-Number(b.dataset.mk); renderSpend() }));
+  v.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{ LS.set('pm:spView',b.dataset.view); renderSpend() }));
+  v.querySelectorAll('[data-grp]').forEach(b=>b.addEventListener('click',()=>{ const o=lsMap('pm:spOpen'); if(o[b.dataset.grp]) delete o[b.dataset.grp]; else o[b.dataset.grp]=1; LS.set('pm:spOpen',JSON.stringify(o)); renderSpend() }));
   $('#spBudget').addEventListener('click',e=>{
     const b=e.currentTarget, inp2=document.createElement('input');
     inp2.className='sp-bin'; inp2.inputMode='decimal'; inp2.placeholder='Monthly budget, empty to remove';
@@ -7240,7 +7367,6 @@ function renderSpend(){
   const aw=v.querySelector('.sp-addwrap');
   if(aw&&isPhone()) v.querySelector('.sp').style.setProperty('--sp-pad',(aw.offsetHeight+24)+'px');
 }
-
 /* ───────── events ───────── */
 let hashLock=false;
 function currentHash(){
@@ -7646,7 +7772,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:28';
+const APP_VER='19 Nov 02:33';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
@@ -7791,6 +7917,7 @@ async function afterLogin(){
     window.addEventListener('resize',syncSidebarButton);
     route();
     if(spendRoll()) renderSide();
+    loadRates().then(c=>{ if(c){ renderSide(); if(st.spend) renderSpend() } });
     setTimeout(()=>{ showDigest(); checkRemind() },700);
   }catch(e){
     console.error(e);
