@@ -1720,6 +1720,37 @@ input:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--lime) 15
 .row.on::after{content:'';position:absolute;right:6px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--lime)}
 .row.on:hover::after{display:none}
 @media (max-width:760px){.grid{gap:10px;grid-template-columns:repeat(2,1fr)}.card{padding:12px}.card-top{top:11px;left:12px;right:12px}.card-peek{display:none}}
+/* project actions: one button, one labelled menu */
+.row{padding-right:6px}
+.row-name{padding:11px 8px}
+.row-pin{flex:0 0 auto;display:flex;color:var(--dim);padding:0 4px}
+.row-more{flex:0 0 auto;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:3px;color:var(--soft)}
+.row-more i{width:3.5px;height:3.5px;border-radius:50%;background:currentColor}
+.row-more:hover{background:var(--raise);color:var(--txt)}
+@media (hover:hover){.row .row-more{opacity:0}.row:hover .row-more,.row .row-more:focus-visible{opacity:1}
+  .card-more{opacity:0}.card:hover .card-more,.card-more:focus-visible{opacity:1}}
+.card-more{margin-left:auto;background:rgba(9,9,10,.55);backdrop-filter:blur(6px)}
+.card-top .flag+.card-more{margin-left:0}
+.idea .idea-acts,.tditem .idea-acts{display:none!important}
+.idea-foot .row-more{margin-left:auto}
+.pmenu>button svg{width:15px;height:15px}
+@media (hover:hover){.idea .row-more,.tditem .row-more{opacity:0}
+  .idea:hover .row-more,.tditem:hover .row-more,.idea .row-more:focus-visible,.tditem .row-more:focus-visible{opacity:1}}
+.pmenu{position:fixed;z-index:150;min-width:232px;padding:6px;border-radius:14px;background:var(--panel-2);
+  border:1px solid var(--line-2);box-shadow:0 24px 60px -20px #000;animation:pmenuIn .12s ease}
+@keyframes pmenuIn{from{opacity:0;transform:translateY(-4px) scale(.98)}to{opacity:1;transform:none}}
+.pmenu-name{padding:7px 10px 8px;font-size:12.5px;font-weight:600;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.pmenu>button{width:100%;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;font-size:14px;color:var(--txt);text-align:left}
+.pmenu>button svg{color:var(--soft)}
+.pmenu>button:hover{background:var(--raise)}
+.pmenu-status{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:2px 2px 8px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.pmenu-status button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px;border-radius:9px;font-size:12px;color:var(--soft)}
+.pmenu-status button:hover{background:var(--raise);color:var(--txt)}
+.pmenu-status button.on{background:var(--raise);color:var(--txt);box-shadow:inset 0 0 0 1px var(--line-2)}
+.pmenu-status button[data-s=active].on svg{color:var(--amber)}
+.pmenu-status button[data-s=done].on svg{color:var(--mint)}
+.pmenu-del{color:var(--magenta)!important}
+.pmenu-del svg{color:var(--magenta)!important}
 @media (prefers-reduced-motion:reduce){.view-in,.check.pop svg{animation:none}#view{scroll-behavior:auto}}
 @media (max-width:760px){.day b{font-size:19px}}
 </style>
@@ -2552,11 +2583,8 @@ function renderSide(){
         <span class="row-text">${esc(p.name)}</span>
         ${p.important?`<span class="flag">${svg('flag',11,2.1)}</span>`:''}
       </a>
-      <button class="btn-pin ${p.pinned?'on':''}" data-pin="${p.id}" title="${p.pinned?'Unpin':'Pin to top'}">${svg('pin',12,1.7)}</button>
-      <div class="picker">
-        ${STATUSES.map(s=>`<button class="pick ${p.status===s.id?'on':''}" data-s="${s.id}" data-set="${p.id}" title="${s.label}">${svg(s.id,13,p.status===s.id?2.2:1.6)}</button>`).join('')}
-      </div>
-      <button class="btn-gear" data-gear="${p.id}" title="Settings">${svg('gear',13,1.5)}</button>
+      ${p.pinned?`<span class="row-pin" title="Pinned">${svg('pin',12,1.7)}</span>`:''}
+      <button class="row-more" data-pmenu="${p.id}" title="Status, pin, archive…" aria-label="Project actions"><i></i><i></i><i></i></button>
     </div>`).join('');
   bindRowDrag(box);
 }
@@ -2799,6 +2827,7 @@ function renderAll(){
         <div class="card-top">
           <span class="card-status" data-s="${p.status}" title="${sMeta(p.status).short}">${svg(p.status,14,2)}${p.status==='done'?' Done':''}</span>
           ${p.important?`<span class="flag">${svg('flag',12,2.1)}</span>`:''}
+          <button class="row-more card-more" data-pmenu="${p.id}" title="Status, pin, archive…" aria-label="Project actions"><i></i><i></i><i></i></button>
         </div>
         ${(()=>{const open=t.filter(x=>!x.done).slice(0,3);
           return open.length&&p.status!=='done'?`<div class="card-peek">${open.map(x=>`<span>${esc(x.text)}</span>`).join('')}</div>`:''})()}
@@ -3313,6 +3342,7 @@ function ideaCard(p,i,cur){
     </div>
     <div class="idea-foot">
       <span class="idea-date">${ago(i.created)}${i.cat&&i.cat!==ARCHIVE&&cur===''?' · '+esc(folderName(p,i.cat)):''}</span>
+      <button class="row-more" data-amenu title="Actions" aria-label="Actions"><i></i><i></i><i></i></button>
       <div class="idea-acts">
         <button data-ifol="${i.id}" title="Move to a folder">${svg('arch',11,1.7)}</button>
         <button data-mk="${i.id}" title="Turn this into its own project">${svg('plus',11,2.4)}</button>
@@ -3490,6 +3520,7 @@ function todoPane(p){
           ${i.note?`<span class="has-note" title="Has a note">${svg('pen',11,1.9)}</span>`:''}
           ${i.done?'':dueChip(p.id,i)}
           <button class="star ${i.star?'on':''}" data-tdstar="${i.id}" title="${i.star?'Remove from today':'Do it today'}">${svg('star',15,1.8)}</button>
+          <button class="row-more" data-amenu title="Actions" aria-label="Actions"><i></i><i></i><i></i></button>
           <div class="idea-acts">
             <button data-tdexp2="${i.id}" title="${exp?'Close':'Link and notes'}">${svg(exp?'x':'pen',13,1.9)}</button>
             <button data-tdmk="${i.id}" title="Turn into a project">${svg('plus',13,2.4)}</button>
@@ -5725,8 +5756,7 @@ function setStatus(p,s){
   if(s==='active'&&!p.startDate) p.startDate=today();
   saveProject(p,true);
   sortProjects();
-  renderSide();
-  if(st.openId===p.id) renderProject(); else renderAll();
+  refreshView();          // перерисовываем тот экран, который открыт, а не всегда главную
 }
 
 /* ───────── backups ───────── */
@@ -6129,6 +6159,91 @@ document.addEventListener('click',e=>{
   const f=e.target.closest('[data-filter]'); if(f){st.filter=f.dataset.filter;renderAll();return}
   if(e.target.closest('#emptyNew')) newProject();
 });
+/* меню проекта: статус, закрепить, важное, архив, настройки, удалить — подписанными строками */
+function closeProjectMenu(){ const m=document.querySelector('.pmenu'); if(m) m.remove() }
+function projectMenu(pid,x,y){
+  closeProjectMenu();
+  const p=st.projects.find(q=>q.id===pid); if(!p) return;
+  const el=document.createElement('div');
+  el.className='pmenu';
+  el.innerHTML=`
+    <div class="pmenu-name">${esc(p.name||'Untitled')}</div>
+    <div class="pmenu-status">${STATUSES.map(z=>`<button class="${p.status===z.id?'on':''}" data-m="status" data-s="${z.id}">${svg(z.id,15,2)}<span>${z.short}</span></button>`).join('')}</div>
+    <button data-m="pin">${svg('pin',15,1.8)} ${p.pinned?'Unpin':'Pin to top'}</button>
+    <button data-m="imp">${svg('flag',15,2)} ${p.important?'Not important':'Mark important'}</button>
+    <button data-m="arch">${svg('arch',15,1.8)} ${p.archived?'Take out of archive':'Move to archive'}</button>
+    <button data-m="gear">${svg('gear',15,1.6)} Settings</button>
+    <button data-m="del" class="pmenu-del">${svg('trash',15,1.8)} Delete…</button>`;
+  document.body.appendChild(el);
+  const w=el.offsetWidth, h=el.offsetHeight;
+  el.style.left=Math.max(8,Math.min(x,innerWidth-w-8))+'px';
+  el.style.top=Math.max(8,Math.min(y,innerHeight-h-8))+'px';
+  el.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-m]'); if(!b) return;
+    e.preventDefault(); e.stopPropagation();
+    const m=b.dataset.m;
+    closeProjectMenu();
+    if(m==='status'){ setStatus(p,b.dataset.s); toast(sMeta(b.dataset.s).short); return }
+    if(m==='gear') return openSettings(p.id);
+    if(m==='pin'){ p.pinned=!p.pinned; saveProject(p,true); sortProjects(); refreshView(); return }
+    if(m==='imp'){ p.important=!p.important; saveProject(p,true); sortProjects(); refreshView(); return }
+    if(m==='arch'){
+      p.archived=!p.archived;
+      if(p.archived&&st.openId===p.id) st.openId=null;
+      saveProject(p,true); sortProjects(); route();
+      toast(p.archived?'Moved to archive':'Back out of archive',{action:'Undo',onAction:()=>{ p.archived=!p.archived; saveProject(p,true); sortProjects(); route() }});
+      return;
+    }
+    if(m==='del'){
+      if(!confirm('Delete \''+(p.name||'project')+'\' along with its tasks, notes and photos? This cannot be undone.')) return;
+      const phs=await photosOf(p.id);
+      for(const ph of phs) await delPhotoDB(ph.id);
+      await delProject(p.id);
+      st.projects=st.projects.filter(q=>q.id!==p.id);
+      if(st.openId===p.id) st.openId=null;
+      route(); toast('Project deleted');
+    }
+  });
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-pmenu]');
+  if(b){
+    e.preventDefault(); e.stopPropagation();
+    const r=b.getBoundingClientRect();
+    projectMenu(b.dataset.pmenu,r.left,r.bottom+6);
+    return;
+  }
+  if(!e.target.closest('.pmenu')) closeProjectMenu();
+},true);
+document.addEventListener('contextmenu',e=>{
+  const host=e.target.closest('.row[data-id], .card[data-open], .prow[data-open]'); if(!host) return;
+  e.preventDefault();
+  projectMenu(host.dataset.id||host.dataset.open,e.clientX,e.clientY);
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeProjectMenu() },true);
+window.addEventListener('resize',closeProjectMenu);
+
+/* меню действий у идеи и задачи: строки с подписями, нажимают на те же скрытые кнопки */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-amenu]'); if(!b) return;
+  e.preventDefault(); e.stopPropagation();
+  closeProjectMenu();
+  const host=b.closest('.idea,.tditem'); if(!host) return;
+  const acts=Array.from(host.querySelectorAll('.idea-acts button'));
+  const el=document.createElement('div');
+  el.className='pmenu';
+  el.innerHTML=acts.map((a,k)=>`<button data-k="${k}" class="${a.hasAttribute('data-idel')||a.hasAttribute('data-tddel')?'pmenu-del':''}">${a.innerHTML} ${esc(a.title||'')}</button>`).join('');
+  document.body.appendChild(el);
+  const r=b.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight;
+  el.style.left=Math.max(8,Math.min(r.right-w,innerWidth-w-8))+'px';
+  el.style.top=Math.max(8,Math.min(r.bottom+6,innerHeight-h-8))+'px';
+  el.addEventListener('click',ev=>{
+    const k=ev.target.closest('[data-k]'); if(!k) return;
+    ev.stopPropagation(); closeProjectMenu();
+    const target=acts[+k.dataset.k]; if(target&&document.body.contains(target)) target.click();
+  });
+},true);
+
 /* срок: один общий выбор даты для любых списков */
 function refreshView(){
   if(st.openId) renderProject(); else if(st.focus) renderFocus(); else if(!st.hist&&!st.review) renderAll();
