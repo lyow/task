@@ -1965,6 +1965,10 @@ body:has(.digest) .fab-wrap{display:none}
 .tool-time input{padding:4px 8px;border-radius:8px;border:1px solid var(--line-2);background:var(--bg);color:var(--txt);color-scheme:dark;font:inherit}
 .td-when{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 12px;margin-bottom:10px;border-radius:10px;border:1px solid var(--line-2);font-size:13.5px;font-weight:600;color:var(--soft)}
 .td-when:hover{color:var(--txt);background:var(--raise)}
+.sp-rep{display:flex;align-items:center;gap:9px;width:100%;min-height:42px;padding:0 12px;margin:-4px 0 16px;border-radius:11px;border:1px solid var(--line-2);font-size:14px;color:var(--soft)}
+.sp-rep.on{color:var(--txt);border-color:color-mix(in srgb,var(--lime) 45%,var(--line-2))}
+.sp-rep.on svg{color:var(--lime)}
+.sp-rep-mark{font-style:normal;color:var(--dim);font-size:13px;margin-left:4px}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -3354,7 +3358,7 @@ function snippet(text,q,pad){
   const a=Math.max(0,i-pad), b=Math.min(t.length,i+q.length+pad*2);
   return (a>0?'…':'')+t.slice(a,b)+(b<t.length?'…':'');
 }
-const KIND_LABEL={task:'task',idea:'idea',wish:'wish',todo:'to do',link:'link',sticky:'note',quick:'link'};
+const KIND_LABEL={spent:'spent',bought:'bought',task:'task',idea:'idea',wish:'wish',todo:'to do',link:'link',sticky:'note',quick:'link'};
 
 function searchHits(){
   const q=st.query.trim().toLowerCase();
@@ -3365,7 +3369,8 @@ function searchHits(){
     if((p.name||'').toLowerCase().includes(q)) hits.push({k:'name',t:p.name});
     (p.tasks||[]).forEach(t=>{
       const kind=t.kind||(SPECIAL(p.id)?KIND_OF(p.id):'task');
-      if((t.text||'').toLowerCase().includes(q)) hits.push({k:kind,t:t.text,done:t.done,id:t.id});
+      const wk=p.id===WANT&&t.done?(isExp(t)?'spent':'bought'):kind;
+      if((t.text||'').toLowerCase().includes(q)) hits.push({k:wk,t:t.text+(p.id===WANT&&t.done&&t.price?' · '+money2(Number(t.price)):''),done:t.done&&wk!=='spent'&&wk!=='bought',id:t.id,sp:p.id===WANT&&t.done&&Number(t.price)>0});
       if((t.note||'').toLowerCase().includes(q)) hits.push({k:'note',t:snippet(t.note,q,45),id:t.id});
       if((t.url||'').toLowerCase().includes(q)) hits.push({k:'link',t:t.url,id:t.id});
     });
@@ -3391,7 +3396,7 @@ function renderSearch(){
         <span class="dot" data-s="${g.p.status}"></span>${esc(g.p.name)}
         <span class="scount">${g.hits.length}</span>
       </a>
-      ${g.hits.slice(0,8).map(h=>`<a class="srow ${h.done?'done':''}" href="#p/${g.p.id}" data-open="${g.p.id}" data-hit="${h.id||''}">
+      ${g.hits.slice(0,8).map(h=>`<a class="srow ${h.done?'done':''}" href="#p/${g.p.id}" data-open="${g.p.id}" data-hit="${h.id||''}"${h.sp?' data-sphit="1"':''}>
         <span class="skind">${KIND_LABEL[h.k]||h.k}</span>
         <span class="stext">${mark(h.t,q)}</span>
       </a>`).join('')}
@@ -3869,6 +3874,7 @@ function itemEdit(p,item,isWish){
         ${CATS.map(c=>`<button data-ec="${c.id}" class="${(item.cat||'other')===c.id?'on':''}">${c.label}</button>`).join('')}
       </div></div>`}
     <label class="f"><span>Link</span><input id="eUrl" placeholder="https://" value="${esc(item.url||'')}"></label>
+    ${isWish?`<div class="f"><span>Counts in Spending as</span><div class="sp-cats">${['Wishlist'].concat(spendCats()).concat(layObj(item).ecat&&spendCats().indexOf(layObj(item).ecat)<0?[layObj(item).ecat]:[]).map(c=>`<button class="chip ${(layObj(item).ecat||guessCat(item.text)||'Wishlist')===c?'on':''}" data-wcat="${esc(c)}">${esc(c)}</button>`).join('')}</div></div>`:''}
     ${isWish?`<div class="f"><span>Photo</span><button class="wish-shot" id="ePhoto" style="width:100%">${svg('img',15,1.7)} replace photo</button></div>`:''}
     <div class="sheet-foot"><button class="opt" id="eSave" style="width:100%">Save</button></div>
   </div>`;
@@ -3877,6 +3883,9 @@ function itemEdit(p,item,isWish){
     if(e.target===el||e.target.closest('[data-close]')) return close();
     const c=e.target.closest('[data-ec]');
     if(c){ item.cat=c.dataset.ec; saveProject(p,true); close(); itemEdit(p,item,isWish); return }
+    const wc=e.target.closest('[data-wcat]');
+    if(wc){ setLay(item,'ecat',wc.dataset.wcat==='Wishlist'?'':wc.dataset.wcat); saveProject(p,true);
+      el.querySelectorAll('[data-wcat]').forEach(b=>b.classList.toggle('on',b===wc)); return }
     if(e.target.closest('#ePhoto')){
       const inp=$('#wishPick');
       inp.onchange=async ev=>{
@@ -4226,6 +4235,7 @@ function bindWish(p){
     const item=(p.tasks||[]).find(x=>x.id===key); if(!item) return;
     if(op){ window.open(item.url,'_blank','noopener'); return }
     if(tg){ item.done=!item.done; item.doneAt=item.done?Date.now():null; saveProject(p,true); renderProject(); renderSide();
+      if(item.done&&!layObj(item).ecat){ const g=guessCat(item.text); if(g){ setLay(item,'ecat',g); saveProject(p,true) } }
       if(item.done&&!(Number(item.price)>0)) askPaid(p,item);
       return }
     if(ed){ itemEdit(p,item,true); return }
@@ -6624,14 +6634,45 @@ function parseSpend(raw){
   if(m) return {text:m[2].trim(),price:parseFloat(m[1].replace(',','.'))};
   return {text:t,price:null};
 }
+/* категория по прошлой записи с тем же названием */
+function guessCat(text){
+  const k=String(text||'').trim().toLowerCase(); if(!k) return '';
+  const p=wantP(); const hit=p&&(p.tasks||[]).slice().reverse().find(t=>layObj(t).ecat&&String(t.text||'').trim().toLowerCase()===k);
+  return hit?layObj(hit).ecat:'';
+}
+/* повторяющиеся траты: запись с layout.rep='month' сама появляется в каждом новом месяце, когда наступает её число */
+function spendRoll(){
+  const p=wantP(); if(!p) return false;
+  const nk=nowKey(), today=new Date().getDate(); let ch=false;
+  (p.tasks||[]).filter(t=>isExp(t)&&layObj(t).rep==='month').forEach(t=>{
+    let last=t, guard=0;
+    while(guard++<24){
+      const d0=new Date(last.doneAt||Date.now()), k=monthKey(d0.getTime())+1;
+      if(k>nk) break;
+      const y=Math.floor(k/12), m=k%12, dim=new Date(y,m+1,0).getDate();
+      const day=Math.min(layObj(t).rday||d0.getDate(),dim);
+      if(k===nk&&day>today) break;
+      const nx={id:uid(),text:last.text,price:last.price,url:'',done:true,doneAt:new Date(y,m,day,12).getTime(),created:Date.now()};
+      const L=layObj(last); nx.layout=JSON.stringify(L);
+      setLay(last,'rep','');
+      p.tasks.push(nx); last=nx; ch=true;
+    }
+  });
+  if(ch) saveProject(p,true);
+  return ch;
+}
+const REP_SPEND=/(?:^|\s)(monthly|every month|каждый месяц|ежемесячно)$/i;
 function addExpense(raw,cat,at){
   const p=wantP(); if(!p) return null;
+  let mrep=false; const rr=String(raw||'').trim().match(REP_SPEND);
+  if(rr){ mrep=true; raw=String(raw).trim().slice(0,rr.index) }
   const r=parseSpend(raw);
   if(!(r.price>0)){ toast('Add an amount, like “coffee 300”'); return null }
   const same=r.text&&(p.tasks||[]).slice().reverse().find(t=>isExp(t)&&layObj(t).ecat&&String(t.text||'').toLowerCase()===r.text.toLowerCase());
   if(same) cat=layObj(same).ecat;                      /* то же название, что раньше, — та же категория */
   const it={id:uid(),text:r.text||cat||'Expense',price:r.price,url:'',done:true,doneAt:at||Date.now(),created:Date.now()};
   setLay(it,'exp',1); if(cat) setLay(it,'ecat',cat);
+  if(mrep){ setLay(it,'rep','month'); setLay(it,'rday',new Date(it.doneAt).getDate()) }
   p.tasks=p.tasks||[]; p.tasks.push(it);
   saveProject(p,true); blip('add');
   return it;
@@ -6643,7 +6684,7 @@ function dropExpense(it){
   return ()=>{ p.tasks.splice(Math.min(at,p.tasks.length),0,it); saveProject(p,true); refreshView() };
 }
 function spentToast(it){
-  toast(money2(it.price)+' · '+catOf(it),{action:'Undo',onAction:()=>{ dropExpense(it); refreshView() }});
+  toast(money2(it.price)+' · '+catOf(it)+(layObj(it).rep?' · every month':''),{action:'Undo',onAction:()=>{ dropExpense(it); refreshView() }});
 }
 /* отметили покупку без цены — спрашиваем, сколько заплатили */
 function askPaid(p,item){
@@ -6686,17 +6727,21 @@ function spendEdit(it){
       <div class="sp-cats">${(exp?[]:['Wishlist']).concat(cats).concat(cur&&cats.indexOf(cur)<0?[cur]:[]).map(c=>`<button type="button" class="chip ${(cur||(exp?'':'Wishlist'))===c?'on':''}" data-ec="${esc(c)}">${esc(c)}</button>`).join('')}
         <input id="eCat" class="sp-newcat" placeholder="New…" autocomplete="off" aria-label="New category"></div>
     </div>
+    ${exp?`<button type="button" class="sp-rep ${layObj(it).rep?'on':''}" data-erep>${svg(layObj(it).rep?'boxOk':'box',15,1.9)} Repeats every month</button>`:''}
     <div class="sheet-foot sp-foot">
       <button type="button" class="danger" data-edel>${exp?svg('trash',14,1.8)+' Delete':svg('box',14,1.8)+' Not bought'}</button>
       <button type="submit" class="gate-go sp-save">Save</button>
     </div>
   </form>`;
   let pick=cur||(exp?'':'Wishlist');
+  let wantRep=!!layObj(it).rep;
   const close=()=>el.remove();
   el.addEventListener('click',e=>{
     if(e.target===el||e.target.closest('[data-close]')) return close();
     const c=e.target.closest('[data-ec]');
     if(c){ pick=c.dataset.ec; el.querySelectorAll('[data-ec]').forEach(b=>b.classList.toggle('on',b===c)); el.querySelector('#eCat').value=''; return }
+    const rb=e.target.closest('[data-erep]');
+    if(rb){ wantRep=!wantRep; rb.classList.toggle('on',wantRep); rb.innerHTML=svg(wantRep?'boxOk':'box',15,1.9)+' Repeats every month'; return }
     if(e.target.closest('[data-edel]')){
       close();
       if(exp){ const undo=dropExpense(it); refreshView(); toast('Deleted',{action:'Undo',onAction:undo}) }
@@ -6716,6 +6761,7 @@ function spendEdit(it){
     if(/^\d{4}-\d\d-\d\d$/.test(dv)&&dv!==ld(d)){ const [y,m,dd]=dv.split('-').map(Number); it.doneAt=new Date(y,m-1,dd,12).getTime() }
     setLay(it,'ecat',cat&&cat!=='Wishlist'?cat:'');
     setLay(it,'approx','');
+    if(exp){ setLay(it,'rep',wantRep?'month':''); setLay(it,'rday',wantRep?new Date(it.doneAt).getDate():'') }
     saveProject(p,true); close(); refreshView();
   });
   document.body.appendChild(el);
@@ -6723,6 +6769,7 @@ function spendEdit(it){
 }
 function renderSpend(){
   $('#crumb').textContent='Spending';
+  spendRoll();
   const all=spendEntries();
   const nk=nowKey(), off=Math.max(0,st.spMonth||0), k=nk-off;
   const inK=kk=>all.filter(e=>monthKey(e.at)===kk);
@@ -6768,7 +6815,7 @@ function renderSpend(){
         <section class="sp-days">${days.map(g=>`<div class="sp-day">
           <div class="sp-day-h"><b>${dayLabel(g.at)}</b><span>${money2(g.sum)}</span></div>
           ${g.items.map(e=>`<button class="sp-row" data-sp="${e.t.id}">
-            <span class="sp-name">${esc(e.t.text||e.cat)}</span>
+            <span class="sp-name">${esc(e.t.text||e.cat)}${layObj(e.t).rep?' <i class="sp-rep-mark" title="Every month">↻</i>':''}</span>
             <span class="sp-cat">${esc(e.cat)}</span>
             <b>${money2(e.amt)}</b></button>`).join('')}
         </div>`).join('')}</section>
@@ -6882,7 +6929,7 @@ function flashItem(id){
   if(it&&it.done&&p.id===WANT&&st.wantFilter!=='done'){ st.wantFilter='done'; renderProject() }
   if(it&&it.done&&p.id===TODO&&st.todoFilter!=='done'){ st.todoFilter='done'; renderProject() }
   setTimeout(()=>{
-    const el=document.querySelector(`#view [data-id="${id}"],#view [data-task="${id}"],#view [data-ref="${id}"]`); if(!el) return;
+    const el=document.querySelector(`#view [data-id="${id}"],#view [data-task="${id}"],#view [data-ref="${id}"],#view [data-sp="${id}"]`); if(!el) return;
     el.scrollIntoView({block:'center',behavior:'smooth'}); el.classList.add('flash');
     setTimeout(()=>el.classList.remove('flash'),1800);
   },60);
@@ -6898,6 +6945,8 @@ document.addEventListener('click',e=>{
     e.preventDefault();
     if(o.closest('.sgroup')){ st.query=''; const qq=$('#q'); if(qq) qq.value=''; }
     const hid=o.dataset.hit;
+    if(hid&&o.dataset.sphit){ const it=(wantP().tasks||[]).find(x=>x.id===hid);
+      if(it){ resetViews(); st.spend=true; st.spMonth=Math.max(0,nowKey()-monthKey(it.doneAt)); route(); setTimeout(()=>flashItem(hid),150); return } }
     openProject(o.dataset.open);
     if(hid) setTimeout(()=>flashItem(hid),150);
     return;
@@ -7331,6 +7380,7 @@ async function afterLogin(){
     syncSidebarButton();
     window.addEventListener('resize',syncSidebarButton);
     route();
+    if(spendRoll()) renderSide();
     setTimeout(()=>{ showDigest(); checkRemind() },700);
   }catch(e){
     console.error(e);
