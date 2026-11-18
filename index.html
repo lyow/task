@@ -1430,8 +1430,8 @@ kbd{font-size:11.5px}
 
 /* v3 — colour with a job, feedback on every press, today list */
 @property --sec{syntax:'<color>';inherits:true;initial-value:#D4FF3A}
-:root{--bg:#09090A;--panel:#111112;--panel-2:#18181A;--raise:#212123;--line:#252528;--line-2:#3A3A3E;
-  --soft:#BEBEC4;--dim:#8A8A92;--btn-hover:#2B2B2E;--s-idle:#8A8A92}
+:root{--bg:#09090A;--panel:#111112;--panel-2:#18181A;--raise:#1C1C1E;--line:#232326;--line-2:#303034;
+  --soft:#A4A4AC;--dim:#7E7E86;--btn-hover:#242427;--s-idle:#7E7E86;--chip-bg:rgba(255,255,255,.05)}
 .btn-nav.want{border:none;padding:9px 12px;align-items:center}
 body{--sec:var(--lime);transition:--sec .45s ease}
 body[data-sec=inbox],body[data-sec=violet]{--sec:var(--violet)}
@@ -1769,6 +1769,95 @@ input:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--lime) 15
 .pmenu-del svg{color:var(--magenta)!important}
 @media (prefers-reduced-motion:reduce){.view-in,.check.pop svg{animation:none}#view{scroll-behavior:auto}}
 @media (max-width:760px){.day b{font-size:19px}}
+/* v6 — a step darker, one rhythm everywhere */
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.btn-nav:focus-visible,.row-name:focus-visible,.card:focus-visible,.prow:focus-visible{outline-color:var(--lime)}
+input:focus-visible,textarea:focus-visible{outline:none}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08)}
+.mini,.bar{background:var(--line)}
+.jot #capBtn,.quick-btn,.task-add button,.want-add .go,.wish-add .go,.link-add .go,.fab:not(.small),.gate-go,.cap-send{box-shadow:none}
+.quick-btn{box-shadow:none}
+.sheet::before,.gate::before{display:none}
+.sheet{border-radius:18px;padding:22px}
+.sheet-head{font-size:15px;font-weight:600;color:var(--txt);font-family:var(--display)}
+.sheet-head button{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--soft)}
+.sheet-head button:hover{background:var(--raise);color:var(--txt)}
+.f>span{font-size:13px;color:var(--soft)}
+.f input{padding:12px 13px;border-color:var(--line-2);background:var(--bg)}
+.opt{min-height:40px;border-radius:10px}
+.sheet-foot{margin-top:6px}
+.sheet-foot .danger{width:100%;min-height:40px}
+.gate-box{box-shadow:none;border-color:var(--line)}
+.gate-box .f input{background:var(--bg)}
+.gate-go{min-height:46px}
+/* one size for small text buttons */
+.ghost-btn{display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:6px 12px;border-radius:10px;
+  border:1px solid var(--line-2);color:var(--soft);font-size:13px;font-weight:600;font-family:var(--ui)}
+.ghost-btn:hover{color:var(--txt);background:var(--raise);border-color:var(--line-2)}
+.pane-h .row-more{margin-left:2px}
+.row-more.big{width:40px;height:40px;border-radius:11px;border:1px solid var(--line-2);color:var(--soft)}
+.row-more.big:hover{background:var(--raise);color:var(--txt)}
+@media (hover:hover){.pane-h .row-more{opacity:1}}
+/* quick links */
+.qtoggle{min-height:34px;font-size:13px;font-weight:600;padding:7px 12px}
+.qchip a{min-height:34px;font-size:13.5px}
+.qchip:hover{box-shadow:inset 0 0 0 1px var(--line-2)}
+.qadd{padding:3px 3px 3px 4px;background:var(--panel)}
+.qadd input{width:190px;font-size:13.5px}
+.qadd button{width:28px;height:28px}
+.qadd button:hover{box-shadow:inset 0 0 0 1px var(--line-2);background:var(--raise)}
+/* task steps: quiet until wanted */
+.sub-toggle{min-height:26px;border-color:var(--line);color:var(--dim)}
+.sub-toggle.has{color:var(--soft);border-color:var(--line-2)}
+.sub-toggle.full{color:var(--mint);border-color:color-mix(in srgb,var(--mint) 30%,transparent)}
+@media (hover:hover){
+  .tasks li .sub-toggle:not(.has):not(.full):not(.open){opacity:0}
+  .tasks li:hover .sub-toggle,.tasks li .sub-toggle:focus-visible{opacity:1}
+}
+.tasks li.first-open{background:none}
+/* history, review, search: same quiet headers and rows */
+.msum{background:var(--panel);border:1px solid var(--line);border-radius:16px}
+.msum-c{background:var(--bg)}
+.msum-c.t b,.msum-c.p b,.msum-c.w b,.msum-c.d b{color:var(--txt)}
+.msum-c span,.hday-h span,.hrow .hsrc,.rsec h2,.skind{font-size:12.5px}
+.msum-h button{width:36px;height:36px;border-radius:10px;border-color:var(--line-2)}
+.hbar i{background:var(--line-2)}
+.hbar.today i{background:var(--lime)}
+.hrow{padding:10px 4px;border-bottom:1px solid var(--line)}
+.hday .hrow:last-child{border-bottom:none}
+.hrow .hicon,.hrow.task .hicon,.hrow.proj .hicon,.hrow.wish .hicon,.hrow.todo .hicon,.hrow.idea .hicon{color:var(--soft);background:var(--raise)}
+.hrow.task .hicon,.hrow.todo .hicon{color:var(--mint)}
+.rsec h2{font-size:13.5px;font-weight:600;color:var(--soft)}
+.rrow{border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+.racts button{min-height:34px;padding:6px 12px;border-radius:10px;border:1px solid var(--line-2);color:var(--soft);font-size:13px;font-weight:600}
+.racts button:hover{color:var(--txt);background:var(--raise)}
+.sgroup{border-radius:14px;background:var(--panel)}
+.srow:hover{background:var(--panel-2)}
+.skind{color:var(--dim);min-width:44px}
+.srow mark{background:color-mix(in srgb,var(--lime) 22%,transparent);color:var(--txt);border-radius:3px;padding:0 1px}
+.empty-line{max-width:820px;margin:28px auto;padding:22px;border:1px dashed var(--line-2);border-radius:14px;
+  text-align:center;font-size:14.5px;color:var(--soft)}
+.empty-line a{color:var(--lime);text-decoration:none;font-weight:600;margin-left:6px}
+.head{margin-bottom:20px}
+.lede{font-size:14.5px}
+body:has(.sheet-wrap) .fab-wrap,body:has(.pmenu) .fab-wrap{display:none}
+/* settings panel in the sidebar */
+.side-tools .tool.on{color:var(--lime)}
+/* phones: touch targets */
+@media (max-width:760px){
+  .row-more{width:40px;height:40px}
+  .ghost-btn{min-height:40px}
+  .qtoggle,.qchip a{min-height:40px}
+  .qchip button{opacity:1;min-width:34px}
+  .qadd input{width:150px}
+  .qadd button{width:34px;height:34px}
+  .sub-toggle{min-height:34px;min-width:40px;justify-content:center}
+  .msum-h button{width:40px;height:40px}
+  .racts button{min-height:40px}
+  .tasks li .star,.task-del{min-width:34px;min-height:34px;display:inline-flex;align-items:center;justify-content:center}
+  .check,.due,.tsnooze,.star,.board-toggle,.idea-name,.wcheck,.fbtn{position:relative}
+  .check::after,.due::after,.tsnooze::after,.star::after,.board-toggle::after,.idea-name::after{content:'';position:absolute;inset:-10px -8px}
+}
 </style>
 </head>
 <body class="side-open">
@@ -2999,18 +3088,9 @@ function renderHistory(){
 
   $('#view').innerHTML=`
     <header class="head">
-      <button class="back-link" id="histBack">${svg('arrow',11,2.2)} All projects</button>
-      <h1>What you <i>actually did</i></h1>
-      <p class="lede">${week.length
-        ? `${week.length} thing${week.length===1?'':'s'} closed out in the last seven days. Worth remembering on the days it feels like nothing moves.`
-        : 'Nothing closed out in the last week yet. Tick something off and it shows up here.'}</p>
+      <h1>History</h1>
+      <p class="lede">${week.length?`${week.length} done in the last 7 days.`:'Nothing done in the last 7 days yet.'}</p>
     </header>
-    ${week.length?`<div class="stats">
-      <div class="stat" data-s="done"><b>${counts.task||0}</b><span>tasks</span></div>
-      <div class="stat"><b>${counts.proj||0}</b><span>projects</span></div>
-      <div class="stat"><b>${counts.wish||0}</b><span>bought</span></div>
-      <div class="stat"><b>${counts.todo||0}</b><span>read / watched</span></div>
-    </div>`:''}
     ${(()=>{const m=monthSummary(st.histMonth||0);
       return `<div class="msum">
         <div class="msum-h">
@@ -3039,14 +3119,12 @@ function renderHistory(){
         <span class="htext">${esc(e.text)}</span>
         <button class="hsrc" data-open="${e.pid}">${esc(e.src)}</button>
       </div>`).join('')}
-    </div>`).join(''):`<p class="hint" style="max-width:820px;margin:0 auto">Nothing here yet.</p>`}
+    </div>`).join(''):`<p class="empty-line">Tick something off and it shows up here.</p>`}
     ${ev.length&&st.histDays<120?`<div style="max-width:820px;margin:0 auto"><button class="btn-inline" id="hMore">Show more history</button></div>`:''}
   `;
   const mp=$('#mPrev'), mn=$('#mNext');
   if(mp) mp.addEventListener('click',()=>{st.histMonth=(st.histMonth||0)+1;renderHistory()});
   if(mn) mn.addEventListener('click',()=>{st.histMonth=Math.max(0,(st.histMonth||0)-1);renderHistory()});
-  const hb=$('#histBack');
-  if(hb) hb.addEventListener('click',()=>{ st.hist=false; st.review=false; route() });
   const hm=$('#hMore');
   if(hm) hm.addEventListener('click',()=>{ st.histDays+=30; renderHistory() });
 }
@@ -3091,9 +3169,9 @@ function renderSearch(){
   $('#crumb').textContent='Search';
   $('#view').innerHTML=`
     <header class="head">
-      <h1>Found <i>${total}</i></h1>
-      <p class="lede">${total?`Across ${groups.length} ${groups.length===1?'place':'places'}. Click any line to open where it lives.`
-        :'Nothing matches. Try a shorter word — it searches names, tasks, notes, links and wishes.'}</p>
+      <h1>Search</h1>
+      <p class="lede">${total?`${total} match${total===1?'':'es'} for “${esc(st.query.trim())}” in ${groups.length} ${groups.length===1?'place':'places'}.`
+        :`Nothing matches “${esc(st.query.trim())}”. Try a shorter word.`}</p>
     </header>
     ${groups.map(g=>`<div class="sgroup">
       <a class="sgroup-h" href="#p/${g.p.id}" data-open="${g.p.id}">
@@ -3130,22 +3208,16 @@ function renderReview(){
 
   $('#view').innerHTML=`
     <header class="head">
-      <h1>Weekly <i>review</i></h1>
-      <p class="lede">${nothing?'Nothing is asking for attention. Rare and worth noticing.'
-        :'Five minutes here beats an hour of guilt later. Push it, park it, or let it go.'}</p>
+      <h1>Review</h1>
+      <p class="lede">${week.length} done this week${nothing?'. Nothing needs a decision.':` · ${due.length+stale.length+cold.length} need a decision.`}</p>
     </header>
-    <div class="stats home-stats">
-      <div class="stat" data-s="done"><b>${week.length}</b><span>closed this week</span></div>
-      <div class="stat"><b>${stars.reduce((n,g)=>n+g.items.filter(t=>!t.done).length,0)}</b><span>in focus</span></div>
-      <div class="stat"><b>${due.length+stale.length+cold.length}</b><span>need a decision</span></div>
-    </div>
     ${due.length?`<div class="rsec"><h2>Asked to come back</h2>${due.map(p=>card(p,[
       {k:'snooze',l:'later'},{k:'start',l:'start now'},{k:'arch',l:'archive'}])).join('')}</div>`:''}
     ${stale.length?`<div class="rsec"><h2>Started, then stalled</h2>${stale.map(p=>card(p,[
       {k:'snooze',l:'park it'},{k:'done',l:'call it done'},{k:'arch',l:'archive'}])).join('')}</div>`:''}
     ${cold.length?`<div class="rsec"><h2>Never got going</h2>${cold.map(p=>card(p,[
       {k:'start',l:'start now'},{k:'arch',l:'archive'},{k:'del',l:'delete'}])).join('')}</div>`:''}
-    ${nothing?`<p class="hint" style="max-width:640px">Come back next week — or open <a href="#history" style="color:var(--violet)">History</a> to see what you got through.</p>`:''}
+    ${nothing?`<p class="empty-line">All clear. <a href="#history">See what you did</a></p>`:''}
   `;
   $('#view').querySelectorAll('[data-rev-act]').forEach(b=>b.addEventListener('click',async e=>{
     e.preventDefault(); e.stopPropagation();
@@ -3154,7 +3226,8 @@ function renderReview(){
     if(k==='snooze'){ p.revisit=plusMonths(1); saveProject(p,true); toast('Back on '+ru(p.revisit)) }
     if(k==='start'){ p.status='active'; p.revisit=''; if(!p.startDate) p.startDate=today(); saveProject(p,true); toast('In progress') }
     if(k==='done'){ setStatus(p,'done'); toast('Marked finished') }
-    if(k==='arch'){ p.archived=true; p.revisit=''; saveProject(p,true); toast('Archived') }
+    if(k==='arch'){ const rv=p.revisit; p.archived=true; p.revisit=''; saveProject(p,true);
+      toast('Archived',{action:'Undo',onAction:()=>{ p.archived=false; p.revisit=rv; saveProject(p,true); sortProjects(); renderReview(); renderSide() }}) }
     if(k==='del'){
       if(!confirm('Delete “'+(p.name||'project')+'” for good?')) return;
       for(const ph of await photosOf(p.id)) await delPhotoDB(ph.id);
@@ -4084,9 +4157,8 @@ function quickBar(p){
           <button data-qdel="${i.id}" title="Remove">${svg('x',10,2.4)}</button>
         </span>`).join('')}
         <span class="qadd">
-          <input id="qUrl" placeholder="paste a link" autocomplete="off">
-          <input id="qName" placeholder="name" autocomplete="off">
-          <button id="qAdd" title="Add">${svg('plus',12,2.6)}</button>
+          <input id="qUrl" placeholder="Paste a link" autocomplete="off" aria-label="Paste a link, a name after it is optional">
+          <button id="qAdd" title="Add link">${svg('plus',12,2.6)}</button>
         </span>
       </div>`}
   </div>`;
@@ -4106,12 +4178,14 @@ function bindQuickBar(p){
     renderProject();
   });
   const add=()=>{
-    const ui=$('#qUrl'), ni=$('#qName');
-    let u=(ui.value||'').trim(); if(!u) return;
+    const ui=$('#qUrl');
+    const raw=(ui.value||'').trim(); if(!raw) return;
+    const m=raw.match(/^(\S+)\s*(.*)$/);
+    let u=m[1]; const nm=m[2].trim();
     if(!/^https?:\/\//i.test(u)) u='https://'+u;
     p.tasks=p.tasks||[];
-    p.tasks.push({id:uid(),kind:'quick',text:(ni.value||'').trim(),url:u,done:false,created:Date.now()});
-    ui.value=''; ni.value='';
+    p.tasks.push({id:uid(),kind:'quick',text:nm,url:u,done:false,created:Date.now()});
+    ui.value='';
     saveProject(p,true); renderProject();
     const f=$('#qUrl'); if(f) f.focus();
   };
@@ -4119,15 +4193,16 @@ function bindQuickBar(p){
   if(ab){
     ab.addEventListener('click',add);
     $('#qUrl').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
-    $('#qName').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
   }
   const box=$('#qlist');
   if(box) box.addEventListener('click',e=>{
     const d=e.target.closest('[data-qdel]');
     if(!d) return;
     e.preventDefault();
+    const gone=p.tasks.find(x=>x.id===d.dataset.qdel), at=p.tasks.indexOf(gone);
     p.tasks=p.tasks.filter(x=>x.id!==d.dataset.qdel);
     saveProject(p,true); renderProject();
+    if(gone) toast('Link removed',{action:'Undo',onAction:()=>{ p.tasks.splice(at,0,gone); saveProject(p,true); renderProject() }});
   });
 }
 
@@ -4960,7 +5035,7 @@ async function renderProject(){
     <header class="head p-head">
       <div class="p-title-row">
         <input class="p-title" id="pTitle" value="${esc(p.name)}" placeholder="Project name">
-        ${SPECIAL(p.id)?'':`<button class="btn-gear big" data-gear="${p.id}" title="Settings">${svg('gear',16,1.5)}</button>`}
+        ${SPECIAL(p.id)?'':`<button class="row-more big" data-pmenu="${p.id}" title="Project menu" aria-label="Project menu"><i></i><i></i><i></i></button>`}
       </div>
       <div class="p-meta">
         ${SPECIAL(p.id)?'':`<div class="picker big">
@@ -4993,15 +5068,18 @@ async function renderProject(){
         <h2 class="pane-h">
           <button class="board-toggle" id="boardToggle">Board <span class="count" id="phCount"></span>
             <span class="qchev">${svg('chev',11,2.2)}</span></button><span class="sp"></span>
-          <button class="ghost-btn" id="expand">expand</button>
-          <button class="ghost-btn" id="addNote">+ note</button>
-          <button class="ghost-btn" id="pack">arrange</button>
-          <button class="ghost-btn" id="tidy">same size</button>
-          <button class="ghost-btn" id="trashBtn">trash</button>
-          <button class="ghost-btn" id="addPhoto">+ photo</button>
+          <button class="ghost-btn" id="addPhoto">${svg('img',14,1.8)} Add photo</button>
+          <button class="row-more" data-amenu title="More" aria-label="More"><i></i><i></i><i></i></button>
+          <span class="board-acts" hidden>
+            <button id="addNote" title="Add a note">${svg('pen',15,1.8)}</button>
+            <button id="expand" title="Full screen">${svg('size',15,1.8)}</button>
+            <button id="pack" title="Arrange neatly">${svg('box',15,1.8)}</button>
+            <button id="tidy" title="Make all the same size">${svg('img',15,1.8)}</button>
+            <button id="trashBtn" title="Deleted photos">${svg('trash',15,1.8)}</button>
+          </span>
         </h2>
         <div id="board"></div>
-        <p class="hint">Drag images anywhere · resize from the corner handle at the bottom right · the cross removes · double click opens it large · drop files straight into the window or paste a screenshot with <kbd>Ctrl</kbd>+<kbd>V</kbd></p>
+        <p class="hint">Drop images here or paste a screenshot. Drag to move, pull the corner to resize, double click to open.</p>
       </section>`}
     </div>`;
   bindProject(p);
@@ -5660,14 +5738,14 @@ function closeBoardFull(){
   if(b) b.classList.remove('full');
   document.body.classList.remove('board-open');
   const x=document.getElementById('boardX'); if(x) x.remove();
-  const btn=$('#expand'); if(btn) btn.textContent='expand';
+  const btn=$('#expand'); if(btn) btn.title='Full screen';
 }
 function toggleBoard(){
   const b=$('#board'); if(!b) return;
   if(b.classList.contains('full')){ closeBoardFull(); b.scrollIntoView({block:'center'}); return; }
   b.classList.add('full');
   document.body.classList.add('board-open');
-  const btn=$('#expand'); if(btn) btn.textContent='close';
+  const btn=$('#expand'); if(btn) btn.title='Close full screen';
   const x=document.createElement('button');
   x.id='boardX'; x.className='board-x';
   x.innerHTML=svg('x',15,2.2)+' close';
@@ -5757,22 +5835,13 @@ function openSettings(id){
   const el=document.createElement('div');
   el.className='sheet-wrap';
   el.innerHTML=`<div class="sheet">
-    <div class="sheet-head"><span>Project settings</span><button data-close>${svg('x',15,2)}</button></div>
+    <div class="sheet-head"><span>Project settings</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
     <label class="f"><span>Name</span><input id="sName" value="${esc(p.name)}"></label>
-    <div class="f"><span>Status</span>
-      <div class="picker big">${STATUSES.map(s=>`<button class="pick ${p.status===s.id?'on':''}" data-s="${s.id}" data-sset="${s.id}">${svg(s.id,14,p.status===s.id?2.2:1.6)}<span>${s.label}</span></button>`).join('')}</div>
-    </div>
     <div class="f"><span>Colour</span>
       <div class="sk-colors">
         <button data-pc="" class="sk-dot pc-none ${!p.color?'on':''}" title="None"></button>
         ${['violet','cyan','magenta','mint','amber','lime'].map(c=>
           `<button data-pc="${c}" class="sk-dot c-${c} ${p.color===c?'on':''}" title="${c}"></button>`).join('')}
-      </div>
-    </div>
-    <div class="f"><span>Priority</span>
-      <div class="two">
-        <button class="opt ${p.important?'on':''}" data-imp="1">${svg('flag',13,2.1)} Important</button>
-        <button class="opt ${p.important?'':'on'}" data-imp="0">Normal</button>
       </div>
     </div>
     <label class="f"><span>Start date</span><input type="date" id="sDate" value="${p.startDate||''}"></label>
@@ -5804,9 +5873,8 @@ function openSettings(id){
       </div>
     </div>
     ${p.id===INBOX?'<p class="hint">“Ideas” is a permanent inbox for quick thoughts — it cannot be deleted.</p>'
-      :`<div class="sheet-foot two">
-          <button class="opt" data-arch>${svg('arch',13,1.7)} ${p.archived?'Unarchive':'Archive'}</button>
-          <button class="danger" data-del>${svg('trash',14,1.8)} Delete</button>
+      :`<div class="sheet-foot">
+          <button class="danger" data-del>${svg('trash',14,1.8)} Delete project…</button>
         </div>`}
   </div>`;
   const close=()=>el.remove();
@@ -6365,13 +6433,13 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-amenu]'); if(!b) return;
   e.preventDefault(); e.stopPropagation();
   closeProjectMenu();
-  const host=b.closest('.idea,.tditem,.wcard'); if(!host) return;
-  const acts=Array.from(host.querySelectorAll('.idea-acts button, .wacts button'));
+  const host=b.closest('.idea,.tditem,.wcard,.pane-h,.xrow'); if(!host) return;
+  const acts=Array.from(host.querySelectorAll('.idea-acts button, .wacts button, .board-acts button, .xacts button'));
   const el=document.createElement('div');
   el.className='pmenu';
   const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
   el.innerHTML=acts.map((a,k)=>{ const ic=a.querySelector('svg');
-    return `<button data-k="${k}" class="${a.hasAttribute('data-idel')||a.hasAttribute('data-tddel')||a.hasAttribute('data-wdel')?'pmenu-del':''}">${ic?ic.outerHTML:''} ${esc(cap(a.title||a.textContent.trim()))}</button>`}).join('');
+    return `<button data-k="${k}" class="${a.hasAttribute('data-idel')||a.hasAttribute('data-tddel')||a.hasAttribute('data-wdel')||a.hasAttribute('data-xdel')?'pmenu-del':''}">${ic?ic.outerHTML:''} ${esc(cap(a.title||a.textContent.trim()))}</button>`}).join('');
   document.body.appendChild(el);
   const r=b.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight;
   el.style.left=Math.max(8,Math.min(r.right-w,innerWidth-w-8))+'px';
