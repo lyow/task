@@ -2133,6 +2133,11 @@ b,strong{font-weight:600}
 .isrc-hint button span{color:var(--dim);opacity:.7;font-variant-numeric:tabular-nums}
 .isrc-hint button:hover{color:var(--txt)}
 .ideas-pane>.isrc-hint{order:6;flex:1 1 auto}
+
+.ideas-more{height:1px}
+.net-dot{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--s2);border:1px solid var(--line);color:var(--soft);white-space:nowrap}
+.net-dot.off{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 35%,var(--line))}
+.ideas-pane>.ideas-more{order:9}
 </style>
 </head>
 <body class="side-open">
@@ -2339,7 +2344,8 @@ function paintNet(){
   if(netOk&&!pendingCount){ el.style.display='none'; return }
   el.style.display='';
   el.className='net-dot'+(netOk?' syncing':' off');
-  el.textContent=netOk?('syncing '+pendingCount):('offline'+(pendingCount?' · '+pendingCount+' waiting':''));
+  el.textContent=netOk?('Syncing '+pendingCount+(pendingCount===1?' change…':' changes…')):('Offline'+(pendingCount?' · '+pendingCount+(pendingCount===1?' change':' changes')+' waiting to sync':' · changes will sync when you are back'));
+  el.title=netOk?'Sending your changes':'Your changes are kept on this device and sent when the connection is back';
 }
 
 async function localPut(store,val){ if(!db) return; try{ await req(tx(store,'readwrite').put(val)) }catch(e){} }
@@ -3502,7 +3508,7 @@ function snippet(text,q,pad){
   const a=Math.max(0,i-pad), b=Math.min(t.length,i+q.length+pad*2);
   return (a>0?'…':'')+t.slice(a,b)+(b<t.length?'…':'');
 }
-const KIND_LABEL={income:'income',spent:'spent',bought:'bought',task:'task',idea:'idea',wish:'wish',todo:'to do',link:'link',sticky:'note',quick:'link'};
+const KIND_LABEL={step:'step',income:'income',spent:'spent',bought:'bought',task:'task',idea:'idea',wish:'wish',todo:'to do',link:'link',sticky:'note',quick:'link'};
 
 function searchHits(){
   const q=st.query.trim().toLowerCase();
@@ -3516,6 +3522,9 @@ function searchHits(){
       const wk=p.id===WANT&&t.done?(isExp(t)?(layObj(t).inc?'income':'spent'):'bought'):kind;
       if((t.text||'').toLowerCase().includes(q)) hits.push({k:wk,t:t.text+(p.id===WANT&&t.done&&t.price?' · '+money2(Number(t.price)):''),done:t.done&&wk!=='spent'&&wk!=='bought',id:t.id,sp:p.id===WANT&&t.done&&Number(t.price)>0});
       if((t.note||'').toLowerCase().includes(q)) hits.push({k:'note',t:snippet(t.note,q,45),id:t.id});
+      (t.subs||[]).forEach(sb=>{ if((sb.text||'').toLowerCase().includes(q)) hits.push({k:'step',t:sb.text+' · in “'+(t.text||'')+'”',done:sb.done,id:t.id}) });
+      if(p.id===WANT&&t.done&&isExp(t)&&!(t.text||'').toLowerCase().includes(q)&&SCAT[catIdOf(t)].l.toLowerCase().includes(q))
+        hits.push({k:isInc(t)?'income':'spent',t:t.text+' · '+SCAT[catIdOf(t)].l+(t.price?' · '+money2(Number(t.price)):''),id:t.id,sp:true});
       if((t.url||'').toLowerCase().includes(q)) hits.push({k:'link',t:t.url,id:t.id});
     });
     if((p.notes||'').toLowerCase().includes(q)) hits.push({k:'notes',t:snippet(p.notes,q,55)});
@@ -3918,7 +3927,7 @@ function ideasPane(p){
     ${srcList.length>1&&!iq?`<div class="isrc-hint">${srcList.slice(0,6).map(k=>`<button data-isrc="${esc(k)}">${esc(k)} <span>${srcs[k]}</span></button>`).join('')}</div>`:''}
     ${(()=>{const sk=aiSkip(), n=all.filter(i=>ideaUrl(i)&&!ideaNamed(i)&&i.cat!==ARCHIVE&&!sk[i.id]).length;
       return n?`<button class="ai-btn" id="aiNameAll" style="margin-top:14px">${svg('spark',14,1.9)} Name ${n} ${n===1?'link':'links'} with AI</button>`:''})()}
-    ${shown.length?`<div class="ideas" id="ideas">${shown.map(i=>ideaCard(p,i,cur)).join('')}</div>`
+    ${shown.length?`<div class="ideas" id="ideas">${(st._ideaRest=shown.slice(60),shown.slice(0,60)).map(i=>ideaCard(p,i,cur)).join('')}</div>${shown.length>60?'<div class="ideas-more" id="ideasMore" aria-hidden="true"></div>':''}`
     :`<p class="empty-line">${cur===ARCHIVE?'Archive is empty.'
       :cur?'Nothing in this folder yet.'
       :'No ideas yet. Paste a link or write a thought above.'}</p>`}
@@ -5419,6 +5428,21 @@ function bindIdeas(p){
     toast('Archived',{action:'Undo',onAction:()=>{ it.cat=was; saveProject(p,true); renderProject(); renderSide() }});
   });
   const box=$('#ideas'); if(!box) return;
+  const more=$('#ideasMore'), view=$('#view');
+  if(st._ideaFill) view.removeEventListener('scroll',st._ideaFill);
+  st._ideaFill=null;
+  if(more){
+    /* дорисовываем по 60, пока конец списка ближе 800px к краю экрана */
+    const fill=()=>{
+      if(!more.isConnected){ view.removeEventListener('scroll',fill); return }
+      let guard=0;
+      while((st._ideaRest||[]).length&&more.getBoundingClientRect().top<view.getBoundingClientRect().bottom+800&&guard++<10){
+        box.insertAdjacentHTML('beforeend',st._ideaRest.splice(0,60).map(i=>ideaCard(p,i,st.ideaFolder||'')).join(''));
+      }
+      if(!(st._ideaRest||[]).length){ more.remove(); view.removeEventListener('scroll',fill) }
+    };
+    st._ideaFill=fill; view.addEventListener('scroll',fill,{passive:true}); setTimeout(fill,0);
+  }
   box.addEventListener('click',e=>{
     const b=e.target.closest('[data-ito],[data-iwish]'); if(!b) return;
     const toTodo=!!b.dataset.ito, key=b.dataset.ito||b.dataset.iwish;
@@ -8042,7 +8066,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:24';
+const APP_VER='19 Nov 03:28';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
