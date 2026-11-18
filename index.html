@@ -2132,6 +2132,20 @@ body:has(.paid-pop) .fab-wrap{display:none}
 .sp-soon .sp-row{padding:8px 0;min-height:52px;border-top:none}
 .sp-soon .sp-row:hover{background:none}
 .sp-ai{font-size:14.5px;line-height:1.6;color:var(--txt)}
+/* today and task rows */
+.plan-day{margin-top:12px}
+.upcoming{max-width:760px;margin:26px auto 0}
+.up-day{margin-bottom:14px}
+.up-h{display:flex;align-items:baseline;gap:8px;padding:0 4px 6px;font-size:14px;font-weight:600}
+.up-h small{font-size:12.5px;font-weight:500;color:var(--dim)}
+.upcoming .tasks li{align-items:center}
+[data-row]{position:relative;touch-action:pan-y}
+[data-row].swiping{transition:none!important;z-index:2;background:var(--panel)}
+[data-row].swiping::after{content:attr(data-swipe-label);position:absolute;top:0;bottom:0;display:flex;align-items:center;font-size:13px;font-weight:700}
+[data-row][data-swipe=done].armed{box-shadow:-6px 0 0 var(--mint)}
+[data-row][data-swipe=later].armed{box-shadow:6px 0 0 var(--amber)}
+[data-row]:not(.swiping){transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+[data-row].kfocus{outline:2px solid var(--lime);outline-offset:-2px;border-radius:10px}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -2772,6 +2786,28 @@ function dueLabel(d){
 }
 const dueChip=(pid,t)=>{const d=dueOf(t);
   return `<button class="due ${dueState(d)}" data-due="${pid}|${t.id}" title="${d?'Change the date':'Set a date'}">${svg('clock',12,2)}${d?' '+dueLabel(d):''}${repOf(t)?' ↻':''}</button>`};
+/* даты словами в конце строки: «в пятницу», «через 3 дня», «next monday», «25 дек», «dec 25», «25.12» */
+const WD=[[/^(воскресень[ея]|вс|sunday|sun)$/,0],[/^(понедельник|пн|monday|mon)$/,1],[/^(вторник|вт|tuesday|tue)$/,2],[/^(сред[ау]|ср|wednesday|wed)$/,3],
+  [/^(четверг|чт|thursday|thu)$/,4],[/^(пятниц[ау]|пт|friday|fri)$/,5],[/^(суббот[ау]|сб|saturday|sat)$/,6]];
+const MONW=[/^(янв|jan)/,/^(фев|feb)/,/^(мар|mar)/,/^(апр|apr)/,/^(ма[йя]|may)/,/^(июн|jun)/,/^(июл|jul)/,/^(авг|aug)/,/^(сен|sep)/,/^(окт|oct)/,/^(ноя|nov)/,/^(дек|dec)/];
+function nlDate(text){
+  const t=String(text||'').trim(), low=t.toLowerCase();
+  const end=(re)=>{ const m=low.match(new RegExp('(?:^|\\s)'+re+'$','i')); return m?{m,rest:t.slice(0,m.index).trim()}:null };
+  const plus=n=>ldPlus(n);
+  let r;
+  if((r=end('(сегодня|завтра|послезавтра|today|tomorrow)'))) return {due:plus(DUE_WORDS[r.m[1]]),rest:r.rest};
+  if((r=end('(?:через|in)\\s+(\\d+)\\s*(дн[яей]*|день|days?|недел[юиь]*|weeks?)'))){ const n=+r.m[1]*(/нед|week/.test(r.m[2])?7:1); return {due:plus(n),rest:r.rest} }
+  if((r=end('(через неделю|next week|на следующей неделе|in a week)'))) return {due:plus(7),rest:r.rest};
+  if((r=end('(?:(в|во|on|this|next|в следующ[а-я]+)\\s+)?([а-яa-z]+)'))){
+    const w=WD.find(x=>x[0].test(r.m[2]));
+    if(w){ const today=new Date().getDay(); let d=(w[1]-today+7)%7||7; return {due:plus(d),rest:r.rest} }
+  }
+  const md=(day,mon)=>{ const now=new Date(); let y=now.getFullYear(); const dt=new Date(y,mon,day); if(ld(dt)<ld()) dt.setFullYear(y+1); return dt.getMonth()===mon?ld(dt):null };
+  if((r=end('(\\d{1,2})\\s+([а-яa-z]{3,})\\.?'))){ const mi=MONW.findIndex(x=>x.test(r.m[2])); if(mi>=0){ const d=md(+r.m[1],mi); if(d) return {due:d,rest:r.rest} } }
+  if((r=end('([a-z]{3,})\\.?\\s+(\\d{1,2})'))){ const mi=MONW.findIndex(x=>x.test(r.m[1])); if(mi>=0){ const d=md(+r.m[2],mi); if(d) return {due:d,rest:r.rest} } }
+  if((r=end('(\\d{1,2})[./](\\d{1,2})'))){ const mo=+r.m[2]-1; if(mo>=0&&mo<12){ const d=md(+r.m[1],mo); if(d) return {due:d,rest:r.rest} } }
+  return null;
+}
 const DUE_WORDS={'сегодня':0,'today':0,'завтра':1,'tomorrow':1,'послезавтра':2};
 const isHot=t=>!!t.star||(!t.done&&!!dueOf(t)&&dueOf(t)<=ld());
 const starred=()=>st.projects.map(p=>({p,items:(p.tasks||[]).filter(isHot)})).filter(g=>g.items.length);
@@ -3278,7 +3314,7 @@ function renderAll(){
       return `<section class="today" id="today">
         <div class="sec-h"><h2>Today</h2><span class="sec-n">${hot.length}</span></div>
         <ul class="tasks tlist">${hot.map(({p,t})=>`
-          <li data-hot="${p.id}|${t.id}">
+          <li data-hot="${p.id}|${t.id}" data-row="${p.id}|${t.id}">
             <button class="check" data-ttog="${p.id}|${t.id}" aria-label="Done">${svg('box',18,1.8)}</button>
             <span>${linkify(t.text)}</span>
             ${dueOf(t)?dueChip(p.id,t):''}
@@ -3630,17 +3666,22 @@ function renderFocus(){
   const groups=starred();
   const total=groups.reduce((n,g)=>n+g.items.length,0);
   const doneN=groups.reduce((n,g)=>n+g.items.filter(t=>t.done).length,0);
+  const t0=ld(), late=[], up=[];
+  st.projects.forEach(p=>{ if(p.archived) return; (p.tasks||[]).forEach(t=>{ if(t.done||t.kind==='sticky'||t.kind==='link'||t.kind==='quick') return;
+    const d=dueOf(t); if(!d) return; if(d<t0) late.push({p,t}); else if(d>t0&&d<=ldPlus(7)) up.push({p,t,d}) }) });
+  up.sort((a,b)=>a.d.localeCompare(b.d));
+  const upDays=[]; up.forEach(x=>{ let g=upDays.find(y=>y.d===x.d); if(!g){ g={d:x.d,items:[]}; upDays.push(g) } g.items.push(x) });
   $('#view').innerHTML=`
     <header class="head">
       <h1>Today</h1>
-      <p class="lede">${total?`${doneN} of ${total} done. This is the short list — everything else can wait.`
-        :'Nothing starred yet. Open any project, hover a task and hit the star. Pulled tasks land here, so you get one list instead of ten.'}</p>
+      <p class="lede">${total?`${doneN} of ${total} done.`:'Nothing for today. Star a task or give it a date and it shows up here.'}</p>
+      ${late.length?`<button class="ghost-btn plan-day" id="planDay">${svg('clock',14,1.9)} Move ${late.length} overdue to today</button>`:''}
     </header>
     ${total?`<div id="focusWrap" class="focus-wrap">${groups.map(g=>`
       <div class="fgroup">
         <div class="fgroup-h"><span class="dot" data-s="${g.p.status}"></span><button data-open="${g.p.id}">${esc(g.p.name)}</button></div>
         <ul class="tasks">${g.items.map(t=>`
-          <li class="${t.done?'done':''}">
+          <li class="${t.done?'done':''}" data-row="${g.p.id}|${t.id}">
             <button class="check" data-ftoggle="${g.p.id}|${t.id}" aria-label="Toggle">${svg(t.done?'boxOk':'box',17,1.8)}</button>
             <span>${linkify(t.text)}</span>
             ${dueOf(t)?dueChip(g.p.id,t):''}
@@ -3648,9 +3689,21 @@ function renderFocus(){
           </li>`).join('')}</ul>
       </div>`).join('')}
       ${doneN?`<div style="max-width:760px;margin:0 auto"><button class="btn-inline" id="clearDone">Clear ${doneN} finished</button></div>`:''}
-    </div>`:''}`;
-  const wrap=$('#focusWrap');
-  if(wrap) wrap.addEventListener('click',e=>{
+    </div>`:''}
+    ${upDays.length?`<section class="upcoming"><h2 class="pane-h">Next 7 days</h2>${upDays.map(g=>`<div class="up-day">
+      <div class="up-h">${esc(dueLabel(g.d))}<small>${WEEK[new Date(g.d+'T12:00').getDay()]}</small></div>
+      <ul class="tasks">${g.items.map(({p,t})=>`<li data-row="${p.id}|${t.id}">
+        <button class="check" data-ftoggle="${p.id}|${t.id}" aria-label="Done">${svg('box',17,1.8)}</button>
+        <span>${linkify(t.text)}</span>${dueChip(p.id,t)}
+        <button class="tsrc" data-open="${p.id}">${esc(p.id===TODO?'To do':p.name)}</button></li>`).join('')}</ul></div>`).join('')}</section>`:''}`;
+  const pd=$('#planDay');
+  if(pd) pd.addEventListener('click',()=>{
+    const prev=late.map(x=>[x,dueOf(x.t)]);
+    late.forEach(x=>{ setDue(x.t,t0); saveProject(x.p,true) }); renderFocus(); renderSide();
+    toast('Moved '+late.length+' to today',{action:'Undo',onAction:()=>{ prev.forEach(([x,d])=>{ setDue(x.t,d); saveProject(x.p,true) }); renderFocus(); renderSide() }});
+  });
+  const wrap=$('#view');
+  if(wrap&&!wrap._focusBound){ wrap._focusBound=true; wrap.addEventListener('click',e=>{
     if(e.target.closest('a')) return;
     const tg=e.target.closest('[data-ftoggle]'), un=e.target.closest('[data-funstar]');
     const hit=tg||un; if(!hit) return;
@@ -3659,7 +3712,7 @@ function renderFocus(){
     const task=(pr.tasks||[]).find(x=>x.id===tid); if(!task) return;
     if(tg){ task.done=!task.done; task.doneAt=task.done?Date.now():null; rollRepeat(task) } else { task.star=false; if(dueOf(task)&&dueOf(task)<=ld()) setDue(task,'') }
     saveProject(pr,true); renderFocus(); renderSide();
-  });
+  }); }
   const cd=$('#clearDone');
   if(cd) cd.addEventListener('click',()=>{
     starred().forEach(g=>{g.items.filter(t=>t.done).forEach(t=>t.star=false); saveProject(g.p,true)});
@@ -3999,7 +4052,7 @@ function todoPane(p){
     </div>
     ${shown.length?`<div class="tdlist" id="tdList">${shown.map(i=>{
       const exp=st.todoOpen===i.id;
-      return `<div class="tditem ${i.done?'done':''} ${exp?'open':''}" data-id="${i.id}">
+      return `<div class="tditem ${i.done?'done':''} ${exp?'open':''}" data-id="${i.id}" data-row="${p.id}|${i.id}">
         <div class="tdhead">
           <button class="check" data-tdtog="${i.id}" aria-label="Toggle">${svg(i.done?'boxOk':'box',17,1.8)}</button>
           <span class="catbadge" data-c="${i.cat||'other'}">${esc(catLabel(i.cat))}</span>
@@ -5574,7 +5627,7 @@ function renderTasks(t){
     const subs=x.subs||[], sd=subs.filter(y=>y.done).length;
     const exp=st.taskOpen===x.id;
     return `
-    <li class="${x.done?'done':''} ${fo&&x.id===fo.id?'first-open':''}" draggable="true" data-task="${x.id}">
+    <li class="${x.done?'done':''} ${fo&&x.id===fo.id?'first-open':''}" draggable="true" data-task="${x.id}" data-row="${st.openId}|${x.id}">
       <button class="check" data-toggle="${x.id}" aria-label="Toggle">${svg(x.done?'boxOk':'box',17,1.8)}</button>
       <span>${linkify(x.text)}</span>
       ${x.done?'':dueChip(st.openId,x)}
@@ -6468,12 +6521,14 @@ function openKeys(){
   const K=a=>a.map(k=>`<kbd>${k}</kbd>`).join('');
   const rows=[['Quick add',[mod,'K']],['Search','/'],['Write it down: just start typing',null],
     ['Undo / redo',[mod,'Z'],[mod,'Shift','Z']],['Close a window or menu',['Esc']],['Paste a screenshot onto the board',[mod,'V']],
+    ['Move through tasks',['↑'],['↓']],['Done / not done','Space'],['Date for the task','D'],['Move to tomorrow','T'],
     ['Save a full backup with photos',[mod,'Shift','E']],['This list',['?']]];
   const el=document.createElement('div');
   el.className='sheet-wrap';
   el.innerHTML=`<div class="sheet keys-sheet">
     <div class="sheet-head"><span>Keyboard shortcuts</span><button data-close aria-label="Close">${svg('x',15,2)}</button></div>
     ${rows.map(r=>`<div class="kb-row"><span>${r[0]}</span><span class="kb-k">${r[1]?(Array.isArray(r[1])?K(r[1]):K([r[1]])):''}${r[2]?' '+K(r[2]):''}</span></div>`).join('')}
+    <p class="hint">On a phone, swipe a task right for done, left for tomorrow. Dates can be typed at the end: “friday”, “через 3 дня”, “25 dec”.</p>
     <p class="hint">In quick add, start with <kbd>!</kbd> for Ideas, <kbd>$</kbd> for Wishlist, <kbd>?</kbd> for To do, <kbd>&gt;</kbd> for the current project.</p>
   </div>`;
   el.addEventListener('click',e=>{ if(e.target===el||e.target.closest('[data-close]')) el.remove() });
@@ -6604,7 +6659,8 @@ function parseQuick(raw){
   let due='', task=full, rep='';
   const rw=full.match(/(?:^|\s)(every day|daily|every week|weekly|every month|monthly|каждый день|ежедневно|каждую неделю|еженедельно|каждый месяц|ежемесячно)$/i);
   if(rw){ const w=rw[1].toLowerCase(); rep=/day|daily|день|ежедн/.test(w)?'day':/week|недел/.test(w)?'week':'month'; task=full.slice(0,rw.index).trim()||full }
-  const dw=task.match(/(?:^|\s)(сегодня|завтра|послезавтра|today|tomorrow)$/i);
+  const nd=nlDate(task); if(nd){ due=nd.due; task=nd.rest||task }
+  const dw=null;
   if(dw){ due=ldPlus(DUE_WORDS[dw[1].toLowerCase()]); task=task.slice(0,dw.index).trim()||task }
   if(rep&&!due) due=ld();
   return {text,full,task,due,rep,price,url,forced};
@@ -7781,6 +7837,60 @@ document.addEventListener('click',e=>{
   const pr=st.projects.find(x=>x.id===pid); if(!pr) return;
   const task=(pr.tasks||[]).find(x=>x.id===tid); if(task) pickDue(pr,task);
 });
+/* строки задач: свайп на телефоне (вправо — сделано, влево — на завтра) и клавиши на компьютере */
+function rowRef(el){ const r=el&&el.dataset.row; if(!r) return null; const [pid,tid]=r.split('|'); const p=st.projects.find(x=>x.id===pid); const t=p&&(p.tasks||[]).find(x=>x.id===tid); return t?{p,t}:null }
+function rowDone(ref){
+  const {p,t}=ref, was=[t.done,t.doneAt,t.layout];
+  t.done=!t.done; t.doneAt=t.done?Date.now():null; const rolled=t.done&&rollRepeat(t);
+  saveProject(p,true); refreshView(); if(t.done) blip('done');
+  if(t.done&&!rolled) toast('Done',{action:'Undo',onAction:()=>{ t.done=was[0]; t.doneAt=was[1]; if(was[2]) t.layout=was[2]; else delete t.layout; saveProject(p,true); refreshView() }});
+}
+function rowLater(ref){
+  const {p,t}=ref, was=dueOf(t);
+  setDue(t,ldPlus(1)); saveProject(p,true); refreshView();
+  toast('Tomorrow',{action:'Undo',onAction:()=>{ setDue(t,was); saveProject(p,true); refreshView() }});
+}
+(()=>{
+  let sx=0, sy=0, row=null, dx=0, horiz=null;
+  document.addEventListener('touchstart',e=>{
+    const r=e.target.closest('#view [data-row]'); if(!r||e.target.closest('input,textarea,.subs')||e.touches.length>1){ row=null; return }
+    row=r; sx=e.touches[0].clientX; sy=e.touches[0].clientY; dx=0; horiz=null;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!row) return;
+    const x=e.touches[0].clientX-sx, y=e.touches[0].clientY-sy;
+    if(horiz===null&&(Math.abs(x)>10||Math.abs(y)>10)) horiz=Math.abs(x)>Math.abs(y)*1.4;
+    if(!horiz) return;
+    dx=Math.max(-140,Math.min(140,x));
+    row.style.transform='translateX('+dx+'px)'; row.classList.add('swiping');
+    row.dataset.swipe=dx>0?'done':'later'; row.classList.toggle('armed',Math.abs(dx)>90);
+  },{passive:true});
+  document.addEventListener('touchend',()=>{
+    if(!row) return;
+    const r=row, d=dx; row=null;
+    r.style.transform=''; r.classList.remove('swiping','armed');
+    if(!horiz) return;
+    const ref=rowRef(r); if(!ref) return;
+    if(d>90) rowDone(ref); else if(d<-90&&!ref.t.done) rowLater(ref);
+  });
+})();
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||'')||document.querySelector('.sheet-wrap,.qa-wrap,.cap-wrap,.pmenu')) return;
+  const rows=[...document.querySelectorAll('#view [data-row]')].filter(r=>r.offsetParent);
+  const cur=document.querySelector('#view [data-row].kfocus');
+  const move=n=>{ if(!rows.length) return; let i=cur?rows.indexOf(cur):-1; i=Math.max(0,Math.min(rows.length-1,i+n)); if(cur) cur.classList.remove('kfocus'); rows[i].classList.add('kfocus'); rows[i].scrollIntoView({block:'nearest'}) };
+  if(!rows.length) return;
+  if(e.key==='ArrowDown'||(e.key==='j'&&cur)){ e.preventDefault(); e.stopImmediatePropagation(); return move(1) }
+  if(e.key==='ArrowUp'||(e.key==='k'&&cur)){ e.preventDefault(); e.stopImmediatePropagation(); return move(-1) }
+  if(!cur) return;
+  const ref=rowRef(cur); if(!ref) return;
+  if(e.key===' '||e.key==='x'){ e.preventDefault(); e.stopImmediatePropagation(); const id=cur.dataset.row; rowDone(ref); setTimeout(()=>{ const n=document.querySelector(`#view [data-row="${id}"]`); if(n) n.classList.add('kfocus') },60); return }
+  if(e.key==='d'){ e.preventDefault(); e.stopImmediatePropagation(); pickDue(ref.p,ref.t); return }
+  if(e.key==='t'){ e.preventDefault(); e.stopImmediatePropagation(); rowLater(ref); return }
+  if(e.key==='Enter'){ const ex=cur.querySelector('[data-tdexp],[data-taskexp]'); if(ex){ e.preventDefault(); ex.click() } return }
+  if(e.key==='Escape') cur.classList.remove('kfocus');
+},true);
 /* галочка: короткий всплеск в цвете раздела, только когда отмечаем сделанным */
 document.addEventListener('click',e=>{
   const c=e.target.closest('.check'); if(!c) return;
@@ -7940,7 +8050,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:42';
+const APP_VER='19 Nov 02:44';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
