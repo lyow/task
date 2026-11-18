@@ -2400,6 +2400,24 @@ button:active:not(:disabled){transform:scale(.97)}
 .sp-sum{margin-top:6px;font-size:13.5px;color:var(--soft)}
 .sp-hero{margin-top:22px}
 .sp-stats .sp-big>span{display:flex}
+
+/* project page: status as a segmented control; no outline on the next task */
+.picker.big{display:inline-flex;gap:2px;padding:3px;background:var(--s1);border:1px solid var(--line);border-radius:12px;box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+.picker.big .pick{height:30px;padding:0 12px;border:0!important;border-radius:9px;background:none;color:var(--soft);box-shadow:none}
+.picker.big .pick:hover{color:var(--txt);background:var(--s2)}
+.picker.big .pick.on{background:var(--s3);color:var(--txt);box-shadow:inset 0 1px 0 var(--edge),0 0 0 1px var(--line-2)}
+.picker.big .pick.on[data-s=active] svg{color:var(--amber)}
+.picker.big .pick.on[data-s=done] svg{color:var(--mint)}
+.tasks li.first-open{border:0!important;box-shadow:none!important;background:none!important;outline:0}
+.notes{background:#0A0A0D;border:1px solid var(--line);border-radius:var(--r-card);box-shadow:inset 0 1px 2px rgba(0,0,0,.45)}
+.tag,.tag-imp{border-radius:999px;background:var(--s2);border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--edge)}
+
+.f>.sp-amt{display:flex;margin:0}
+.sp-amt select{height:46px;background:#0A0A0D;border:1px solid var(--line);color:var(--txt);padding:0 8px}
+.sp-sheet .sp-grid13{grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:5px}
+.sp-sheet .sp-grid13 button{padding:7px 4px;gap:3px}
+.gate{background:radial-gradient(520px 260px at 50% 18%,rgba(212,255,58,.05),transparent 70%),var(--ink)}
+.gate-box{background:var(--s1);border:1px solid var(--line);box-shadow:var(--sh-card),0 40px 90px -40px #000;border-radius:var(--r-f)}
 </style>
 </head>
 <body class="side-open">
@@ -2515,7 +2533,7 @@ button:active:not(:disabled){transform:scale(.97)}
   <form class="gate-box" id="gateForm">
     <img class="gate-mark" src="icon-512.png" alt="">
     <h1>Welcome back</h1>
-    <p>Your projects, ideas and wishlist live in the cloud now. Sign in to reach them from any device.</p>
+    <p>Sign in to your projects, ideas and money.</p>
     <label class="f"><span>Email</span><input type="email" id="gMail" autocomplete="username" required></label>
     <label class="f"><span>Password</span><input type="password" id="gPass" autocomplete="current-password" required></label>
     <button class="gate-go" id="gGo" type="submit">Sign in</button>
@@ -3294,7 +3312,7 @@ function renderSide(){
   syncBadge();
   const list=sideVisible();
   $('#sideLabel').textContent='Projects · '+list.length;
-  $('#btnAll').classList.toggle('on',st.openId===null&&!st.focus&&!st.hist);
+  $('#btnAll').classList.toggle('on',st.openId===null&&!st.focus&&!st.hist&&!st.review&&!st.spend&&!st.query.trim());
   const fb=$('#btnFocus'), fc=$('#fcount');
   if(fb) fb.classList.toggle('on',st.focus);
   if(fc) fc.textContent=starCount();
@@ -3879,11 +3897,11 @@ function renderReview(){
       <p class="lede">${week.length} done this week${nothing?'. Nothing needs a decision.':` · ${due.length+stale.length+cold.length} need a decision.`}</p>
     </header>
     ${due.length?`<div class="rsec"><h2>Asked to come back</h2>${due.map(p=>card(p,[
-      {k:'snooze',l:'later'},{k:'start',l:'start now'},{k:'arch',l:'archive'}])).join('')}</div>`:''}
+      {k:'snooze',l:'Later'},{k:'start',l:'Start now'},{k:'arch',l:'Archive'}])).join('')}</div>`:''}
     ${stale.length?`<div class="rsec"><h2>Started, then stalled</h2>${stale.map(p=>card(p,[
-      {k:'snooze',l:'park it'},{k:'done',l:'call it done'},{k:'arch',l:'archive'}])).join('')}</div>`:''}
+      {k:'snooze',l:'Park it'},{k:'done',l:'Call it done'},{k:'arch',l:'Archive'}])).join('')}</div>`:''}
     ${cold.length?`<div class="rsec"><h2>Never got going</h2>${cold.map(p=>card(p,[
-      {k:'start',l:'start now'},{k:'arch',l:'archive'},{k:'del',l:'delete'}])).join('')}</div>`:''}
+      {k:'start',l:'Start now'},{k:'arch',l:'Archive'},{k:'del',l:'Delete'}])).join('')}</div>`:''}
     ${nothing?`<p class="empty-line">All clear. <a href="#history">See what you did</a></p>`:''}
   `;
   $('#view').querySelectorAll('[data-rev-act]').forEach(b=>b.addEventListener('click',async e=>{
@@ -8484,7 +8502,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 02:57';
+const APP_VER='19 Nov 02:58';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
