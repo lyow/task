@@ -736,9 +736,6 @@ body.no-hints .lede{display:none}
 .lcard[draggable],.lrow[draggable]{cursor:grab}
 .refprev img{max-width:min(92vw,760px);max-height:74vh;border-radius:14px;object-fit:contain}
 
-.refprev-name{font-family:var(--display);font-weight:600;font-size:15px;max-width:40vw;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.refprev-host{font-family:var(--ui);font-size:12px;color:var(--dim)}
 /* рамка выделения и панель действий */
 .marquee{position:absolute;z-index:60;border:1px solid var(--violet);background:color-mix(in srgb,var(--violet) 12%,transparent);
   border-radius:6px;pointer-events:none}
@@ -2505,7 +2502,6 @@ async function putPhoto(ph){
   }
 }
 
-const TRASH_DAYS=30;
 
 async function delPhotoDB(id){          // в корзину, не насовсем
   if(!sb||!ME) return;
@@ -2545,10 +2541,6 @@ async function trashOf(pid){
   }catch(e){ return [] }
 }
 
-async function sweepTrash(pid){         // старше месяца — вычищаем
-  const old=(await trashOf(pid)).filter(x=>Date.now()-(x.deletedAt||0)>TRASH_DAYS*864e5);
-  for(const ph of old) await purgePhoto(ph.id,ph.path);
-}
 
 async function photosOf(pid){
   if(!sb||!ME) return [];
@@ -2557,18 +2549,6 @@ async function photosOf(pid){
   return await signPhotos((data||[]).filter(r=>!r.deleted_at));
 }
 
-async function firstPhotoOf(pid){
-  if(!sb||!ME) return null;
-  const {data}=await sb.from('photos').select('*').eq('project_id',pid)
-    .order('created',{ascending:true}).limit(4);
-  const out=await signPhotos((data||[]).filter(r=>!r.deleted_at));
-  return out[0]||null;
-}
-async function photoById(id){
-  const {data}=await sb.from('photos').select('*').eq('id',id).limit(1);
-  const out=await signPhotos(data||[]);
-  return out[0]||null;
-}
 const photoSrc=ph=>ph.url||(ph.blob?URL.createObjectURL(ph.blob):'');
 
 /* ───────── helpers ───────── */
@@ -2683,7 +2663,6 @@ const plusDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return dayStr(d)}
 const plusMonths=n=>{const d=new Date();d.setMonth(d.getMonth()+n);return dayStr(d)};
 const isDue=p=>!!p.revisit&&p.revisit<=dayStr(new Date());
 const dueProjects=()=>st.projects.filter(x=>!SPECIAL(x.id)&&isDue(x));
-const plural=(n,a,b,c)=>{const x=n%10,y=n%100;return x===1&&y!==11?a:(x>=2&&x<=4&&(y<10||y>=20)?b:c)};
 /* срок задачи живёт в поле layout — у задач оно больше ни для чего не нужно */
 const ld=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const ldPlus=n=>{const d=new Date();d.setDate(d.getDate()+n);return ld(d)};
@@ -3078,12 +3057,6 @@ function renderSide(){
   bindRowDrag(box);
 }
 
-async function coverOf(p){
-  if(p.cover){
-    try{ const ph=await photoById(p.cover); if(ph) return ph }catch(e){}
-  }
-  return await firstPhotoOf(p.id);
-}
 const coverCache={};
 const COVER_KEY='pm:covers';
 let coverFresh=0;
@@ -5287,7 +5260,7 @@ async function openTrash(p){
           <button data-purge="${ph.id}" data-path="${esc(ph.path||'')}" title="Delete for good">${svg('trash',13,1.8)}</button>
         </div>
       </div>`).join('')}</div>
-      <p class="hint" style="margin-top:12px">Anything here is cleared automatically after ${TRASH_DAYS} days.</p>`
+      <p class="hint" style="margin-top:12px">Deleted photos stay here until you remove them.</p>`
     :`<p class="hint" style="margin:0">Nothing deleted recently.</p>`}
   </div>`;
   const close=()=>el.remove();
@@ -5325,7 +5298,7 @@ async function openTrash(p){
           <button data-purge="${ph.id}" data-path="${esc(ph.path||'')}" title="Delete for good">${svg('trash',13,1.8)}</button>
         </div>
       </div>`).join('')}</div>
-      <p class="hint" style="margin-top:12px">Anything here is cleared automatically after ${TRASH_DAYS} days.</p>`
+      <p class="hint" style="margin-top:12px">Deleted photos stay here until you remove them.</p>`
     :`<p class="hint" style="margin:0">Nothing deleted recently.</p>`}
   </div>`;
   const close=()=>el.remove();
@@ -5348,31 +5321,6 @@ async function openTrash(p){
   document.body.appendChild(el);
 }
 
-function refPreview(p,item){
-  const emb=embedOf(item.url);
-  if(!emb){ window.open(item.url,'_blank','noopener'); return }   // не видео — открываем сразу
-  const el=document.createElement('div');
-  el.className='lb refprev';
-  el.innerHTML=`
-    <div class="embed-box ${emb.wide?'wide':'tall'}">
-      <iframe src="${esc(emb.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-        allowfullscreen loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    </div>
-    <div class="lb-bar">
-      <span class="refprev-name">${esc(item.text||hostOf(item.url)||'Untitled')}</span>
-      <span class="refprev-host">${esc(hostOf(item.url))}</span>
-      <button data-go>${svg('link',14,1.9)} Open the link</button>
-      <button data-edit>${svg('gear',14,1.6)} Settings</button>
-      <button data-close>${svg('x',14,2)} Close</button>
-    </div>`;
-  const close=()=>el.remove();
-  el.addEventListener('click',e=>{
-    if(e.target===el||e.target.closest('[data-close]')) return close();
-    if(e.target.closest('[data-go]')){ window.open(item.url,'_blank','noopener'); return }
-    if(e.target.closest('[data-edit]')){ close(); linkEdit(p,item) }
-  });
-  document.body.appendChild(el);
-}
 
 /* идея-видео: смотрим прямо здесь и сразу даём ей название */
 function ideaPreview(p,i){
@@ -6834,10 +6782,6 @@ async function readClip(){
   }catch(e){ return '' }
 }
 
-function nameFor(id){
-  const p=st.projects.find(x=>x.id===id);
-  return p?p.name:'Ideas';
-}
 
 async function saveCapture(target,text,url,file,extra){
   const p=st.projects.find(x=>x.id===target);
@@ -7176,7 +7120,6 @@ function catIdOf(t){
   if(L.ecat&&OLDCAT[L.ecat]) return OLDCAT[L.ecat];
   return isExp(t)?'other':'shopping';
 }
-const catOf=t=>SCAT[catIdOf(t)].l;
 const guessCat=text=>recognise(text).cat||'';
 function spName(t){ const s=svcOf(t.text); const raw=String(t.text||'').trim();
   if(s&&!(' '+normName(raw)+' ').replace(s.re,' ').trim()) return s.name;
@@ -7239,7 +7182,6 @@ function spendMonth(off){ const k=nowKey()-off; return monthSum(spendEntries().f
 const GROUPS=[{id:'everyday',l:'Everyday',cats:['coffee','food','groceries','transport']},{id:'subs',l:'Subscriptions',cats:['subs']},
   {id:'shop',l:'Shopping',cats:['shopping','gifts']},{id:'fun',l:'Fun',cats:['fun','gambling']},{id:'homehealth',l:'Home & Health',cats:['home','health']},
   {id:'travel',l:'Travel',cats:['travel']},{id:'other',l:'Other',cats:['other']}];
-const spendCats=()=>SCATS.map(c=>c.id);
 /* «claude 200», «200 claude», «кофе 4,5», «$15 netflix», «такси 300р», «spotify 10 monthly» */
 const REP_SPEND=/(?:^|\s)(monthly|every month|каждый месяц|ежемесячно|в месяц)$/i;
 function curTok(x){ x=String(x||'').toLowerCase();
@@ -8259,7 +8201,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:14';
+const APP_VER='19 Nov 03:15';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
