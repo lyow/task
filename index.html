@@ -1938,6 +1938,33 @@ body:has(.paid-pop) .fab-wrap{display:none}
 .ai-btn:disabled{opacity:.7;cursor:progress}
 @keyframes flashHit{0%,60%{box-shadow:0 0 0 2px var(--lime)}100%{box-shadow:0 0 0 2px transparent}}
 #view .flash{animation:flashHit 1.8s ease;border-radius:12px}
+/* today digest */
+.digest{position:fixed;z-index:120;right:20px;bottom:20px;width:min(380px,calc(100vw - 20px));padding:8px;border-radius:18px;
+  background:var(--panel-2);border:1px solid var(--line-2);box-shadow:0 30px 70px -24px #000;animation:pmenuIn .18s cubic-bezier(.2,.8,.2,1)}
+.digest.out{opacity:0;transform:translateY(6px);transition:.16s}
+.dg-head{display:flex;align-items:center;gap:8px;padding:6px 6px 8px 10px}
+.dg-head b{font-family:var(--display);font-size:16px;font-weight:600}
+.dg-n{font-size:12.5px;font-weight:700;color:var(--on);background:var(--lime);border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums}
+.dg-x{margin-left:auto;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--dim)}
+.dg-x:hover{background:var(--raise);color:var(--txt)}
+.dg-row{display:flex;align-items:center;gap:8px;padding:8px 6px 8px 10px;border-radius:12px;transition:opacity .18s,transform .18s}
+.dg-row:hover{background:var(--raise)}
+.dg-row.gone{opacity:0;transform:translateX(12px)}
+.dg-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.dg-text b{font-weight:500;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dg-text small{font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dg-text em{font-style:normal;color:var(--magenta)}
+.dg-later{min-height:36px;padding:0 11px;border-radius:10px;border:1px solid var(--line-2);font-size:13px;font-weight:600;color:var(--soft)}
+.dg-later:hover{color:var(--txt);background:var(--panel)}
+.dg-done{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--lime);color:var(--on)}
+.dg-more{width:100%;padding:10px;font-size:13px;color:var(--soft);border-radius:10px}
+.dg-more:hover{background:var(--raise);color:var(--txt)}
+body:has(.digest) .fab-wrap{display:none}
+@media (max-width:760px){.digest{left:0;right:0;margin:0 auto;bottom:calc(10px + env(safe-area-inset-bottom))}}
+.tool-time{gap:8px;flex-wrap:wrap}
+.tool-time input{padding:4px 8px;border-radius:8px;border:1px solid var(--line-2);background:var(--bg);color:var(--txt);color-scheme:dark;font:inherit}
+.td-when{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 12px;margin-bottom:10px;border-radius:10px;border:1px solid var(--line-2);font-size:13.5px;font-weight:600;color:var(--soft)}
+.td-when:hover{color:var(--txt);background:var(--raise)}
 /* settings panel in the sidebar */
 .side-tools .tool.on{color:var(--lime)}
 /* phones: touch targets */
@@ -2012,6 +2039,8 @@ body:has(.paid-pop) .fab-wrap{display:none}
     <button class="tool" id="tSound"></button>
     <button class="tool" id="tAi"></button>
     <button class="tool" id="tResort">Sort automatically again</button>
+    <button class="tool" id="tRemind"></button>
+    <label class="tool tool-time" id="tRemindRow" style="display:none">Morning reminder at <input type="time" id="tRemindAt"></label>
     <button class="tool" id="tExport"></button>
     <button class="tool" id="tKeys"></button>
   </div>
@@ -2748,12 +2777,69 @@ const archivedCount=()=>st.projects.filter(p=>p.archived).length;
 
 /* ───────── sidebar ───────── */
 /* сколько задач на сегодня и просрочено — в заголовке вкладки и на значке приложения */
-function dueCount(){
-  const t0=ld(); let n=0;
+function dueItems(){
+  const t0=ld(), out=[];
   st.projects.forEach(p=>{ if(p.archived) return;
-    (p.tasks||[]).forEach(t=>{ if(!t.done&&t.kind!=='sticky'&&t.kind!=='link'&&t.kind!=='quick'){ const d=dueOf(t); if(d&&d<=t0) n++ } }) });
-  return n;
+    (p.tasks||[]).forEach(t=>{ if(!t.done&&t.kind!=='sticky'&&t.kind!=='link'&&t.kind!=='quick'){ const d=dueOf(t); if(d&&d<=t0) out.push({p,t,d}) } }) });
+  return out.sort((a,b)=>a.d.localeCompare(b.d));
 }
+const dueCount=()=>dueItems().length;
+/* сводка на сегодня: раз в день при открытии, только если есть что показать */
+function showDigest(force){
+  if(!force&&LS.get('pm:digest')===ld()) return;
+  if(document.querySelector('.digest,.sheet-wrap,.qa-wrap,.cap-wrap')) return;
+  const list=dueItems(); if(!list.length) return;
+  LS.set('pm:digest',ld());
+  const t0=ld();
+  const el=document.createElement('section');
+  el.className='digest'; el.setAttribute('aria-label','Due today');
+  const row=x=>`<div class="dg-row" data-dg="${x.p.id}|${x.t.id}">
+      <span class="dg-text"><b>${esc(x.t.text||'Untitled')}</b><small>${esc(x.p.id===TODO?'To do':x.p.id===INBOX?'Ideas':x.p.name)}${x.d<t0?' · <em>was due '+esc(dueLabel(x.d))+'</em>':''}</small></span>
+      <button class="dg-later" data-dgl title="Move to tomorrow">Tomorrow</button>
+      <button class="dg-done" data-dgd aria-label="Done">${svg('boxOk',16,2)}</button>
+    </div>`;
+  el.innerHTML=`<div class="dg-head"><b>Today</b><span class="dg-n">${list.length}</span><button class="dg-x" aria-label="Close">${svg('x',14,2.2)}</button></div>
+    <div class="dg-list">${list.slice(0,6).map(row).join('')}</div>
+    ${list.length>6?`<button class="dg-more" data-dgall>${list.length-6} more in Today</button>`:''}`;
+  const close=()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),160) };
+  el.addEventListener('click',e=>{
+    if(e.target.closest('.dg-x')) return close();
+    if(e.target.closest('[data-dgall]')){ close(); resetViews(); st.focus=true; route(); return }
+    const r=e.target.closest('[data-dg]'); if(!r) return;
+    const [pid,tid]=r.dataset.dg.split('|');
+    const pr=st.projects.find(x=>x.id===pid), t=pr&&(pr.tasks||[]).find(x=>x.id===tid); if(!t) return;
+    if(e.target.closest('[data-dgd]')){ t.done=true; t.doneAt=Date.now(); rollRepeat(t); blip('done') }
+    else if(e.target.closest('[data-dgl]')) setDue(t,ldPlus(1));
+    else return;
+    saveProject(pr,true); r.classList.add('gone');
+    setTimeout(()=>{ r.remove(); if(!el.querySelector('.dg-row')){ close(); toast('All clear for today') } },180);
+    refreshView();
+  });
+  el.addEventListener('keydown',e=>{ if(e.key==='Escape') close() });
+  document.body.appendChild(el);
+}
+/* напоминания работают, только пока приложение открыто: сервера нет */
+function remindOn(){ return LS.get('pm:remind')==='1'&&'Notification' in window&&Notification.permission==='granted' }
+function checkRemind(){
+  if(!remindOn()) return;
+  const now=new Date(), hm=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const at=LS.get('pm:remindAt')||'09:00';
+  const list=dueItems();
+  const seen=(()=>{ try{ return JSON.parse(LS.get('pm:reminded')||'{}')||{} }catch(e){ return {} } })();
+  const day=ld(); if(seen.day!==day){ seen.day=day; seen.ids=[]; seen.morning=false }
+  let fresh=list.filter(x=>seen.ids.indexOf(x.t.id)<0);
+  if(hm>=at&&!seen.morning){
+    seen.morning=true; fresh=list;
+  }else if(!seen.morning) fresh=[];
+  if(fresh.length){
+    try{ new Notification(list.length===1?'1 thing for today':list.length+' things for today',
+      {body:fresh.slice(0,3).map(x=>'• '+x.t.text).join('\n')+(fresh.length>3?'\n…':''),icon:'icon-512.png',tag:'pm-today'}) }catch(e){}
+  }
+  seen.ids=list.map(x=>x.t.id);
+  LS.set('pm:reminded',JSON.stringify(seen));
+}
+setInterval(checkRemind,60000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&ME){ checkRemind(); showDigest() } });
 function syncBadge(){
   const n=dueCount();
   document.title=(n?'('+n+') ':'')+pageTitle();
@@ -2789,6 +2875,9 @@ function renderSide(){
   if(ts){ ts.innerHTML=svg(sOn?'boxOk':'box',14,1.9)+' Sounds'; ts.classList.toggle('on',sOn) }
   const ta2=$('#tAi');
   if(ta2){ ta2.innerHTML=svg('spark',14,1.8)+(aiKey()?' AI key · on':' AI key'); ta2.classList.toggle('on',!!aiKey()) }
+  const tr=$('#tRemind'), rOn=LS.get('pm:remind')==='1';
+  if(tr){ tr.innerHTML=svg(rOn?'boxOk':'box',14,1.9)+' Reminders'; tr.classList.toggle('on',rOn) }
+  const trr=$('#tRemindRow'); if(trr){ trr.style.display=rOn?'':'none'; const ti=$('#tRemindAt'); if(ti&&document.activeElement!==ti) ti.value=LS.get('pm:remindAt')||'09:00' }
   const tx=$('#tExport'); if(tx&&!tx.innerHTML) tx.innerHTML=svg('arch',14,1.7)+' Export backup';
   const tk=$('#tKeys'); if(tk&&!tk.innerHTML) tk.innerHTML=svg('box',14,1.7)+' Keyboard shortcuts';
   const tt=$('#tTheme');
@@ -3750,11 +3839,13 @@ function todoPane(p){
           <button class="row-more" data-amenu title="Actions" aria-label="Actions"><i></i><i></i><i></i></button>
           <div class="idea-acts">
             <button data-tdexp2="${i.id}" title="${exp?'Close':'Link and notes'}">${svg(exp?'x':'pen',13,1.9)}</button>
+            ${i.done?'':`<button data-due="${p.id}|${i.id}" title="${dueOf(i)?'Change the date':'Set a date'}">${svg('clock',13,1.9)}</button>`}
             <button data-tdmk="${i.id}" title="Turn into a project">${svg('plus',13,2.4)}</button>
             <button data-tddel="${i.id}" title="Delete">${svg('trash',13,1.8)}</button>
           </div>
         </div>
         ${exp?`<div class="tdmore">
+          ${i.done?'':`<button class="td-when" data-due="${p.id}|${i.id}">${svg('clock',13,1.9)} ${dueOf(i)?esc(dueLabel(dueOf(i)))+({day:' · every day',week:' · every week',month:' · every month'}[repOf(i)]||''):'Add a date or repeat'}</button>`}
           <div class="tdlink">
             <input data-tdurl="${i.id}" placeholder="https:// — where to watch, buy or read it" value="${esc(i.url||'')}">
             <button data-tdopen="${i.id}">${svg('link',12,1.9)} open</button>
@@ -6118,7 +6209,7 @@ function openSettings(id){
       p.archived=!p.archived;
       if(p.archived&&st.openId===p.id) st.openId=null;
       saveProject(p,true); sortProjects(); close(); route();
-      toast(p.archived?'Moved to archive':'Back out of archive');
+      toast(p.archived?'Moved to archive':'Back out of archive',{action:'Undo',onAction:()=>{ p.archived=!p.archived; saveProject(p,true); sortProjects(); route() }});
       return;
     }
     if(e.target.closest('[data-del]')){
@@ -6933,7 +7024,11 @@ function pickDue(pr,task){
   </div>`;
   let dirty=false;
   const close=()=>{ el.remove(); if(dirty) refreshView() };
-  const apply=d=>{ setDue(task,d); if(!d) setLay(task,'rep',''); saveProject(pr,true); dirty=true; close() };
+  const apply=d=>{
+    const wasD=dueOf(task), wasR=repOf(task);
+    setDue(task,d); if(!d) setLay(task,'rep',''); saveProject(pr,true); dirty=true; close();
+    if(!d&&wasD) toast('Date cleared',{action:'Undo',onAction:()=>{ setDue(task,wasD); setLay(task,'rep',wasR); saveProject(pr,true); refreshView() }});
+  };
   el.addEventListener('click',e=>{
     if(e.target===el||e.target.closest('[data-close]')) return close();
     const r=e.target.closest('[data-rep]');
@@ -7064,6 +7159,17 @@ $('#tTheme').addEventListener('click',()=>{
   renderSide();
 });
 $('#tExport').addEventListener('click',exportData);
+$('#tRemind').addEventListener('click',async()=>{
+  if(LS.get('pm:remind')==='1'){ LS.set('pm:remind',''); renderSide(); toast('Reminders off'); return }
+  if(!('Notification' in window)){ toast('This browser cannot show notifications',{kind:'warn'}); return }
+  let perm=Notification.permission;
+  if(perm==='default'){ try{ perm=await Notification.requestPermission() }catch(e){} }
+  if(perm!=='granted'){ toast('Notifications are blocked',{kind:'warn',sub:'Allow them for this site in the browser settings'}); return }
+  LS.set('pm:remind','1'); renderSide();
+  toast('Reminders on',{sub:'At '+(LS.get('pm:remindAt')||'09:00')+' and when something is due, while the app is open'});
+  checkRemind();
+});
+$('#tRemindAt').addEventListener('change',e=>{ if(e.target.value){ LS.set('pm:remindAt',e.target.value); toast('Reminder at '+e.target.value) } });
 $('#tKeys').addEventListener('click',openKeys);
 $('#tResort').addEventListener('click',()=>{
   st.manual=false; LS.set('pm:manual','0');
@@ -7225,6 +7331,7 @@ async function afterLogin(){
     syncSidebarButton();
     window.addEventListener('resize',syncSidebarButton);
     route();
+    setTimeout(()=>{ showDigest(); checkRemind() },700);
   }catch(e){
     console.error(e);
     document.getElementById('view').innerHTML='<div class="pad"><h1 style="font-family:var(--display);font-size:20px">Could not reach the database</h1><p class="lede">Check your connection and reload. If it keeps failing, the tables or their access rules may not be set up yet.</p></div>';
