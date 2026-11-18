@@ -1691,6 +1691,35 @@ input:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--lime) 15
 .confetti{position:fixed;inset:0;z-index:9998;pointer-events:none;overflow:hidden}
 .confetti i{position:absolute;top:-14px;width:8px;height:12px;border-radius:2px;animation:fall 1.5s cubic-bezier(.3,.6,.5,1) forwards}
 @keyframes fall{to{transform:translate(var(--dx),108vh) rotate(var(--r))}}
+/* project cards: the picture is the card, steps fill the ones without a picture */
+.grid{gap:16px;grid-template-columns:repeat(auto-fill,minmax(236px,1fr))}
+.card{border-radius:16px;padding:16px}
+.card .cover{transition:opacity .4s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.card.has-cover .cover{opacity:.92}
+.card.has-cover .veil{background:linear-gradient(180deg,rgba(9,9,10,.25) 0%,rgba(9,9,10,.3) 30%,rgba(9,9,10,.9) 72%,rgba(9,9,10,.97) 100%)}
+@media (hover:hover){.card.has-cover:hover .cover{opacity:1;transform:scale(1.045)}}
+.card-top{top:14px;left:16px;right:16px}
+.card-status{gap:6px;font-size:12.5px;font-weight:600}
+.card-status[data-s=active]{color:var(--amber)}
+.card.has-cover .card-status{padding:5px 8px;background:rgba(9,9,10,.55);backdrop-filter:blur(6px)}
+.card-peek{margin:26px 0 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:6px;
+  font-size:13px;line-height:1.3;color:var(--soft)}
+.card-peek span{display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.card-peek span::before{content:'';flex:0 0 auto;width:11px;height:11px;border-radius:4px;border:1.5px solid var(--line-2)}
+.card-peek span:first-child{color:var(--txt)}
+.card-peek span:first-child::before{border-color:var(--lime)}
+.card.has-cover .card-peek{display:none}
+.card:not(.has-cover) .next{display:none}
+.card-name{margin-top:10px;font-size:18px;-webkit-line-clamp:2}
+.card-meta .stale{display:inline-flex;align-items:center;gap:5px}
+.mini{height:4px;border-radius:4px;margin-top:10px}
+.mini i{border-radius:4px;transition:width .4s ease}
+.banner{padding:10px 14px}
+.banner>span{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0}
+.banner .b-list{margin-top:0}
+.row.on::after{content:'';position:absolute;right:6px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--lime)}
+.row.on:hover::after{display:none}
+@media (max-width:760px){.grid{gap:10px;grid-template-columns:repeat(2,1fr)}.card{padding:12px}.card-top{top:11px;left:12px;right:12px}.card-peek{display:none}}
 @media (prefers-reduced-motion:reduce){.view-in,.check.pop svg{animation:none}#view{scroll-behavior:auto}}
 @media (max-width:760px){.day b{font-size:19px}}
 </style>
@@ -2536,29 +2565,75 @@ async function coverOf(p){
   return await firstPhotoOf(p.id);
 }
 const coverCache={};
-const COVER_TTL=45*60*1000;
+const COVER_KEY='pm:covers';
+let coverFresh=0;
+const coverMap=()=>{ try{ return JSON.parse(LS.get(COVER_KEY)||'{}')||{} }catch(e){ return {} } };
+async function coverStore(){ try{ return window.caches?await caches.open('pm-covers-v1'):null }catch(e){ return null } }
+async function thumbBlob(url){
+  const r=await fetch(url); if(!r.ok) throw new Error('cover');
+  const bmp=await createImageBitmap(await r.blob());
+  const k=Math.min(1,640/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(bmp.width*k)); c.height=Math.max(1,Math.round(bmp.height*k));
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  return await new Promise((res,rej)=>c.toBlob(x=>x?res(x):rej(new Error('cover')),'image/jpeg',.8));
+}
+/* обложки: сразу из памяти и с диска, потом один запрос на всё и одна подпись ссылок */
 async function paintCovers(){
-  const cards=Array.from(document.querySelectorAll('.card[data-cover], .prow[data-cover]'));
-  // сначала мгновенно ставим то, что уже знаем — без мигания
-  const pending=[];
-  for(const card of cards){
-    const c=coverCache[card.dataset.cover];
-    if(c&&c.url&&Date.now()-c.at<COVER_TTL) attachCover(card,c.url);
-    else if(c&&c.empty&&Date.now()-c.at<COVER_TTL) continue;
-    else pending.push(card);
+  const cards=()=>Array.from(document.querySelectorAll('.card[data-cover], .prow[data-cover]'));
+  const put=(pid,url)=>cards().forEach(c=>{ if(c.dataset.cover===pid) attachCover(c,url) });
+  cards().forEach(c=>{ const m=coverCache[c.dataset.cover]; if(m&&m.url) attachCover(c,m.url) });
+  const map=coverMap(), store=await coverStore();
+  if(store) await Promise.all(Object.keys(map).map(async pid=>{
+    if(coverCache[pid]&&coverCache[pid].url) return;
+    try{
+      const hit=await store.match('/cover/'+map[pid]); if(!hit) return;
+      coverCache[pid]={url:URL.createObjectURL(await hit.blob()),id:map[pid]}; put(pid,coverCache[pid].url);
+    }catch(e){}
+  }));
+  if(!sb||!ME||(coverFresh&&Date.now()-coverFresh<5*60*1000)) return;
+  let rows;
+  try{
+    const q=await sb.from('photos').select('id,project_id,path,created,deleted_at').order('created',{ascending:true});
+    if(q.error) throw q.error;
+    rows=(q.data||[]).filter(r=>!r.deleted_at&&r.path);
+  }catch(e){ return }
+  coverFresh=Date.now();
+  const want={};
+  st.projects.forEach(p=>{
+    if(SPECIAL(p.id)) return;
+    const pick=(p.cover&&rows.find(r=>r.id===p.cover))||rows.find(r=>r.project_id===p.id);
+    if(pick) want[p.id]=pick;
+  });
+  const next={}; Object.keys(want).forEach(pid=>{ next[pid]=want[pid].id });
+  LS.set(COVER_KEY,JSON.stringify(next));
+  Object.keys(coverCache).forEach(pid=>{
+    if(want[pid]) return;
+    delete coverCache[pid];
+    cards().forEach(c=>{ if(c.dataset.cover!==pid) return; const im=c.querySelector('img.cover'); if(im) im.remove(); c.classList.remove('has-cover') });
+  });
+  const need=Object.keys(want).filter(pid=>!(coverCache[pid]&&coverCache[pid].id===want[pid].id));
+  if(need.length){
+    let urlOf={};
+    try{
+      const sg=await sb.storage.from('photos').createSignedUrls(need.map(pid=>want[pid].path),3600);
+      (sg.data||[]).forEach(d=>{ if(d.path&&d.signedUrl) urlOf[d.path]=d.signedUrl });
+    }catch(e){}
+    await Promise.all(need.map(async pid=>{
+      const row=want[pid], src=urlOf[row.path]; if(!src) return;
+      let u=src;
+      try{
+        const blob=await thumbBlob(src);
+        if(store) await store.put('/cover/'+row.id,new Response(blob,{headers:{'Content-Type':'image/jpeg'}}));
+        u=URL.createObjectURL(blob);
+      }catch(e){}
+      coverCache[pid]={url:u,id:row.id}; put(pid,u);
+    }));
   }
-  for(const card of pending){
-    const p=st.projects.find(x=>x.id===card.dataset.cover);
-    if(!p) continue;
-    let ph=null;
-    try{ ph=await coverOf(p) }catch(e){}
-    const u=ph?photoSrc(ph):'';
-    coverCache[p.id]=u?{url:u,at:Date.now()}:{empty:true,at:Date.now()};
-    if(!u) continue;
-    if(u.indexOf('blob:')===0) st.urls.push(u);
-    if(!document.body.contains(card)) return;
-    attachCover(card,u);
-  }
+  if(store) try{                                        // старые уменьшенные копии больше не нужны
+    const keep=new Set(Object.values(next).map(id=>'/cover/'+id));
+    (await store.keys()).forEach(k=>{ const path=new URL(k.url).pathname; if(!keep.has(path)) store.delete(k) });
+  }catch(e){}
 }
 function attachCover(card,url){
   const thumb=card.querySelector('.pthumb');
@@ -2575,7 +2650,7 @@ function attachCover(card,url){
   card.insertBefore(img,card.firstChild);
   card.classList.add('has-cover');
 }
-function dropCover(pid){ delete coverCache[pid] }
+function dropCover(pid){ delete coverCache[pid]; coverFresh=0 }
 
 function bindRowDrag(box){
   let dragId=null;
@@ -2719,16 +2794,18 @@ function renderAll(){
       return `<a class="card" href="#p/${p.id}" data-open="${p.id}" data-cover="${p.id}" style="--pc:var(--${tintOf(p)})">
         <div class="veil"></div>
         <div class="card-top">
-          <span class="card-status" data-s="${p.status}">${svg(p.status,11,2)} ${sMeta(p.status).short}</span>
+          <span class="card-status" data-s="${p.status}" title="${sMeta(p.status).short}">${svg(p.status,14,2)}${p.status==='done'?' Done':''}</span>
           ${p.important?`<span class="flag">${svg('flag',12,2.1)}</span>`:''}
         </div>
+        ${(()=>{const open=t.filter(x=>!x.done).slice(0,3);
+          return open.length&&p.status!=='done'?`<div class="card-peek">${open.map(x=>`<span>${esc(x.text)}</span>`).join('')}</div>`:''})()}
         <div class="card-name">${esc(p.name)}</div>
         ${(()=>{const nx=nextStep(p);return nx&&p.status!=='done'?`<div class="next"><em>next</em><span>${esc(nx.text)}</span></div>`:''})()}
         <div class="card-meta">${(()=>{
           if(isDue(p)) return `<span class="due-badge">${svg('clock',10,2)} time to come back</span>`;
           if(p.revisit) return `<span class="rev-tag">back on ${ru(p.revisit)}</span>`;
           const ag=daysAgo(p.updated||p.created);
-          return p.status==='active'&&ag>=7?`<span class="stale">untouched for ${ag} ${ag===1?'day':'days'}</span>`
+          return p.status==='active'&&ag>=7?`<span class="stale" title="Untouched for ${ag} days">${svg('clock',11,2)} ${ag}d</span>`
           :''})()}<span class="card-n">${t.length?d+'/'+t.length:''}</span></div>
         ${t.length?`<div class="mini"><i style="width:${(d/t.length)*100}%"></i></div>`:''}
       </a>`}).join('')}</div>`)
