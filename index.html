@@ -2291,6 +2291,32 @@ h1.p-title{margin:0;font-family:var(--display)}
 .cal-cell{min-height:92px}
 .cal-cell.is-today{background:color-mix(in srgb,var(--lime) 5%,transparent)}
 @media (max-width:1100px){.cal-legend{display:none}}
+
+/* phone: comfortable and nothing zooms or runs off the edge */
+@media (max-width:760px){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not(.p-title),textarea,select{font-size:16px!important}
+  .sp-q.idea-q{flex:1 1 100%}
+  .picker.big .pick{white-space:nowrap;font-size:13px;padding-left:8px;padding-right:8px}
+  .jot-tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;margin-right:-14px;padding-right:14px;-webkit-mask:linear-gradient(90deg,#000 85%,transparent);mask:linear-gradient(90deg,#000 85%,transparent)}
+  .jot-tabs::-webkit-scrollbar{display:none}
+  .jot-tab{flex:0 0 auto}
+  .chips{scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chips.xrow{flex-wrap:wrap;overflow:visible}
+  .chips.xrow .wsum{order:9;flex:1 1 100%;margin:4px 0 0 2px;flex-wrap:wrap}
+  .chips.xrow .chips-more{margin-left:auto}
+  .tdhead .due.nodate{display:none}
+  .tdlist:not(.tdf-open):not(.tdf-done) .catbadge{display:none}
+  .tdhead .tdtext{min-width:0;flex:1}
+  #view{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+  .jr-money,.home-money,.sp-blabel{min-height:36px;display:inline-flex;align-items:center}
+  .tsrc{position:relative}
+  .tsrc::after{content:'';position:absolute;inset:-9px -4px}
+}
+
+.cap-wrap{top:var(--vvt,0px);bottom:auto;height:min(var(--vvh,100%),100%)}
+.cap-targets{margin-bottom:12px;scrollbar-width:none}
+.cap-targets::-webkit-scrollbar{display:none}
 </style>
 </head>
 <body class="side-open">
@@ -2934,7 +2960,7 @@ function dueLabel(d){
   const a=d.split('-'); return MON[+a[1]-1]+' '+(+a[2]);
 }
 const dueChip=(pid,t)=>{const d=dueOf(t);
-  return `<button class="due ${dueState(d)}" data-due="${pid}|${t.id}" title="${d?'Change the date':'Set a date'}">${svg('clock',12,2)}${d?' '+dueLabel(d):''}${repOf(t)?' ↻':''}</button>`};
+  return `<button class="due ${dueState(d)}${d?'':' nodate'}" data-due="${pid}|${t.id}" title="${d?'Change the date':'Set a date'}">${svg('clock',12,2)}${d?' '+dueLabel(d):''}${repOf(t)?' ↻':''}</button>`};
 /* даты словами в конце строки: «в пятницу», «через 3 дня», «next monday», «25 дек», «dec 25», «25.12» */
 const WD=[[/^(воскресень[ея]|вс|sunday|sun)$/,0],[/^(понедельник|пн|monday|mon)$/,1],[/^(вторник|вт|tuesday|tue)$/,2],[/^(сред[ау]|ср|wednesday|wed)$/,3],
   [/^(четверг|чт|thursday|thu)$/,4],[/^(пятниц[ау]|пт|friday|fri)$/,5],[/^(суббот[ау]|сб|saturday|sat)$/,6]];
@@ -4195,18 +4221,15 @@ function todoPane(p){
   const byCat=c=>open.filter(i=>(i.cat||'other')===c).length;
   return `<section class="pane wide">
     <div class="want-add">
-      <input class="w-text" id="tdText" placeholder="A task, a book, a film, a place…" autocomplete="off">
-      <div class="kind-pick">
-        ${CATS.map(c=>`<button data-cat="${c.id}" class="${st.todoCat===c.id?'on':''}">${c.label}</button>`).join('')}
-      </div>
+      <input class="w-text" id="tdText" placeholder="${({other:'A task',read:'A book to read',watch:'Something to watch',go:'A place to go',learn:'Something to learn'})[f]||'A task, a book, a film, a place…'}" autocomplete="off" enterkeyhint="done">
       <button class="go" id="tdAdd">${svg('plus',15,2.4)}</button>
     </div>
-    <div class="chips" style="margin:14px 0 0;align-items:center">
+    <div class="chips td-chips tdf-${f}" style="margin:14px 0 0;align-items:center">
       ${tabs.map(t=>{const k=t.id==='open'?open.length:t.id==='done'?done.length:byCat(t.id);
         return `<button class="chip ${f===t.id?'on':''}" data-tf="${t.id}">${t.label}${k?` <span class="chip-n">${k}</span>`:''}</button>`}).join('')}
       ${open.length>1?`<button class="dice" id="tdDice">${svg('spark',12,1.9)} Pick one</button>`:''}
     </div>
-    ${shown.length?`<div class="tdlist" id="tdList">${shown.map(i=>{
+    ${shown.length?`<div class="tdlist tdf-${f}" id="tdList">${shown.map(i=>{
       const exp=st.todoOpen===i.id;
       return `<div class="tditem ${i.done?'done':''} ${exp?'open':''}" data-id="${i.id}" data-row="${p.id}|${i.id}">
         <div class="tdhead">
@@ -4741,7 +4764,7 @@ function bindTodo(p){
     const ti=$('#tdText'); const v=ti.value.trim(); if(!v) return;
     p.tasks=p.tasks||[];
     const q=parseQuick(v);
-    const item={id:uid(),text:q.due?q.task:v,cat:st.todoCat,url:'',note:'',done:false,created:Date.now()};
+    const item={id:uid(),text:q.due?q.task:v,cat:CATS.some(c=>c.id===st.todoFilter)?st.todoFilter:'other',url:'',note:'',done:false,created:Date.now()};
     if(q.due) setDue(item,q.due);
     p.tasks.push(item);
     ti.value=''; st.todoRefocus=true;
@@ -6953,18 +6976,19 @@ async function openCapture(preText,preFile){
       <span class="cp-go">${svg('chev',14,2.2)}</span>
     </div>
     <textarea id="capText" placeholder="…or just write it down" rows="2"></textarea>
+    <div class="cap-label">Where</div>
+    <div class="cap-targets" id="capTargets">
+      ${targets.map(t=>`<button class="cap-t ${t.cls} ${t.id===target?'on':''}" data-t="${t.id}">${esc(t.label)}</button>`).join('')}
+    </div>
     <div class="cap-row">
       <button class="cap-photo" id="capPhoto">${svg('img',17,1.7)} <span id="cpPhotoLabel">Photo</span></button>
       ${micBtn('#capText')}
       <button class="cap-send" id="capSend">${svg('plus',17,2.6)} Save</button>
     </div>
-    <div class="cap-label">Where</div>
-    <div class="cap-targets" id="capTargets">
-      ${targets.map(t=>`<button class="cap-t ${t.cls} ${t.id===target?'on':''}" data-t="${t.id}">${esc(t.label)}</button>`).join('')}
-    </div>
   </div>`;
   document.body.appendChild(el);
   requestAnimationFrame(()=>el.classList.add('in'));
+  { const on=el.querySelector('.cap-t.on'), box=el.querySelector('#capTargets'); if(on&&box) box.scrollLeft=Math.max(0,on.offsetLeft-box.offsetLeft-16) }
 
   const close=()=>{ el.classList.remove('in'); setTimeout(()=>el.remove(),220) };
   const ta=el.querySelector('#capText');
@@ -8591,7 +8615,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='19 Nov 03:58';
+const APP_VER='19 Nov 04:07';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
