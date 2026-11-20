@@ -2321,6 +2321,8 @@ h1.p-title{margin:0;font-family:var(--display)}
 .tool-cur{flex-direction:column;align-items:stretch!important;gap:8px}
 .cur-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .cur-hint{font-size:12.5px;color:var(--dim);line-height:1.4}
+
+.toast .t-act2{margin-right:-4px;opacity:.85}
 </style>
 </head>
 <body class="side-open">
@@ -2845,13 +2847,14 @@ function toast(m,opt){
   t.className='toast '+(o.kind||'ok');
   t.innerHTML=`<span class="t-ico">${svg(o.kind==='warn'?'clock':o.kind==='bad'?'x':'boxOk',15,2)}</span>
     <span class="t-body"><b>${esc(m)}</b>${o.sub?`<span>${esc(o.sub)}</span>`:''}</span>
-    ${o.action?`<button class="t-act">${esc(o.action)}</button>`:''}`;
-  const btn=t.querySelector('.t-act');
+    ${o.action2?`<button class="t-act t-act2">${esc(o.action2)}</button>`:''}${o.action?`<button class="t-act t-act1">${esc(o.action)}</button>`:''}`;
+  const btn=t.querySelector('.t-act1'), b2=t.querySelector('.t-act2');
   if(btn) btn.onclick=()=>{ t.classList.remove('on'); if(o.onAction) o.onAction() };
+  if(b2) b2.onclick=()=>{ t.classList.remove('on'); if(o.onAction2) o.onAction2() };
   t.classList.add('on');
   if(navigator.vibrate&&o.kind!=='bad') try{navigator.vibrate(8)}catch(e){}
   clearTimeout(toastT);
-  toastT=setTimeout(()=>t.classList.remove('on'),o.action?4200:2200);
+  toastT=setTimeout(()=>t.classList.remove('on'),o.action2?6500:o.action?4200:2200);
 }
 
 /* ───────── state ───────── */
@@ -7248,7 +7251,31 @@ function curTok(x){ x=String(x||'').toLowerCase();
   if(/^(£|gbp|фунт[а-я]*)$/.test(x)) return '£';
   return '' }
 /* в какой валюте обычно платишь: сумма без валюты считается в ней (итоги всё равно в основной) */
-const payCur=()=>{ const c=LS.get('pm:payCur')||''; return CURS.includes(c)?c:curSym() };
+const payCur=()=>{ const c=LS.get('pm:payCur')||''; return CURS.includes(c)?c:'auto' };
+/* «местная» валюта для Auto: та, в которой чаще всего писали траты (не основная); если таких нет — драм */
+function localCur(){
+  const pc=payCur(), main=curSym(); if(pc!=='auto') return pc;
+  const n={}; ((wantP()||{}).tasks||[]).slice(-200).forEach(t=>{ const c=layObj(t).cur; if(isExp(t)&&c&&c!==main) n[c]=(n[c]||0)+1 });
+  const best=Object.keys(n).sort((a,b)=>n[b]-n[a])[0];
+  return best||(main==='֏'?'':'֏');
+}
+/* валюта не написана: смотрим, как платили за это раньше, и правдоподобна ли сумма в $ или в местной валюте */
+function guessCur(text,amount,inc){
+  const main=curSym(), pc=payCur();
+  if(pc!=='auto') return pc;
+  const loc=localCur(); if(!loc||loc===main||!(amount>0)) return main;
+  const usd=c=>{ const r=fxRate(c,'$'); return r?amount*r:null };
+  const lo=inc?5:0.8, hi=inc?20000:600, ok=c=>{ const v=usd(c); return v!=null&&v>=lo&&v<=hi };
+  const nm=normName(text);
+  if(nm){ const prev=((wantP()||{}).tasks||[]).slice().reverse().find(t=>isExp(t)&&!isGamble(t)&&normName(t.text)===nm);
+    if(prev){ const pr=fxRate(layObj(prev).cur||main,'$'), pv=pr?Number(prev.price)*pr:0;
+      if(pv>0){ const best=[main,loc].map(c=>({c,d:Math.abs(Math.log((usd(c)||1e-9)/pv))})).sort((a,b)=>a.d-b.d)[0]; if(best.d<Math.log(8)) return best.c } } }
+  const okM=ok(main), okL=ok(loc);
+  if(okM&&!okL) return main;
+  if(okL&&!okM) return loc;
+  if(okM&&okL) return usd(main)>=300?loc:main;
+  return amount>=1000?loc:main;
+}
 const CUR_W='(\\$|€|֏|₽|£|usd|eur|amd|rub|gbp|драм[а-я]*|drams?|др\\.?|руб[а-я]*\\.?|долл[а-я]*|бакс[а-я]*|dollars?|евро|euros?|фунт[а-я]*)';
 /* «10000amd» → «10000 amd», «10 000 драм» → «10000 драм», «10к» и «10 тыс» → «10000», «армянских драм» → «драм» */
 function spendPrep(raw){
@@ -7281,8 +7308,8 @@ function parseSpend(raw){
     if(nums.length===2){ gin=val(nums[0]); gout=val(nums[1]) }
     else if(sg(nums[0])==='+') gout=val(nums[0]);
     else gin=val(nums[0]);
-    gc=gc||payCur(); if(gc===curSym()) gc='';
-    return {text:gw.replace(/^(на|за|for|on)\s+/i,'').trim(),price:Math.max(0,gin-gout),cur:gc,rep:false,gin,gout};
+    const gtyped=!!gc; gc=gc||guessCur(gw,Math.max(gin,gout),false); if(gc===curSym()) gc='';
+    return {text:gw.replace(/^(на|за|for|on)\s+/i,'').trim(),price:Math.max(0,gin-gout),cur:gc,rep:false,gin,gout,typed:gtyped,guessed:!gtyped};
   }
   if(plus) s=s.replace(/^\+\s*/,'');
   const tk=s.split(/\s+/).filter(Boolean);
@@ -7295,13 +7322,15 @@ function parseSpend(raw){
     if(!cur&&at+1<tk.length&&curTok(tk[at+1])){ cur=curTok(tk[at+1]); drop.push(at+1) }
     else if(!cur&&at>0&&curTok(tk[at-1])){ cur=curTok(tk[at-1]); drop.push(at-1) }
     if(m[1]==='-') minus=true; if(m[1]==='+') plus=true;
-    price=spendNum(m[3],cur||payCur());
+    price=spendNum(m[3],cur||(payCur()==='auto'?localCur():payCur()));
     drop.sort((a,b)=>b-a).forEach(k=>tk.splice(k,1));
   }
-  typed=!!cur; if(!cur) cur=payCur();
+  typed=!!cur;
+  const text0=tk.join(' ');
+  if(!cur&&price>0) cur=guessCur(text0.replace(/^(на|за|for|on)\s+/i,''),price,!minus&&(plus||isIncomeName(text0)));
   if(cur===curSym()) cur='';
   const text=tk.join(' ').replace(/^(на|за|for|on)\s+/i,'').replace(/^[\-–:·,]+\s*|\s*[\-–:·,]+$/g,'').trim();
-  return {text,price,cur,rep,typed,inc:!minus&&(plus||isIncomeName(text))};
+  return {text,price,cur,rep,typed,guessed:!typed&&price>0,inc:!minus&&(plus||isIncomeName(text))};
 }
 /* повторяющиеся траты: запись с layout.rep='month' сама появляется в каждом новом месяце, когда наступает её число */
 function spendRoll(){
@@ -7336,7 +7365,7 @@ function addExpense(raw,_cat,at){
   if(!gamble&&!(r.price>0)){ toast('Add an amount, like “coffee 4”'); return null }
   const rc=recognise(r.text);
   let cur=r.cur;
-  if((r.typed===false||!cur)&&rc.svc){                                     /* сервис — в той валюте, в которой его записывали последний раз */
+  if((r.typed===false&&payCur()!=='auto'||!cur&&r.typed===undefined)&&rc.svc){                                     /* сервис — в той валюте, в которой его записывали последний раз */
     const n=normName(r.text), prev=(p.tasks||[]).slice().reverse().find(t=>isExp(t)&&normName(t.text)===n);
     if(prev) cur=layObj(prev).cur||curSym();
   }
@@ -7360,7 +7389,7 @@ function addExpense(raw,_cat,at){
   if(r.rep&&!gamble) setLayRaw(it,{rep:'month',rday:new Date(it.doneAt).getDate()});
   p.tasks=p.tasks||[]; p.tasks.push(it);
   saveProject(p,true); blip('add');
-  st.spLast=it.id;
+  st.spLast=it.id; if(r.guessed) st.spGuess=it.id;
   if(!inc&&!rc.cat&&!r.cat&&r.text&&!gamble) aiCatFor(it);
   return it;
 }
@@ -7393,7 +7422,10 @@ function spentToast(it){
   const c=SCAT[catIdOf(it)];
   if(st.spUpdated===it.id){ st.spUpdated=null; toast('Updated monthly '+spName(it),{sub:entryAmt(it)}); return }
   const mv=curOf(it)&&!isGamble(it)?inMain(it,Number(it.price)).v:null;
-  toast(spName(it)+' · '+entryAmt(it)+(mv!=null?' ≈ '+money2(mv):''),{sub:c.e+' '+c.l+(layObj(it).rep?' · every month':''),action:'Undo',onAction:()=>{ dropExpense(it); refreshView() }});
+  const guessed=st.spGuess===it.id; st.spGuess=null;
+  const nowC=layObj(it).cur||curSym(), loc=localCur(), other=nowC===curSym()?loc:curSym();
+  const flip=guessed&&other&&other!==nowC?{action2:'Make it '+other,onAction2:()=>{ setLayRaw(it,{cur:other}); fxStamp(it); saveProject(wantP(),true); refreshView(); spentToast(it) }}:{};
+  toast(spName(it)+' · '+entryAmt(it)+(mv!=null?' ≈ '+money2(mv):''),{...flip,sub:c.e+' '+c.l+(layObj(it).rep?' · every month':''),action:'Undo',onAction:()=>{ dropExpense(it); refreshView() }});
 }
 /* отметили покупку без цены — спрашиваем, сколько заплатили */
 function askPaid(p,item){
@@ -7674,7 +7706,7 @@ function renderSpend(){
         ${st.spNeed?`<div class="sp-need"><span>How much was <b>${esc(st.spNeed.text)}</b>?</span><input id="spAmt" inputmode="decimal" autocomplete="off" placeholder="${curSym()}" aria-label="Amount"><button class="sp-go" id="spAmtGo">Add</button></div>`:''}
         ${freq.length&&!st.spNeed?`<div class="sp-freq">${freq.map(e=>`<button data-again="${e.t.id}">${spIcon(e.t)}${esc(spName(e.t))} <b>${amtStr(e.amt,e.cur)}</b></button>`).join('')}</div>`:''}
         <div class="sp-add">
-          <input id="spIn" placeholder="${payCur()==='֏'?'barber 10000 · claude 20$ · +500$ salary':payCur()==='₽'?'такси 500 · claude 20$ · +50000 зарплата':'taxi 10 · claude 20 · +500 salary'}" autocomplete="off" enterkeyhint="done" aria-label="What you paid or got, and how much">
+          <input id="spIn" placeholder="${(payCur()==='auto'?localCur():payCur())==='֏'?'barber 10000 · claude 20$ · +500$ salary':(payCur()==='auto'?localCur():payCur())==='₽'?'такси 500 · claude 20$ · +50000 зарплата':'taxi 10 · claude 20 · +500 salary'}" autocomplete="off" enterkeyhint="done" aria-label="What you paid or got, and how much">
           ${micBtn('#spIn')}
           <button class="sp-go" id="spGo">Add</button>
         </div>
@@ -8533,11 +8565,11 @@ function openSettingsSheet(){
   let tc=$('#tCur');
   if(!tc){ tc=document.createElement('div'); tc.className='tool tool-cur'; tc.id='tCur'; $('#sideTools').appendChild(tc) }
   const curRows=()=>'<span class="cur-row">Totals in <span class="cur-pick">'+CURS.map(c=>`<button data-setcur="${c}" class="${curSym()===c?'on':''}">${c}</button>`).join('')+'</span></span>'
-    +'<span class="cur-row">I usually pay in <span class="cur-pick">'+CURS.map(c=>`<button data-setpay="${c}" class="${payCur()===c?'on':''}">${c}</button>`).join('')+'</span></span>'
-    +'<small class="cur-hint">'+(payCur()===curSym()?'An amount without a currency counts as '+curSym()+'.':'Type “barber 10000” and it is saved as '+payCur()+'10,000, counted in '+curSym()+' at today’s rate.')+'</small>';
+    +'<span class="cur-row">I pay in <span class="cur-pick">'+['auto',...CURS].map(c=>`<button data-setpay="${c}" class="${payCur()===c?'on':''}">${c==='auto'?'Auto':c}</button>`).join('')+'</span></span>'
+    +'<small class="cur-hint">'+(payCur()==='auto'?(localCur()?'No currency written? “barber 10000” counts as '+localCur()+', “claude 20” as '+curSym()+'. Each name remembers its last currency. Totals in '+curSym()+'.':'An amount without a currency counts as '+curSym()+'.'):'An amount without a currency counts as '+payCur()+(payCur()!==curSym()?', converted to '+curSym()+' at the day’s rate.':'.'))+'</small>';
   tc.innerHTML=curRows();
   tc.onclick=e=>{ const b=e.target.closest('[data-setcur],[data-setpay]'); if(!b) return;
-    if(b.dataset.setcur) LS.set('pm:cur',b.dataset.setcur); else LS.set('pm:payCur',b.dataset.setpay);
+    if(b.dataset.setcur) LS.set('pm:cur',b.dataset.setcur); else LS.set('pm:payCur',b.dataset.setpay==='auto'?'':b.dataset.setpay);
     tc.innerHTML=curRows(); refreshView() };
   let full=$('#tFull');
   if(!full){ full=document.createElement('button'); full.className='tool'; full.id='tFull'; full.innerHTML=svg('img',14,1.7)+' Full backup with photos'; full.addEventListener('click',exportAll); $('#sideTools').appendChild(full) }
@@ -8651,7 +8683,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='20 Nov 20:13';
+const APP_VER='20 Nov 20:17';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
