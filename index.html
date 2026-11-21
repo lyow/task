@@ -7252,30 +7252,9 @@ function curTok(x){ x=String(x||'').toLowerCase();
   return '' }
 /* в какой валюте обычно платишь: сумма без валюты считается в ней (итоги всё равно в основной) */
 const payCur=()=>{ const c=LS.get('pm:payCur')||''; return CURS.includes(c)?c:'auto' };
-/* «местная» валюта для Auto: та, в которой чаще всего писали траты (не основная); если таких нет — драм */
-function localCur(){
-  const pc=payCur(), main=curSym(); if(pc!=='auto') return pc;
-  const n={}; ((wantP()||{}).tasks||[]).slice(-200).forEach(t=>{ const c=layObj(t).cur; if(isExp(t)&&c&&c!==main) n[c]=(n[c]||0)+1 });
-  const best=Object.keys(n).sort((a,b)=>n[b]-n[a])[0];
-  return best||(main==='֏'?'':'֏');
-}
-/* валюта не написана: смотрим, как платили за это раньше, и правдоподобна ли сумма в $ или в местной валюте */
-function guessCur(text,amount,inc){
-  const main=curSym(), pc=payCur();
-  if(pc!=='auto') return pc;
-  const loc=localCur(); if(!loc||loc===main||!(amount>0)) return main;
-  const usd=c=>{ const r=fxRate(c,'$'); return r?amount*r:null };
-  const lo=inc?5:0.8, hi=inc?20000:600, ok=c=>{ const v=usd(c); return v!=null&&v>=lo&&v<=hi };
-  const nm=normName(text);
-  if(nm){ const prev=((wantP()||{}).tasks||[]).slice().reverse().find(t=>isExp(t)&&!isGamble(t)&&normName(t.text)===nm);
-    if(prev){ const pr=fxRate(layObj(prev).cur||main,'$'), pv=pr?Number(prev.price)*pr:0;
-      if(pv>0){ const best=[main,loc].map(c=>({c,d:Math.abs(Math.log((usd(c)||1e-9)/pv))})).sort((a,b)=>a.d-b.d)[0]; if(best.d<Math.log(8)) return best.c } } }
-  const okM=ok(main), okL=ok(loc);
-  if(okM&&!okL) return main;
-  if(okL&&!okM) return loc;
-  if(okM&&okL) return usd(main)>=300?loc:main;
-  return amount>=1000?loc:main;
-}
+/* Auto: до 4000 — доллары, от 4000 — драмы (казино всегда в долларах) */
+function localCur(){ const pc=payCur(), main=curSym(); if(pc!=='auto') return pc; return main==='֏'?'$':'֏' }
+function guessCur(text,amount,inc){ const pc=payCur(); if(pc!=='auto') return pc; return amount>=4000?'֏':'$' }
 const CUR_W='(\\$|€|֏|₽|£|usd|eur|amd|rub|gbp|драм[а-я]*|drams?|др\\.?|руб[а-я]*\\.?|долл[а-я]*|бакс[а-я]*|dollars?|евро|euros?|фунт[а-я]*)';
 /* «10000amd» → «10000 amd», «10 000 драм» → «10000 драм», «10к» и «10 тыс» → «10000», «армянских драм» → «драм» */
 function spendPrep(raw){
@@ -7308,8 +7287,8 @@ function parseSpend(raw){
     if(nums.length===2){ gin=val(nums[0]); gout=val(nums[1]) }
     else if(sg(nums[0])==='+') gout=val(nums[0]);
     else gin=val(nums[0]);
-    const gtyped=!!gc; gc=gc||guessCur(gw,Math.max(gin,gout),false); if(gc===curSym()) gc='';
-    return {text:gw.replace(/^(на|за|for|on)\s+/i,'').trim(),price:Math.max(0,gin-gout),cur:gc,rep:false,gin,gout,typed:gtyped,guessed:!gtyped};
+    const gtyped=!!gc; gc=gc||'$'; if(gc===curSym()) gc='';
+    return {text:gw.replace(/^(на|за|for|on)\s+/i,'').trim(),price:Math.max(0,gin-gout),cur:gc,rep:false,gin,gout,typed:gtyped,guessed:false};
   }
   if(plus) s=s.replace(/^\+\s*/,'');
   const tk=s.split(/\s+/).filter(Boolean);
@@ -8566,7 +8545,7 @@ function openSettingsSheet(){
   if(!tc){ tc=document.createElement('div'); tc.className='tool tool-cur'; tc.id='tCur'; $('#sideTools').appendChild(tc) }
   const curRows=()=>'<span class="cur-row">Totals in <span class="cur-pick">'+CURS.map(c=>`<button data-setcur="${c}" class="${curSym()===c?'on':''}">${c}</button>`).join('')+'</span></span>'
     +'<span class="cur-row">I pay in <span class="cur-pick">'+['auto',...CURS].map(c=>`<button data-setpay="${c}" class="${payCur()===c?'on':''}">${c==='auto'?'Auto':c}</button>`).join('')+'</span></span>'
-    +'<small class="cur-hint">'+(payCur()==='auto'?(localCur()?'No currency written? “barber 10000” counts as '+localCur()+', “claude 20” as '+curSym()+'. Each name remembers its last currency. Totals in '+curSym()+'.':'An amount without a currency counts as '+curSym()+'.'):'An amount without a currency counts as '+payCur()+(payCur()!==curSym()?', converted to '+curSym()+' at the day’s rate.':'.'))+'</small>';
+    +'<small class="cur-hint">'+(payCur()==='auto'?'No currency written? Under 4000 counts as $, 4000 and up as ֏. Casino is always $. Totals in '+curSym()+'.':'An amount without a currency counts as '+payCur()+(payCur()!==curSym()?', converted to '+curSym()+' at the day’s rate.':'.'))+'</small>';
   tc.innerHTML=curRows();
   tc.onclick=e=>{ const b=e.target.closest('[data-setcur],[data-setpay]'); if(!b) return;
     if(b.dataset.setcur) LS.set('pm:cur',b.dataset.setcur); else LS.set('pm:payCur',b.dataset.setpay==='auto'?'':b.dataset.setpay);
@@ -8683,7 +8662,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='20 Nov 20:17';
+const APP_VER='21 Nov 08:16';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
