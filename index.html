@@ -2332,12 +2332,58 @@ h1.p-title{margin:0;font-family:var(--display)}
 .sp-cat-h:hover .sp-hide,.sp-hide:focus-visible{opacity:1}
 .sp-hide:hover{color:var(--txt);background:var(--s2)}
 @media (hover:none){ .sp-hide{opacity:1} }
-.sp-hidden{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;padding:0 4px}
+.sp-hidden{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
 .sp-hidden>small{font-size:12.5px;color:var(--dim);margin-right:4px}
 .sp-hidden button{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 6px 0 12px;border-radius:999px;border:1px dashed var(--line);font-size:13px;color:var(--soft)}
 .sp-hidden button b{font-weight:600;font-size:12px;color:var(--txt);padding:3px 8px;border-radius:999px;background:var(--s2)}
 .sp-hidden button:hover b{background:var(--s3)}
 @media (max-width:760px){ .sp-stats{display:grid;grid-template-columns:1fr 1fr} .sp-stats>span,.sp-stats>.sp-big{width:auto} .sp-stats>.sp-big{grid-column:1/-1} .sp-stats>.sp-big b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%} .sp-stats .sp-big>span:not(.sp-ic){min-width:0} }
+
+.sp-split{display:flex;gap:3px;height:10px;margin-top:14px;width:100%;max-width:560px;align-self:stretch}
+.sp-seg{flex:1 1 0;min-width:6px;border-radius:999px;padding:0;transition:transform .15s,filter .15s}
+.sp-seg:hover{filter:brightness(1.25)}
+.sp-split .l0,.sp-split-k i.l0{background:var(--lime)}
+.sp-split .l1,.sp-split-k i.l1{background:#8a8f98}
+.sp-split .l2,.sp-split-k i.l2{background:#5e636b}
+.sp-split .l3,.sp-split-k i.l3{background:#41454c}
+.sp-split .l4,.sp-split-k i.l4{background:#2e3137}
+.sp-split-k{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:13px;color:var(--soft)}
+.sp-split-k button{display:inline-flex;align-items:center;gap:6px;padding:2px 0;color:inherit}
+.sp-split-k button:hover{color:var(--txt)}
+.sp-split-k i{width:8px;height:8px;border-radius:999px;display:inline-block}
+.sp-split-k b{font-weight:600;color:var(--txt);font-variant-numeric:tabular-nums}
+.sp-split-k span{color:var(--dim)}
+.sp-heat .pane-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sp-hm-wd,.sp-hm{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.sp-hm-wd{margin:10px 0 4px}
+.sp-hm-wd span{font-size:11px;color:var(--dim);text-align:center}
+.sp-hm i.pad{display:block}
+.sp-hm button{height:32px;border-radius:7px;display:grid;place-items:center;font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--dim);padding:0;transition:transform .12s}
+.sp-hm button:not(:disabled):hover{transform:scale(1.08)}
+.sp-hm .lv0,.sp-hm-k .lv0{background:var(--s2)}
+.sp-hm .lv1,.sp-hm-k .lv1{background:color-mix(in srgb,var(--lime) 18%,var(--s2))}
+.sp-hm .lv2,.sp-hm-k .lv2{background:color-mix(in srgb,var(--lime) 38%,var(--s2))}
+.sp-hm .lv3,.sp-hm-k .lv3{background:color-mix(in srgb,var(--lime) 62%,var(--s2))}
+.sp-hm .lv4,.sp-hm-k .lv4{background:var(--lime)}
+.sp-hm .lv2,.sp-hm .lv3{color:var(--txt)}
+.sp-hm .lv4{color:#111;font-weight:600}
+.sp-hm .fut{background:transparent;border:1px dashed var(--line);opacity:.5}
+.sp-hm .now{box-shadow:0 0 0 1.5px var(--txt)}
+.sp-hm-k{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:10px;font-size:11.5px;color:var(--dim)}
+.sp-hm-k i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.sp-hm-k span{margin:0 4px}
+.sp-habit{margin:10px 0 0;font-size:13px;color:var(--soft)}
+.sp-day.flash{animation:spFlash 1.4s ease}
+@keyframes spFlash{0%,40%{background:color-mix(in srgb,var(--lime) 10%,transparent)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){ .sp-day.flash{animation:none} .sp-hm button,.sp-seg{transition:none} }
+
+.sp-cat-h{justify-content:flex-start;align-items:center}
+.sp-cat-h>b{margin-left:auto}
+.sp-eye{display:inline-grid;place-items:center;width:28px;height:28px;margin:-6px -8px -6px 2px;border-radius:8px;color:var(--dim);padding:0;flex:0 0 auto}
+.sp-eye:hover{color:var(--txt);background:var(--s2)}
+.sp-hidden button b.sp-eye{width:24px;height:24px;margin:0;padding:0;background:var(--s2);color:var(--soft)}
+.sp-hidden button{opacity:.75}
+.sp-hidden button:hover{opacity:1}
 </style>
 </head>
 <body class="side-open">
@@ -2362,33 +2408,33 @@ h1.p-title{margin:0;font-family:var(--display)}
   </div>
 
   <nav class="nav">
-    <button class="btn-nav focus" id="btnFocus">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.7l2.6 5.5 6 .85-4.35 4.2 1.05 6-5.3-2.85L6.7 20.25l1.05-6L3.4 10.05l6-.85z"/></svg>
-      Today <span class="ncount" id="fcount">0</span>
-    </button>
+    <button class="btn-nav focus" id="btnFocus">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.7l2.6 5.5 6 .85-4.35 4.2 1.05 6-5.3-2.85L6.7 20.25l1.05-6L3.4 10.05l6-.85z"/></svg>
+      Today <span class="ncount" id="fcount">0</span>
+    </button>
     <button class="btn-nav cal" id="btnCal">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
       Calendar <span class="ncount" id="calcount"></span>
-    </button>
-    <i class="nav-sep" aria-hidden="true"></i>
-    <button class="btn-nav ideas" id="btnIdeas">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>
-      Ideas <span class="ncount" id="icount">0</span>
-    </button>
-    <button class="btn-nav todo" id="btnTodo">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M4 12h16M4 17.5h10"/><path d="M18.5 16.5l1.6 1.6 3-3.2"/></svg>
-      To do <span class="ncount" id="tcount">0</span>
-    </button>
-    <i class="nav-sep" aria-hidden="true"></i>
-    <button class="btn-nav want" id="btnWant">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.7" cy="19.8" r="1.4"/><circle cx="17.6" cy="19.8" r="1.4"/><path d="M2.5 3.5h2.7l2.6 11.3h11L21 7.3H6.2"/></svg>
-      Wishlist <span class="ncount" id="wcount">0</span>
-    </button>
-    <button class="btn-nav spend" id="btnSpend">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h3"/></svg>
-      Spending <span class="ncount" id="scount"></span>
-    </button>
-    <i class="nav-sep" aria-hidden="true"></i>
+    </button>
+    <i class="nav-sep" aria-hidden="true"></i>
+    <button class="btn-nav ideas" id="btnIdeas">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>
+      Ideas <span class="ncount" id="icount">0</span>
+    </button>
+    <button class="btn-nav todo" id="btnTodo">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M4 12h16M4 17.5h10"/><path d="M18.5 16.5l1.6 1.6 3-3.2"/></svg>
+      To do <span class="ncount" id="tcount">0</span>
+    </button>
+    <i class="nav-sep" aria-hidden="true"></i>
+    <button class="btn-nav want" id="btnWant">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.7" cy="19.8" r="1.4"/><circle cx="17.6" cy="19.8" r="1.4"/><path d="M2.5 3.5h2.7l2.6 11.3h11L21 7.3H6.2"/></svg>
+      Wishlist <span class="ncount" id="wcount">0</span>
+    </button>
+    <button class="btn-nav spend" id="btnSpend">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h3"/></svg>
+      Spending <span class="ncount" id="scount"></span>
+    </button>
+    <i class="nav-sep" aria-hidden="true"></i>
     <button class="btn-nav jrn" id="btnJrn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h11a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5H6z"/><path d="M6 3.5v17M9.5 8h5.5M9.5 11.5h5.5"/></svg>
       Journal
@@ -2846,6 +2892,8 @@ const I={
   search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
   mic:'<path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>'
 };
+I.eye='<path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>';
+I.eyeoff='<path d="M9.9 5.7A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.6 3.4M6.6 6.7C4 8.4 2.5 12 2.5 12s3.5 6.5 9.5 6.5a9 9 0 0 0 4.4-1.1"/><path d="M9.9 10a2.8 2.8 0 0 0 4 4"/><path d="M3 3l18 18"/>';
 const svg=(k,s,w)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||1.7}" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;
 
 const STATUSES=[
@@ -7627,6 +7675,22 @@ function renderSpend(){
   const zeroDays=Math.max(0,days-spentDays);
   const topDayK=Object.keys(perDay).sort((a,b)=>perDay[b]-perDay[a])[0];
   const topDayAt=topDayK?month.find(e=>dayKey(e.at)===topDayK).at:0;
+  /* сравнение честное: с тем же числом прошлого месяца, а не со всем месяцем */
+  const sameDay=off===0?new Date().getDate():99;
+  const prevSame=monthSum(inK(k-1).filter(e=>new Date(e.at).getDate()<=sameDay)).v, diffSame=total-prevSame;
+  /* календарь месяца: уровень 0–4, большие покупки не гасят остальные дни (шкала по 85-му перцентилю) */
+  const dmY=yr(k), dmM=mo(k), dmN=new Date(dmY,dmM+1,0).getDate(), dmLead=(new Date(dmY,dmM,1).getDay()+6)%7;
+  const dmCap=dayVals.length?dayVals[Math.min(dayVals.length-1,Math.floor(dayVals.length*.85))]:0;
+  const dmLv=v=>!v?0:v>=dmCap?4:Math.max(1,Math.ceil(Math.sqrt(v/dmCap)*4));
+  /* привычка по дням недели: за 90 дней, если записей достаточно */
+  const wdSum=[0,0,0,0,0,0,0], wdN=[0,0,0,0,0,0,0], t90=Date.now()-90*864e5;
+  const d90={}; all.forEach(e=>{ if(e.at>=t90&&!e.inc&&!e.g&&e.main>0){ const dk=dayKey(e.at); d90[dk]=(d90[dk]||0)+e.main } });
+  for(let i=0;i<90;i++){ const d=new Date(Date.now()-i*864e5); const w=d.getDay(); wdN[w]++; wdSum[w]+=d90[dayKey(d)]||0 }
+  const wdAvg=wdSum.map((v,i)=>wdN[i]?v/wdN[i]:0), wdAll=wdAvg.reduce((a,b)=>a+b,0)/7;
+  const wdTop=wdAvg.indexOf(Math.max(...wdAvg));
+  const WDL=['Sundays','Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays'];
+  const habit=Object.keys(d90).length>=10&&wdAll&&wdAvg[wdTop]>=wdAll*1.4?'You spend most on '+WDL[wdTop]+' · '+money(Math.round(wdAvg[wdTop]))+' on average':'';
+  let streak=0; if(off===0){ for(let i=0;i<60;i++){ const d=new Date(Date.now()-i*864e5); if(perDay[dayKey(d)]) break; if(d.getMonth()!==dmM&&i>days) break; streak++ } }
   const hidM=allRaw.filter(e=>monthKey(e.at)===k&&!e.inc&&hid[e.cat]);
   const hidCats=Object.keys(hid).filter(c=>SCAT[c]).map(c=>({c,s:monthSum(hidM.filter(e=>e.cat===c))}));
   const budget=Number(LS.get('pm:budget'))||0, ratio=budget?total/budget:0;
@@ -7664,11 +7728,11 @@ function renderSpend(){
       <span class="sp-amtc"><b class="${entryCls(e.t)}">${entryAmt(e.t)}</b>${e.cur&&e.main!=null?`<small>≈ ${money2(e.g?Math.abs(e.main):e.main)}</small>`:''}</span></button>`;
   /* по группам: строка группы → категории → записи */
   const gbud=lsMap('pm:budgets');
+  const hidHtml=hidCats.length?`<div class="sp-hidden"><small>Not counted</small>${hidCats.map(x=>`<button data-unhide="${x.c}" title="Not counted · tap to count it again" aria-label="Count ${SCAT[x.c].l} again">${SCAT[x.c].e} ${SCAT[x.c].l}${x.s.v?' · '+sumLabel(x.s):''}<b class="sp-eye off" aria-hidden="true">${svg('eyeoff',15,1.9)}</b></button>`).join('')}</div>`:'';
   const groupHtml=()=>{
     const gs=GROUPS.map(G=>{ const es=month.filter(e=>!e.inc&&G.cats.indexOf(e.cat)>=0); return {G,es,s:monthSum(es)} }).filter(x=>x.es.length).sort((a,b)=>b.s.v-a.s.v);
     const ies=month.filter(e=>e.inc);
-    const hidHtml=hidCats.length?`<div class="sp-hidden"><small>Not counted</small>${hidCats.map(x=>`<button data-unhide="${x.c}" title="Count it again">${SCAT[x.c].e} ${SCAT[x.c].l}${x.s.v?' · '+sumLabel(x.s):''}<b>Show</b></button>`).join('')}</div>`:'';
-    if(!gs.length&&!ies.length) return hidHtml;
+    if(!gs.length&&!ies.length) return '';
     const top=Math.max(1,...gs.map(x=>x.s.v));
     const incHtml=ies.length?(()=>{ const isOpen=!!open.income; const cats=ICATS.map(c=>({c:c.id,es:ies.filter(e=>e.cat===c.id)})).filter(x=>x.es.length).map(x=>Object.assign(x,{s:monthSum(x.es)})).sort((a,b)=>b.s.inc-a.s.inc);
       return `<section class="sp-grp sp-grp-inc ${isOpen?'open':''}">
@@ -7695,13 +7759,13 @@ function renderSpend(){
         </button>
         ${isOpen?cats.map(x=>{
           const isG=x.c==='gambling', gn=isG?x.es.reduce((n,e)=>n+(e.main==null?0:(e.net>0?e.main:-e.main)),0):0;
-          return `<div class="sp-cat-h"><span>${SCAT[x.c].e} ${SCAT[x.c].l}<button class="sp-hide" data-hide="${x.c}" title="Hide from totals" aria-label="Hide ${SCAT[x.c].l} from totals">Hide</button></span><b class="${isG?(Math.abs(gn)<0.005?'g-even':gn>0?'g-win':'g-loss'):''}">${isG?gLabel(gn,'')+' · '+x.es.length+' session'+(x.es.length===1?'':'s'):sumLabel(x.s)}</b></div>
+          return `<div class="sp-cat-h"><span>${SCAT[x.c].e} ${SCAT[x.c].l}</span><b class="${isG?(Math.abs(gn)<0.005?'g-even':gn>0?'g-win':'g-loss'):''}">${isG?gLabel(gn,'')+' · '+x.es.length+' session'+(x.es.length===1?'':'s'):sumLabel(x.s)}</b><button class="sp-eye" data-hide="${x.c}" title="Counted · tap to leave it out" aria-label="Leave ${SCAT[x.c].l} out of totals">${svg('eye',15,1.9)}</button></div>
             ${x.es.map(row).join('')}` }).join(''):''}
-      </section>` }).join('')}${hidHtml}</div>`;
+      </section>` }).join('')}</div>`;
   };
   const dayHtml=()=>{
     const groups=[]; month.forEach(e=>{ const dk=dayKey(e.at); let g=groups.find(x=>x.k===dk); if(!g){ g={k:dk,at:e.at,items:[]}; groups.push(g) } g.items.push(e) });
-    return groups.map(g=>{ const s=monthSum(g.items); return `<div class="sp-day">
+    return groups.map(g=>{ const s=monthSum(g.items); return `<div class="sp-day" data-dk="${g.k}">
       <div class="sp-day-h"><b>${dayLabel(g.at)}</b><span>${s.inc?`<em class="g-win">${s.iapprox?'≈ ':''}+${money2(s.inc)}</em>`:''}${s.v||Object.keys(s.miss).length?sumLabel(s):''}</span></div>
       ${g.items.map(row).join('')}</div>` }).join('');
   };
@@ -7731,7 +7795,7 @@ function renderSpend(){
         </div>`:`<small class="sp-total-l">Spent in ${name(k)}${hidCats.length?' · without '+hidCats.map(x=>SCAT[x.c].l).join(', '):''}</small><b class="sp-total" title="${S.approx&&R.date?'Other currencies at rates of '+esc(R.date):''}">${S.approx?'<i class="sp-approx">≈</i>':''}${money2(total)}</b>`}
         ${Object.keys(S.miss).length?`<span class="sp-oth">+ ${Object.keys(S.miss).map(c=>amtStr(S.miss[c],c)).join(' + ')} · no exchange rates yet</span>`:''}
         ${total||prev?`<div class="sp-stats">
-          ${prev?`<span title="Compared with ${MONL[mo(k-1)]}"><small>vs ${MON[mo(k-1)]}</small><b class="${diff>0.5?'up':diff<-0.5?'down':''}">${Math.abs(diff)<0.5?'same':(diff>0?'+':'−')+money(Math.round(Math.abs(diff)))}</b></span>`:''}
+          ${prev?`<span title="${off===0?'Compared with '+MONL[mo(k-1)]+' 1–'+sameDay+' (same point of the month)':'Compared with '+MONL[mo(k-1)]}"><small>vs ${MON[mo(k-1)]}${off===0?' '+sameDay:''}</small><b class="${diffSame>0.5?'up':diffSame<-0.5?'down':''}">${Math.abs(diffSame)<0.5?'same':(diffSame>0?'+':'−')+money(Math.round(Math.abs(diffSame)))}</b></span>`:''}
           ${total?`<span title="Everything spent this month divided by ${days} days"><small>Per day</small><b>${money(Math.round(total/days))}</b></span>`:''}
           ${forecast?`<span title="Variable spending at today's pace plus monthly charges still to come"><small>On pace</small><b>${S.approx?'≈ ':''}${money(Math.round(forecast))}</b></span>`:''}
           ${spentDays>=3&&median<total/days*.8?`<span title="Half the days you spent less than this, half more. One big purchase does not move it"><small>Typical day</small><b>${money(Math.round(median))}</b></span>`:''}
@@ -7739,6 +7803,11 @@ function renderSpend(){
           ${topDayK&&spentDays>=2?`<span title="The day you spent the most"><small>Biggest day</small><b>${MON[new Date(topDayAt).getMonth()]} ${new Date(topDayAt).getDate()} · ${money(Math.round(perDay[topDayK]))}</b></span>`:''}
           ${big?`<button class="sp-big" data-sp="${big.t.id}" title="Biggest expense">${spIcon(big.t)}<span><small>Biggest</small><b>${esc(spName(big.t))} ${entryAmt(big.t)}</b></span></button>`:''}
         </div>`:'<span class="sp-diff">Nothing spent yet</span>'}
+        ${(()=>{ const parts=GROUPS.map(G=>({G,v:gNow[G.id]})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v); if(parts.length<2||!total) return '';
+          const sum=parts.reduce((n,x)=>n+x.v,0);
+          return `<div class="sp-split" role="list">${parts.map((x,i)=>`<button role="listitem" class="sp-seg l${Math.min(i,4)}" data-seg="${x.G.id}" style="flex-grow:${x.v/sum*100}" title="${x.G.l} · ${money(Math.round(x.v))} · ${Math.round(x.v/sum*100)}%"></button>`).join('')}</div>
+            <div class="sp-split-k">${parts.slice(0,4).map((x,i)=>`<button data-seg="${x.G.id}"><i class="l${Math.min(i,4)}"></i>${x.G.l} <b>${Math.round(x.v/sum*100)}%</b></button>`).join('')}${parts.length>4?`<span>+${parts.length-4} more</span>`:''}</div>` })()}
+        ${hidHtml}
         ${summary?`<span class="sp-sum">${esc(summary)}</span>`:''}
         ${gam.length?`<span class="sp-gline ${Math.abs(gNetM)<0.5?'g-even':gNetM>0?'g-win':'g-loss'}">🎰 Gambling: ${Math.abs(gNetM)<0.5?'even':(gNetM>0?'+':'−')+money2(Math.abs(gNetM))} this month${gNetM>0?' · not counted as spending':''}</span>`:''}
         ${budget?`<div class="sp-budget ${ratio>1?'over':ratio>=.85?'near':''}"><i style="width:${Math.min(100,ratio*100)}%"></i>${off===0?`<s style="left:${Math.min(100,new Date().getDate()/new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate()*100)}%" title="Where an even pace would be today"></s>`:''}</div>
@@ -7750,6 +7819,13 @@ function renderSpend(){
         <small>${MON[mo(b.kk)]}</small><span class="sp-v">${b.v?moneyShort(b.v):'–'}</span></button>`).join('')}</div>
       <div class="sp-cols">
         <div class="sp-side">
+          ${month.length||off===0?`<section class="sp-box sp-heat"><h2 class="pane-h">Day by day ${streak>=2?`<span class="sp-subs-t">${streak} days with no spending</span>`:''}</h2>
+            <div class="sp-hm-wd">${['M','T','W','T','F','S','S'].map(x=>`<span>${x}</span>`).join('')}</div>
+            <div class="sp-hm">${'<i class="pad"></i>'.repeat(dmLead)}${Array.from({length:dmN},(_,i)=>{ const d=i+1, dk=dmY+'-'+dmM+'-'+d, v=perDay[dk]||0, fut=off===0&&d>new Date().getDate(), now=off===0&&d===new Date().getDate();
+              return `<button class="lv${fut?'':dmLv(v)}${fut?' fut':''}${now?' now':''}" ${fut?'disabled':''} data-hday="${dk}" title="${MON[dmM]} ${d}${fut?'':' · '+(v?money2(v):'nothing spent')}"><span>${d}</span></button>` }).join('')}</div>
+            <div class="sp-hm-k"><span>Less</span>${[0,1,2,3,4].map(l=>`<i class="lv${l}"></i>`).join('')}<span>More</span></div>
+            ${habit?`<p class="sp-habit">${esc(habit)}</p>`:''}
+          </section>`:''}
           ${soon.length?`<section class="sp-box sp-soon"><h2 class="pane-h">Next 7 days</h2>
             ${soon.map(x=>{ const d=Math.round((x.nx-new Date(new Date().setHours(0,0,0,0)))/864e5); return `<button class="sp-row" data-sp="${x.t.id}">${spIcon(x.t)}
               <span class="sp-main"><span class="sp-name">${esc(spName(x.t))}</span><small>${d===0?'today':d===1?'tomorrow':'in '+d+' days'} · ${MON[x.nx.getMonth()]} ${x.nx.getDate()}</small></span>
@@ -7833,6 +7909,13 @@ function renderSpend(){
     sq.addEventListener('keydown',e=>{ if(e.key==='Escape'){ st.spQ=''; renderSpend() } }) }
   const sm=$('#spMore');
   if(sm) sm.addEventListener('click',e=>{ e.stopPropagation(); spendMenu(sm,k,month) });
+  v.querySelectorAll('[data-hday]').forEach(b=>b.addEventListener('click',()=>{
+    const dk=b.dataset.hday; if(!perDay[dk]) return toast('Nothing spent that day');
+    st.spQ=''; LS.set('pm:spView','day'); renderSpend();
+    const el=$('#view').querySelector('.sp-day[data-dk="'+dk+'"]'); if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),1400) } }));
+  v.querySelectorAll('[data-seg]').forEach(b=>b.addEventListener('click',()=>{
+    const id=b.dataset.seg, o=lsMap('pm:spOpen'); o[id]=1; LS.set('pm:spOpen',JSON.stringify(o)); st.spQ=''; LS.set('pm:spView','group'); renderSpend();
+    const el=$('#view').querySelector('[data-grp="'+id+'"]'); if(el){ el.scrollIntoView({behavior:'smooth',block:'start'}) } }));
   v.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{ LS.set('pm:spView',b.dataset.view); renderSpend() }));
   v.querySelectorAll('[data-grp]').forEach(b=>b.addEventListener('click',()=>{ const o=lsMap('pm:spOpen'); if(o[b.dataset.grp]) delete o[b.dataset.grp]; else o[b.dataset.grp]=1; LS.set('pm:spOpen',JSON.stringify(o)); renderSpend() }));
   $('#spBudget').addEventListener('click',()=>budgetSheet());
@@ -8697,7 +8780,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='26 Nov 00:03';
+const APP_VER='26 Nov 00:08';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
