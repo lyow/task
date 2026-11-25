@@ -7075,7 +7075,7 @@ const moneyShort=n=>n>=10000?curSym()+(n/1000).toLocaleString('en-US',{maximumFr
 const SCATS=[
   {id:'subs',e:'🔁',l:'Subscriptions'},{id:'coffee',e:'☕',l:'Coffee'},{id:'food',e:'🍽️',l:'Food out'},
   {id:'groceries',e:'🛒',l:'Groceries'},{id:'transport',e:'🚕',l:'Transport'},{id:'gifts',e:'🎁',l:'Gifts'},
-  {id:'fun',e:'🎉',l:'Fun'},{id:'gambling',e:'🎰',l:'Gambling'},{id:'shopping',e:'🛍️',l:'Shopping'},
+  {id:'fun',e:'🎉',l:'Fun'},{id:'gambling',e:'🎰',l:'Gambling'},{id:'shopping',e:'🛍️',l:'Shopping'},{id:'tech',e:'💻',l:'Tech'},
   {id:'home',e:'🏠',l:'Home'},{id:'health',e:'💊',l:'Health'},{id:'travel',e:'✈️',l:'Travel'},{id:'care',e:'💈',l:'Personal care'},{id:'other',e:'📦',l:'Other'}];
 /* доходы: свои категории, в сетке трат их нет */
 const ICATS=[{id:'salary',e:'💼',l:'Salary'},{id:'freelance',e:'🧑‍💻',l:'Freelance'},{id:'sales',e:'🏷️',l:'Sales'},
@@ -7118,19 +7118,20 @@ const SVCS=[
 ].map(([name,dom,cat,re])=>({name,dom,cat,re}));
 /* основы слов: короткие (до 3 букв) — только целым словом */
 const STEMS=[
-  ['gambling','casino казино bet ставк poker покер slot слот лото lottery лотере рулетк roulette букмек'],
-  ['subs','subscr подписк premium премиум vpn впн hosting хостинг domain домен'],
-  ['coffee','coffee кофе кофей latte латте cappuc капуч espresso эспрес americano американо раф flat'],
-  ['gifts','gift подар present цвет flowers букет birthday'],
-  ['fun','cinema кино movie фильм concert концерт game игр bowling боулинг club клуб party вечерин театр theatre museum музей karaoke караоке кальян hookah'],
-  ['travel','ticket билет flight авиа самолет plane hotel отель гостиниц hostel хостел visa виза trip поездк tour багаж luggage airport аэропорт'],
-  ['transport','taxi такси metro метро bus автобус train поезд электричк fuel бензин заправк parking парковк каршер самокат scooter проезд трамва тролле'],
-  ['groceries','grocer продукт supermarket супермаркет market маркет молок milk хлеб bread овощ фрукт яйц eggs'],
-  ['food','lunch dinner breakfast обед ужин завтрак restaurant ресторан cafe кафе pizza пицц burger бургер sushi суши шаурм shawarma kfc доставк delivery еда food бар bar пиво beer шашлык хинкал столов'],
-  ['care','barber барбер парикмах стрижк haircut hairdress salon салон маникюр manicure педикюр pedicure nails ногт spa спа массаж massage косметолог cosmetolog эпиляц бров brows ресниц lashes'],
-  ['health','pharmacy аптек doctor врач доктор dentist стоматолог зуб лекарств medicine витамин vitamin анализ клиник clinic gym спортзал фитнес fitness массаж massage бассейн'],
-  ['home','rent аренд квартир apartment utilities коммунал электричеств electric internet интернет мебел furniture ikea икеа ремонт repair уборк cleaning'],
-  ['shopping','clothes одежд shoes обув кроссов sneaker jacket куртк джинс jeans футболк shirt phone телефон наушник headphone laptop ноутбук техник gadget чехол книг book kindle'],
+  ['gambling','casino казино bet ставк poker покер slot слот лото lottery лотере рулетк roulette букмек blackjack блэкджек vivaro totogaming adjarabet'],
+  ['subs','subscr подписк premium премиум vpn впн hosting хостинг domain домен membership абонемент tariff тариф мобильн mobile связь sim симк ucom viva beeline билайн мтс team'],
+  ['coffee','coffee кофе кофей latte латте cappuc капуч espresso эспрес americano американо раф flat матча matcha чай tea кофешоп'],
+  ['gifts','gift подар present цвет flowers букет birthday днюх донат donat charity благотвор'],
+  ['fun','cinema кино movie фильм concert концерт game игр bowling боулинг club клуб party вечерин театр theatre museum музей karaoke караоке кальян hookah квест quest билеты tickets festival фестивал выставк exhibition аттракц зоопарк zoo пейнтбол картинг karting бильярд billiard стендап standup hobby хобби'],
+  ['travel','ticket билет flight авиа самолет plane hotel отель гостиниц hostel хостел visa виза trip поездк tour тур багаж luggage airport аэропорт отпуск vacation holiday страхов insurance трансфер transfer'],
+  ['transport','taxi такси metro метро bus автобус маршрутк train поезд электричк fuel бензин gas petrol газ заправк parking парковк каршер самокат scooter проезд трамва тролле gg yandex яндекс мойк carwash шиномонтаж автосервис машин car штраф'],
+  ['groceries','grocer продукт supermarket супермаркет market маркет магазин молок milk хлеб bread овощ фрукт яйц eggs мясо meat курица chicken рыба fish сыр cheese вода water сок juice снек snack чипс сладост конфет шоколад chocolate круп рис rice макарон pasta масло oil sas carrefour spar перекрест пятероч магнит ашан вкусвилл'],
+  ['food','lunch dinner breakfast обед ужин завтрак restaurant ресторан cafe кафе pizza пицц burger бургер sushi суши ролл шаурм shawarma kfc доставк delivery еда food бар bar пиво beer вино wine коктейл cocktail шашлык хинкал столов хачапур лаваш kebab кебаб donut пончик бургерн фастфуд fastfood перекус чаев tips'],
+  ['care','barber барбер парикмах стрижк haircut hairdress salon салон маникюр manicure педикюр pedicure nails ногт spa спа массаж massage косметолог cosmetolog эпиляц бров brows ресниц lashes skin скин care уход крем cream cosmetic косметик шампун shampoo парфюм perfume духи deodorant дезодорант бритв razor serum сыворотк лосьон lotion гигиен hygiene toothpaste зубная мыло soap гель gel маск mask тату tattoo'],
+  ['health','pharmacy аптек doctor врач доктор dentist стоматолог зуб лекарств medicine таблет pill витамин vitamin анализ клиник clinic hospital больниц gym спортзал зал фитнес fitness тренер trainer тренировк workout йога yoga бассейн pool протеин protein психолог therapy терапи терапевт очки glasses линз lens'],
+  ['tech','macbook mac imac iphone айфон ipad айпад airpods аирподс эирподс watch часы phone телефон смартфон smartphone наушник headphone earbuds laptop ноутбук notebook компьютер computer pc монитор monitor клавиатур keyboard мышк mouse зарядк charger кабел cable ssd флешк планшет tablet камер camera консол console техник electronics электроник gadget гаджет samsung самсунг xiaomi сяоми pixel принтер printer роутер router колонк speaker видеокарт gpu процессор cpu дрон drone'],
+  ['home','rent аренд квартир apartment utilities коммунал электричеств electric свет water газ internet интернет мебел furniture ikea икеа ремонт repair уборк cleaning посуд dishes постел bedding полотенц towel лампа lamp шторы curtain инструмент tools хозтовар бытов household стирк laundry химчист порошок detergent растени plant'],
+  ['shopping','clothes одежд shoes обув кроссов sneaker jacket куртк пальто coat джинс jeans брюк pants футболк shirt худи hoodie свитер sweater платье dress шорты shorts носк socks белье underwear сумк bag рюкзак backpack кепк cap шапк hat очки sunglasses украшен jewelry кольц ring чехол книг book kindle zara hm uniqlo nike найк adidas адидас wildberries ozon покупк shopping'],
 ].map(([cat,w])=>({cat,w:w.split(' ')}));
 const normName=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim();
 const lsMap=k=>{ try{ return JSON.parse(LS.get(k)||'{}')||{} }catch(e){ return {} } };
@@ -7160,7 +7161,7 @@ function learnCat(text,cat){ recCache.clear(); const n=normName(text); if(!n||!S
 function catIdOf(t){
   const L=layObj(t);
   if(L.inc) return L.ecat&&ICAT_ID[L.ecat]?L.ecat:(incomeCat(t.text)||'incother');
-  if(L.ecat&&SCAT[L.ecat]&&!ICAT_ID[L.ecat]) return L.ecat;
+  if(L.ecat&&L.ecat!=='other'&&SCAT[L.ecat]&&!ICAT_ID[L.ecat]) return L.ecat;
   const r=recognise(t.text); if(r.cat) return r.cat;
   if(L.ecat&&OLDCAT[L.ecat]) return OLDCAT[L.ecat];
   return isExp(t)?'other':'shopping';
@@ -7239,7 +7240,7 @@ function monthSum(list){
 const sumLabel=s=>(s.approx?'≈ ':'')+money2(s.v)+Object.keys(s.miss).map(c=>' + '+amtStr(s.miss[c],c)).join('');
 function spendMonth(off){ const k=nowKey()-off; return monthSum(spendEntries().filter(e=>monthKey(e.at)===k)).v }
 const GROUPS=[{id:'everyday',l:'Everyday',cats:['coffee','food','groceries','transport']},{id:'subs',l:'Subscriptions',cats:['subs']},
-  {id:'shop',l:'Shopping',cats:['shopping','gifts']},{id:'fun',l:'Fun',cats:['fun','gambling']},{id:'homehealth',l:'Home & Health',cats:['home','health','care']},
+  {id:'shop',l:'Shopping',cats:['shopping','tech','gifts']},{id:'fun',l:'Fun',cats:['fun','gambling']},{id:'homehealth',l:'Home & Health',cats:['home','health','care']},
   {id:'travel',l:'Travel',cats:['travel']},{id:'other',l:'Other',cats:['other']}];
 /* «claude 200», «200 claude», «кофе 4,5», «$15 netflix», «такси 300р», «spotify 10 monthly» */
 const REP_SPEND=/(?:^|\s)(monthly|every month|каждый месяц|ежемесячно|в месяц)$/i;
@@ -8662,7 +8663,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='21 Nov 08:16';
+const APP_VER='25 Nov 22:04';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
