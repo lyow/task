@@ -2384,6 +2384,8 @@ h1.p-title{margin:0;font-family:var(--display)}
 .sp-hidden button b.sp-eye{width:24px;height:24px;margin:0;padding:0;background:var(--s2);color:var(--soft)}
 .sp-hidden button{opacity:.75}
 .sp-hidden button:hover{opacity:1}
+
+.wfx{font-size:.78em;font-weight:500;color:var(--dim);margin-left:2px}
 </style>
 </head>
 <body class="side-open">
@@ -4206,21 +4208,23 @@ function ideasPane(p){
 }
 
 /* цена поменялась — показываем прежнюю зачёркнутой */
-const wasLabel=i=>{ const w=Number(layObj(i).was); return w&&w!==Number(i.price)?`<s class="wwas" title="Was ${money(w)}">${money(w)}</s> `:'' };
+/* цена желания в основной валюте (для сумм и сортировки) */
+const wishMain=i=>{ const p=Number(i.price)||0, c=curOf(i); if(!c||!p) return p; const r=fxRate(c,curSym()); return r?p*r:p };
+const wasLabel=i=>{ const w=Number(layObj(i).was); return w&&w!==Number(i.price)?`<s class="wwas" title="Was ${amtStr(w,curOf(i))}">${amtStr(w,curOf(i))}</s> `:'' };
 function wishPane(p){
   const items=(p.tasks||[]).filter(i=>!isExp(i));
   const open=items.filter(i=>!i.done), got=items.filter(i=>i.done);
-  const sum=open.reduce((n,i)=>n+(Number(i.price)||0),0);
-  const starSum=open.filter(i=>i.star).reduce((n,i)=>n+(Number(i.price)||0),0);
+  const sum=open.reduce((n,i)=>n+wishMain(i),0), sumFx=open.some(i=>curOf(i)&&Number(i.price));
+  const starSum=open.filter(i=>i.star).reduce((n,i)=>n+wishMain(i),0);
   /* что купить следующим: сначала отмеченное звездой, потом дешевле; если в этом месяце есть доход — то, что влезает в остаток */
-  const next=(()=>{ const priced=open.filter(i=>Number(i.price)>0).sort((a,b)=>(b.star?1:0)-(a.star?1:0)||a.price-b.price); if(!priced.length) return null;
+  const next=(()=>{ const priced=open.filter(i=>Number(i.price)>0).sort((a,b)=>(b.star?1:0)-(a.star?1:0)||wishMain(a)-wishMain(b)); if(!priced.length) return null;
     const m=monthSum(spendEntries().filter(e=>monthKey(e.at)===nowKey())); const left=m.inc?m.inc-m.v:null;
-    if(left!=null){ const f=priced.find(i=>i.price<=left); return f?{i:f,fits:true}:null }
+    if(left!=null){ const f=priced.find(i=>wishMain(i)<=left); return f?{i:f,fits:true}:null }
     return priced[0].star?{i:priced[0],fits:false}:null })();
   const f=st.wantFilter==='done'?'done':'open';
   let shown=(f==='done'?got:open).slice().reverse();
-  if(st.wishSort==='cheap') shown=shown.slice().sort((a,b)=>(Number(a.price)||1e12)-(Number(b.price)||1e12));
-  if(st.wishSort==='dear') shown=shown.slice().sort((a,b)=>(Number(b.price)||-1)-(Number(a.price)||-1));
+  if(st.wishSort==='cheap') shown=shown.slice().sort((a,b)=>(wishMain(a)||1e12)-(wishMain(b)||1e12));
+  if(st.wishSort==='dear') shown=shown.slice().sort((a,b)=>(wishMain(b)||-1)-(wishMain(a)||-1));
   if(st.wishSort==='star') shown=shown.slice().sort((a,b)=>(b.star?1:0)-(a.star?1:0));
   return `<section class="pane wide">
     <div class="wish-add">
@@ -4230,11 +4234,11 @@ function wishPane(p){
       <button class="wish-shot ${st.wishFile?'has':''}" id="wShot" title="Add a photo">${svg(st.wishFile?'boxOk':'img',17,1.7)}</button>
       <button class="go" id="wAdd">${svg('plus',16,2.5)}</button>
     </div>
-    ${f==='open'&&next?`<button class="wnext" data-wnext="${next.i.id}">${svg('star',13,1.9)} Buy next: <b>${esc(next.i.text)}</b> ${money(next.i.price)}${next.fits?' <small>· fits what’s left this month</small>':''}</button>`:''}
+    ${f==='open'&&next?`<button class="wnext" data-wnext="${next.i.id}">${svg('star',13,1.9)} Buy next: <b>${esc(next.i.text)}</b> ${wishPriceLabel(next.i)}${next.fits?' <small>· fits what’s left this month</small>':''}</button>`:''}
     <div class="chips xrow" style="margin:14px 0 0;align-items:center">
       <button class="chip ${f==='open'?'on':''}" data-wf="open">To buy${open.length?` <span class="chip-n">${open.length}</span>`:''}</button>
       <button class="chip ${f==='done'?'on':''}" data-wf="done">Bought${got.length?` <span class="chip-n">${got.length}</span>`:''}</button>
-      ${sum&&f==='open'?`<span class="wsum">${money(sum)} <small>to buy${starSum&&starSum<sum?' · '+money(starSum)+' starred':''}</small></span>`:''}
+      ${sum&&f==='open'?`<span class="wsum">${sumFx?'≈ ':''}${money(Math.round(sum))} <small>to buy${starSum&&starSum<sum?' · '+money(starSum)+' starred':''}</small></span>`:''}
       <span style="flex:1"></span>
       <button class="chip tog" data-ws="${{new:'cheap',cheap:'dear',dear:'star'}[st.wishSort]||'new'}" title="Change the order">${{new:'Newest',cheap:'Cheapest',dear:'Priciest',star:'Starred first'}[st.wishSort]||'Newest'}</button>
       <button class="row-more chips-more" data-amenu title="More" aria-label="More"><i></i><i></i><i></i></button>
@@ -4407,7 +4411,7 @@ function itemEdit(p,item,isWish){
         const pr=parseFloat(String(el.querySelector('#ePrice').value).replace(',','.'));
         const np=isNaN(pr)?null:pr, op=item.price==null||item.price===''?null:Number(item.price);
         if(np!==op){ if(op&&np) setLay(item,'was',op); setLay(item,'pl',''); setLay(item,'ph',''); item.price=np; setLay(item,'approx','') }
-        const cu=el.querySelector('#eCur').value; if(cu!==cur0) setLay(item,'cur',cu===curSym()?'':cu);
+        const cu=el.querySelector('#eCur').value; if(cu!==cur0){ setLay(item,'cur',cu===curSym()?'':cu); setLay(item,'was','') }
         if(pick!==catIdOf(item)){ learnCat(item.text,pick); setLay(item,'ecat',pick) }
       }
       let u=el.querySelector('#eUrl').value.trim();
@@ -4560,9 +4564,10 @@ async function productImage(url,aiImg){
   return '';
 }
 /* цена в карточке: диапазон, если он есть */
-const wishPriceLabel=i=>{ const L=layObj(i), lo=Number(L.pl), hi=Number(L.ph);
-  if(L.approx&&lo&&hi&&hi>lo) return '≈ '+money(lo)+'–'+money(hi).replace(curSym(),'');
-  return (L.approx?'≈ ':'')+money(i.price) };
+const wishPriceLabel=i=>{ const L=layObj(i), lo=Number(L.pl), hi=Number(L.ph), c=curOf(i);
+  if(L.approx&&lo&&hi&&hi>lo) return '≈ '+amtStr(lo,c)+'–'+fmtNum(hi);
+  const m=c&&Number(i.price)&&fxRate(c,curSym())?wishMain(i):null;
+  return (L.approx?'≈ ':'')+amtStr(Number(i.price),c)+(m!=null?` <small class="wfx">≈ ${money(Math.round(m))}</small>`:'') };
 /* что это за ссылка — открываем страницу и называем в нескольких словах */
 const ideaNamed=i=>{ const u=ideaUrl(i); return !u||(!!noUrl(i.text)&&noUrl(i.text)!==shortUrl(u)) };
 async function aiNameIdea(p,i){
@@ -4663,7 +4668,7 @@ async function aiFillWish(p,item,loud,again){
     let hasPhoto=false; try{ hasPhoto=(await photosOf(WANT)).some(x=>x.item===item.id) }catch(e){}
     const got=[];
     if(f&&f.low&&(!handPrice||again)){
-      item.price=f.low; setLay(item,'approx',1); setLay(item,'pl',f.low); setLay(item,'ph',f.high);
+      item.price=f.low; setLay(item,'approx',1); setLay(item,'pl',f.low); setLay(item,'ph',f.high); setLay(item,'cur','');
       got.push(wishPriceLabel(item));
     }
     if(f&&f.url&&(!item.url||again)){ item.url=f.url; got.push('link') }
@@ -4740,11 +4745,12 @@ function bindWish(p){
   const add=async()=>{
     const ti=$('#wText'), pi=$('#wPrice'), li=$('#wLink');
     let v=ti.value.trim(); if(!v&&!(li&&li.value.trim())) return;
-    const pr=parseFloat(String(pi.value).replace(',','.'));
+    const pv=String(pi.value).trim(), pr0=pv?parseSpend('x '+pv):null, pr=pr0&&pr0.price>0?pr0.price:NaN;
     let u=(li?li.value:'').trim();
     if(!u&&ideaUrl({text:v})){ u=ideaUrl({text:v}); v=noUrl(v) }      // ссылку вставили прямо в название
     if(u&&!/^https?:\/\//i.test(u)) u='https://'+u;
     const item={id:uid(),text:v||(u?(linkKind(u).name+' '+linkKind(u).what).trim():'Untitled'),price:isNaN(pr)?null:pr,url:u,done:false,created:Date.now()};
+    if(pr0&&pr0.price>0&&pr0.cur) setLayRaw(item,{cur:pr0.cur});
     p.tasks=p.tasks||[]; p.tasks.push(item);
     if(u) wishFill(p,item,!v);
     if(aiKey()&&(item.price==null||!u)) aiFillWish(p,item,false);
@@ -8780,7 +8786,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='26 Nov 00:08';
+const APP_VER='26 Nov 01:00';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
