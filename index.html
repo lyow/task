@@ -2323,6 +2323,21 @@ h1.p-title{margin:0;font-family:var(--display)}
 .cur-hint{font-size:12.5px;color:var(--dim);line-height:1.4}
 
 .toast .t-act2{margin-right:-4px;opacity:.85}
+
+.sp-stats .sp-big>.sp-ic{flex-direction:row;align-items:center;justify-content:center;place-items:center}
+.sp-stats .sp-big>.sp-ic>i{display:block;line-height:1}
+.sp-total-l{display:block;font-size:13px;color:var(--dim);margin:2px 0 -2px}
+.sp-cat-h>span{display:inline-flex;align-items:center;gap:6px}
+.sp-hide{font-size:12px;font-weight:500;color:var(--dim);padding:2px 8px;border-radius:999px;opacity:0;transition:opacity .15s}
+.sp-cat-h:hover .sp-hide,.sp-hide:focus-visible{opacity:1}
+.sp-hide:hover{color:var(--txt);background:var(--s2)}
+@media (hover:none){ .sp-hide{opacity:1} }
+.sp-hidden{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;padding:0 4px}
+.sp-hidden>small{font-size:12.5px;color:var(--dim);margin-right:4px}
+.sp-hidden button{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 6px 0 12px;border-radius:999px;border:1px dashed var(--line);font-size:13px;color:var(--soft)}
+.sp-hidden button b{font-weight:600;font-size:12px;color:var(--txt);padding:3px 8px;border-radius:999px;background:var(--s2)}
+.sp-hidden button:hover b{background:var(--s3)}
+@media (max-width:760px){ .sp-stats{display:grid;grid-template-columns:1fr 1fr} .sp-stats>span,.sp-stats>.sp-big{width:auto} .sp-stats>.sp-big{grid-column:1/-1} .sp-stats>.sp-big b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%} .sp-stats .sp-big>span:not(.sp-ic){min-width:0} }
 </style>
 </head>
 <body class="side-open">
@@ -7238,7 +7253,9 @@ function monthSum(list){
   return {v,approx,miss,win:Math.max(0,gs),gnet:gs,inc,iapprox,imiss};
 }
 const sumLabel=s=>(s.approx?'≈ ':'')+money2(s.v)+Object.keys(s.miss).map(c=>' + '+amtStr(s.miss[c],c)).join('');
-function spendMonth(off){ const k=nowKey()-off; return monthSum(spendEntries().filter(e=>monthKey(e.at)===k)).v }
+const spHide=()=>lsMap('pm:spHide');
+const spShown=es=>{ const h=spHide(); return es.filter(e=>e.inc||!h[e.cat]) };
+function spendMonth(off){ const k=nowKey()-off; return monthSum(spShown(spendEntries()).filter(e=>monthKey(e.at)===k)).v }
 const GROUPS=[{id:'everyday',l:'Everyday',cats:['coffee','food','groceries','transport']},{id:'subs',l:'Subscriptions',cats:['subs']},
   {id:'shop',l:'Shopping',cats:['shopping','tech','gifts']},{id:'fun',l:'Fun',cats:['fun','gambling']},{id:'homehealth',l:'Home & Health',cats:['home','health','care']},
   {id:'travel',l:'Travel',cats:['travel']},{id:'other',l:'Other',cats:['other']}];
@@ -7595,7 +7612,7 @@ function renderSpend(){
   $('#crumb').textContent='Spending';
   spendRoll();
   if(rates().day!==ld()) loadRates().then(ch=>{ if(ch&&st.spend) renderSpend(); if(ch) renderSide() });
-  const all=spendEntries(), R=rates();
+  const allRaw=spendEntries(), all=spShown(allRaw), R=rates(), hid=spHide();
   const nk=nowKey(), off=Math.max(0,st.spMonth||0), k=nk-off;
   const inK=kk=>all.filter(e=>monthKey(e.at)===kk);
   const yr=kk=>Math.floor(kk/12), mo=kk=>kk%12;
@@ -7604,6 +7621,14 @@ function renderSpend(){
   const S=monthSum(month), P=monthSum(inK(k-1)), total=S.v, prev=P.v, diff=total-prev;
   const days=off===0?new Date().getDate():new Date(yr(k),mo(k)+1,0).getDate();
   const big=month.filter(e=>e.spend).sort((a,b)=>b.spend-a.spend)[0];
+  const perDay={}; month.forEach(e=>{ if(!e.inc&&!e.g&&e.main>0){ const dk=dayKey(e.at); perDay[dk]=(perDay[dk]||0)+e.main } });
+  const dayVals=Object.values(perDay).sort((a,b)=>a-b), spentDays=dayVals.length;
+  const median=spentDays?(spentDays%2?dayVals[(spentDays-1)/2]:(dayVals[spentDays/2-1]+dayVals[spentDays/2])/2):0;
+  const zeroDays=Math.max(0,days-spentDays);
+  const topDayK=Object.keys(perDay).sort((a,b)=>perDay[b]-perDay[a])[0];
+  const topDayAt=topDayK?month.find(e=>dayKey(e.at)===topDayK).at:0;
+  const hidM=allRaw.filter(e=>monthKey(e.at)===k&&!e.inc&&hid[e.cat]);
+  const hidCats=Object.keys(hid).filter(c=>SCAT[c]).map(c=>({c,s:monthSum(hidM.filter(e=>e.cat===c))}));
   const budget=Number(LS.get('pm:budget'))||0, ratio=budget?total/budget:0;
   const win=[]; for(let i=5;i>=0;i--) win.push(Math.min(nk,k+5)-i);
   const bars=win.map(kk=>{ const m=monthSum(inK(kk)); return {kk,v:m.v,inc:m.inc} }), max=Math.max(1,...bars.map(b=>b.v),budget);
@@ -7631,7 +7656,7 @@ function renderSpend(){
   const summary=total&&topG&&gNow[topG.id]?['Mostly '+topG.l+' ('+Math.round(gNow[topG.id]/total*100)+'%)',upG?upG.G.l+(upG.r>=2?' much higher than ':' up '+Math.round(upG.r*100)+'% on ')+MONL[mo(k-1)]:''].filter(Boolean).join(' · '):'';
   /* поиск по всем записям */
   const q=normName(st.spQ||'');
-  const found=q?all.filter(e=>normName(e.t.text).indexOf(q)>=0||normName(SCAT[e.cat].l).indexOf(q)>=0).sort((a,b)=>b.at-a.at):[];
+  const found=q?allRaw.filter(e=>normName(e.t.text).indexOf(q)>=0||normName(SCAT[e.cat].l).indexOf(q)>=0).sort((a,b)=>b.at-a.at):[];
   const view=LS.get('pm:spView')||'group';
   const open=lsMap('pm:spOpen');
   const row=e=>`<button class="sp-row" data-sp="${e.t.id}">${spIcon(e.t)}
@@ -7642,7 +7667,8 @@ function renderSpend(){
   const groupHtml=()=>{
     const gs=GROUPS.map(G=>{ const es=month.filter(e=>!e.inc&&G.cats.indexOf(e.cat)>=0); return {G,es,s:monthSum(es)} }).filter(x=>x.es.length).sort((a,b)=>b.s.v-a.s.v);
     const ies=month.filter(e=>e.inc);
-    if(!gs.length&&!ies.length) return '';
+    const hidHtml=hidCats.length?`<div class="sp-hidden"><small>Not counted</small>${hidCats.map(x=>`<button data-unhide="${x.c}" title="Count it again">${SCAT[x.c].e} ${SCAT[x.c].l}${x.s.v?' · '+sumLabel(x.s):''}<b>Show</b></button>`).join('')}</div>`:'';
+    if(!gs.length&&!ies.length) return hidHtml;
     const top=Math.max(1,...gs.map(x=>x.s.v));
     const incHtml=ies.length?(()=>{ const isOpen=!!open.income; const cats=ICATS.map(c=>({c:c.id,es:ies.filter(e=>e.cat===c.id)})).filter(x=>x.es.length).map(x=>Object.assign(x,{s:monthSum(x.es)})).sort((a,b)=>b.s.inc-a.s.inc);
       return `<section class="sp-grp sp-grp-inc ${isOpen?'open':''}">
@@ -7669,9 +7695,9 @@ function renderSpend(){
         </button>
         ${isOpen?cats.map(x=>{
           const isG=x.c==='gambling', gn=isG?x.es.reduce((n,e)=>n+(e.main==null?0:(e.net>0?e.main:-e.main)),0):0;
-          return `<div class="sp-cat-h"><span>${SCAT[x.c].e} ${SCAT[x.c].l}</span><b class="${isG?(Math.abs(gn)<0.005?'g-even':gn>0?'g-win':'g-loss'):''}">${isG?gLabel(gn,'')+' · '+x.es.length+' session'+(x.es.length===1?'':'s'):sumLabel(x.s)}</b></div>
+          return `<div class="sp-cat-h"><span>${SCAT[x.c].e} ${SCAT[x.c].l}<button class="sp-hide" data-hide="${x.c}" title="Hide from totals" aria-label="Hide ${SCAT[x.c].l} from totals">Hide</button></span><b class="${isG?(Math.abs(gn)<0.005?'g-even':gn>0?'g-win':'g-loss'):''}">${isG?gLabel(gn,'')+' · '+x.es.length+' session'+(x.es.length===1?'':'s'):sumLabel(x.s)}</b></div>
             ${x.es.map(row).join('')}` }).join(''):''}
-      </section>` }).join('')}</div>`;
+      </section>` }).join('')}${hidHtml}</div>`;
   };
   const dayHtml=()=>{
     const groups=[]; month.forEach(e=>{ const dk=dayKey(e.at); let g=groups.find(x=>x.k===dk); if(!g){ g={k:dk,at:e.at,items:[]}; groups.push(g) } g.items.push(e) });
@@ -7700,14 +7726,17 @@ function renderSpend(){
         </div>
         ${incM?`<div class="sp-three" title="${S.approx&&R.date?'Other currencies at rates of '+esc(R.date):''}">
           <span><small>Income</small><b class="g-win">${S.iapprox?'≈ ':''}${money2(incM)}</b></span>
-          <span><small>Spent</small><b>${S.approx?'≈ ':''}${money2(total)}</b></span>
+          <span><small>Spent${hidCats.length?' · without '+hidCats.map(x=>SCAT[x.c].l).join(', '):''}</small><b>${S.approx?'≈ ':''}${money2(total)}</b></span>
           <span><small>${left>=0?'Left':'Over'}</small><b class="${left>=0?'g-win':'g-loss'}">${S.approx||S.iapprox?'≈ ':''}${left<0?'−':''}${money2(Math.abs(left))}</b></span>
-        </div>`:`<b class="sp-total" title="${S.approx&&R.date?'Other currencies at rates of '+esc(R.date):''}">${S.approx?'<i class="sp-approx">≈</i>':''}${money2(total)}</b>`}
+        </div>`:`<small class="sp-total-l">Spent in ${name(k)}${hidCats.length?' · without '+hidCats.map(x=>SCAT[x.c].l).join(', '):''}</small><b class="sp-total" title="${S.approx&&R.date?'Other currencies at rates of '+esc(R.date):''}">${S.approx?'<i class="sp-approx">≈</i>':''}${money2(total)}</b>`}
         ${Object.keys(S.miss).length?`<span class="sp-oth">+ ${Object.keys(S.miss).map(c=>amtStr(S.miss[c],c)).join(' + ')} · no exchange rates yet</span>`:''}
         ${total||prev?`<div class="sp-stats">
           ${prev?`<span title="Compared with ${MONL[mo(k-1)]}"><small>vs ${MON[mo(k-1)]}</small><b class="${diff>0.5?'up':diff<-0.5?'down':''}">${Math.abs(diff)<0.5?'same':(diff>0?'+':'−')+money(Math.round(Math.abs(diff)))}</b></span>`:''}
-          ${total?`<span><small>Per day</small><b>${money(Math.round(total/days))}</b></span>`:''}
+          ${total?`<span title="Everything spent this month divided by ${days} days"><small>Per day</small><b>${money(Math.round(total/days))}</b></span>`:''}
           ${forecast?`<span title="Variable spending at today's pace plus monthly charges still to come"><small>On pace</small><b>${S.approx?'≈ ':''}${money(Math.round(forecast))}</b></span>`:''}
+          ${spentDays>=3&&median<total/days*.8?`<span title="Half the days you spent less than this, half more. One big purchase does not move it"><small>Typical day</small><b>${money(Math.round(median))}</b></span>`:''}
+          ${total&&days>=3?`<span title="Days with nothing spent (monthly charges and gambling aside)"><small>No-spend days</small><b>${zeroDays} of ${days}</b></span>`:''}
+          ${topDayK&&spentDays>=2?`<span title="The day you spent the most"><small>Biggest day</small><b>${MON[new Date(topDayAt).getMonth()]} ${new Date(topDayAt).getDate()} · ${money(Math.round(perDay[topDayK]))}</b></span>`:''}
           ${big?`<button class="sp-big" data-sp="${big.t.id}" title="Biggest expense">${spIcon(big.t)}<span><small>Biggest</small><b>${esc(spName(big.t))} ${entryAmt(big.t)}</b></span></button>`:''}
         </div>`:'<span class="sp-diff">Nothing spent yet</span>'}
         ${summary?`<span class="sp-sum">${esc(summary)}</span>`:''}
@@ -7768,6 +7797,11 @@ function renderSpend(){
     $('#spAmtGo').addEventListener('click',go);
   }
   const v=$('#view');
+  v.querySelectorAll('[data-hide]').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation();
+    const c=b.dataset.hide, m=spHide(); m[c]=1; LS.set('pm:spHide',JSON.stringify(m)); renderSpend(); renderSide();
+    toast(SCAT[c].l+' hidden',{sub:'Not counted in totals',action:'Undo',onAction:()=>{ const m2=spHide(); delete m2[c]; LS.set('pm:spHide',JSON.stringify(m2)); renderSpend(); renderSide() }}) }));
+  v.querySelectorAll('[data-unhide]').forEach(b=>b.addEventListener('click',()=>{
+    const m=spHide(); delete m[b.dataset.unhide]; LS.set('pm:spHide',JSON.stringify(m)); renderSpend(); renderSide() }));
   v.querySelectorAll('[data-again]').forEach(b=>b.addEventListener('click',()=>{
     const src=(wantP().tasks||[]).find(t=>t.id===b.dataset.again); if(!src) return;
     const it=addExpense({text:src.text,price:Number(src.price),cur:layObj(src).cur||'',cat:catIdOf(src)}); if(it) after(it);
@@ -8663,7 +8697,7 @@ window.addEventListener('paste',e=>{
 
 
 /* версия: видно, какая сборка открыта, и сама говорит, когда вышла новая */
-const APP_VER='25 Nov 22:04';
+const APP_VER='26 Nov 00:03';
 (function(){
   const el=document.getElementById('appVer'); if(!el) return;
   let fresh=null, busy=false;
